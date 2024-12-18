@@ -22,9 +22,9 @@ data Tm where
   TmDouble :: Double -> Tm
   TmTpLam :: Ident -> Tm -> Tm
   TmTpApp :: Tm -> Tp -> Tm
-  TmTmLam :: Ident -> Tp -> Tm -> Tm
+  TmTmLam :: (Ident, Tp) -> Tm -> Tm
   TmTmApp :: Tm -> Tm -> Tm
-  TmLet :: Ident -> Tp -> Tm -> Tm -> Tm
+  TmLet :: (Ident, Tp) -> Tm -> Tm -> Tm
   TmMatch :: Tm -> [Alt] -> Tm
   deriving stock (Eq, Ord, Show, Read)
 

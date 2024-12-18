@@ -55,9 +55,13 @@ extra-doc-files:    README.md
 common warnings
     ghc-options: -Wall
 
+common extensions
+    default-extensions: DerivingStrategies
+                      , ImportQualifiedPost
+
 library
-    -- Import common warning flags.
     import:           warnings
+                    , extensions
 
     -- Modules exported by the library.
     exposed-modules:  LambdaComp.Syntax
@@ -65,8 +69,6 @@ library
 
     -- Modules included in this library but not exported.
     -- other-modules:
-
-    default-extensions: DerivingStrategies
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.17.2.1
@@ -78,8 +80,8 @@ library
     default-language: GHC2021
 
 executable lambdacomp
-    -- Import common warning flags.
     import:           warnings
+                    , extensions
 
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
@@ -102,8 +104,8 @@ executable lambdacomp
     default-language: GHC2021
 
 test-suite lambdacomp-test
-    -- Import common warning flags.
     import:           warnings
+                    , extensions
 
     -- Base language which the package is written in.
     default-language: GHC2021
