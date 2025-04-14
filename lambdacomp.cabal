@@ -48,6 +48,8 @@ library
   exposed-modules:
     LambdaComp.CBPV.Syntax
     LambdaComp.CBPV.ToC
+    LambdaComp.FreshName
+    LambdaComp.Ident
     LambdaComp.Syntax
     LambdaComp.ToCBPV
 

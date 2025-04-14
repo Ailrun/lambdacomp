@@ -1,9 +1,8 @@
 module LambdaComp.Syntax where
 
-import Data.String (IsString)
+import Data.String      (IsString (fromString))
 
-newtype Ident = Ident String
-  deriving newtype (Eq, Ord, Show, Read, IsString, Semigroup)
+import LambdaComp.Ident
 
 data Tp where
   TpUnit :: Tp
@@ -23,3 +22,6 @@ data Tm where
   TmPrint :: Tm -> Tm -> Tm
   TmRec :: Ident -> Tm -> Tm
   deriving stock (Eq, Ord, Show, Read)
+
+instance IsString Tm where
+  fromString = TmVar . fromString

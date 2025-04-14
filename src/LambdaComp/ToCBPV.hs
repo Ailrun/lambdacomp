@@ -3,13 +3,14 @@
 {-# LANGUAGE TypeFamilies      #-}
 module LambdaComp.ToCBPV where
 
-import Control.Monad.State.Strict (MonadState (get), State, modify', evalState)
-import Data.String                (IsString (fromString))
+import Control.Monad.State.Strict (evalState)
 
 import LambdaComp.CBPV.Syntax     qualified as CBPV
+import LambdaComp.FreshName
 import LambdaComp.Syntax
 
-type FreshName = State Integer
+runToCBPV :: Tm -> CBPV.Tm 'CBPV.Com
+runToCBPV = (`evalState` 0) . toCBPV
 
 class ToCBPV a where
   type CBPVData a
@@ -39,23 +40,17 @@ instance ToCBPV Tm where
   toCBPV (TmLam x tm)      = CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam x <$> toCBPV tm
   toCBPV (tmf `TmApp` tma) = do
     tma' <- toCBPV tma
-    i <- get
-    modify' (1 +)
-    let ai = "a___" <> fromString (show i)
+    a <- freshNameOf "a___"
 
     tmf' <- toCBPV tmf
-    j <- get
-    modify' (1 +)
-    let fj = "f___" <> fromString (show j)
+    f <- freshNameOf "f___"
 
-    pure $ CBPV.TmThen tma' ai $ CBPV.TmThen tmf' fj $ CBPV.TmForce (CBPV.TmVar fj) `CBPV.TmApp` CBPV.TmVar ai
+    pure $ CBPV.TmThen tma' a $ CBPV.TmThen tmf' f $ CBPV.TmForce (CBPV.TmVar f) `CBPV.TmApp` CBPV.TmVar a
   toCBPV (TmPrint tm0 tm1) = do
     tm0' <- toCBPV tm0
-    i <- get
-    modify' (1 +)
-    let vi = "v___" <> fromString (show i)
-    CBPV.TmThen tm0' vi . CBPV.TmPrint (CBPV.TmVar vi) <$> toCBPV tm1
-  toCBPV (TmRec x tm)      = CBPV.TmRec x <$> toCBPV tm
-
-runToCBPV :: Tm -> CBPV.Tm 'CBPV.Com
-runToCBPV = (`evalState` 0) . toCBPV
+    v <- freshNameOf "v___"
+    CBPV.TmThen tm0' v . CBPV.TmPrint (CBPV.TmVar v) <$> toCBPV tm1
+  toCBPV (TmRec x tm)      = do
+    tm' <- toCBPV tm
+    v <- freshNameOf "r___"
+    pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec x $ CBPV.TmThen tm' v $ CBPV.TmForce (CBPV.TmVar v)

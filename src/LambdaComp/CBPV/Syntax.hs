@@ -1,14 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs     #-}
-module LambdaComp.CBPV.Syntax
-  ( module LambdaComp.CBPV.Syntax
-  , Ident(..)
-  ) where
+module LambdaComp.CBPV.Syntax where
 
 import Data.Set    (Set)
 import Data.Set    qualified as Set
 
-import LambdaComp.Syntax (Ident(..))
+import LambdaComp.Ident (Ident(..))
 
 data Class where
   Val, Com :: Class
@@ -44,6 +41,8 @@ data Tm (c :: Class) where
   TmReturn :: Tm 'Val -> Tm 'Com
   TmThen :: Tm 'Com -> Ident -> Tm 'Com -> Tm 'Com
 
+  TmLet :: Ident -> Tm 'Val -> Tm 'Com -> Tm 'Com
+
   TmPrint :: Tm 'Val -> Tm 'Com -> Tm 'Com
 
   TmRec :: Ident -> Tm 'Com -> Tm 'Com
@@ -63,6 +62,7 @@ freeVarOfTm (tmf `TmApp` tma)  = freeVarOfTm tmf `Set.union` freeVarOfTm tma
 freeVarOfTm (TmForce tm)       = freeVarOfTm tm
 freeVarOfTm (TmReturn tm)      = freeVarOfTm tm
 freeVarOfTm (TmThen tm0 x tm1) = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
+freeVarOfTm (TmLet x tm0 tm1)  = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
 freeVarOfTm (TmPrint tm0 tm1)  = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
 freeVarOfTm (TmRec x tm)       = x `Set.delete` freeVarOfTm tm
 freeVarOfTm _                  = Set.empty -- ground values
