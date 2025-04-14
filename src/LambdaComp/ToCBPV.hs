@@ -55,6 +55,7 @@ instance ToCBPV Tm where
     modify' (1 +)
     let vi = "v___" <> fromString (show i)
     CBPV.TmThen tm0' vi . CBPV.TmPrint (CBPV.TmVar vi) <$> toCBPV tm1
+  toCBPV (TmRec x tm)      = CBPV.TmRec x <$> toCBPV tm
 
 runToCBPV :: Tm -> CBPV.Tm 'CBPV.Com
 runToCBPV = (`evalState` 0) . toCBPV

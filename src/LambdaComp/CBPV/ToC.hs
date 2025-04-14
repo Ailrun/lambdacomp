@@ -6,6 +6,7 @@ module LambdaComp.CBPV.ToC where
 import Control.Monad.Reader       (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict (MonadState (get), StateT, modify', evalStateT)
 import Data.List                  (elemIndex)
+import Data.Set (Set)
 import Data.Set                   qualified as Set
 
 import LambdaComp.CBPV.Syntax
@@ -30,31 +31,37 @@ instance ToC (Tm 'Val) where
   type CData (Tm 'Val) = ([TopDef], String, String)
 
   toC :: Tm 'Val -> WithClosure (CData (Tm 'Val))
-  toC (TmVar x) = do
+  toC (TmVar x)    = do
     mayInd <- asks (elemIndex x)
     pure $ case mayInd of
       Just i  -> ([], "", "env[" <> show i <> "]")
       Nothing -> ([], "", toVar x)
-  toC TmUnit = pure ([], "", "int_item(0)")
-  toC (TmInt n) = pure ([], "", "int_item(" <> show n <> ")")
+  toC TmUnit       = pure ([], "", "int_item(0)")
+  toC (TmInt n)    = pure ([], "", "int_item(" <> show n <> ")")
   toC (TmDouble f) = pure ([], "", "float_item(" <> show f <> ")")
   toC (TmThunk tm) = do
-    i <- get
-    modify' (1 +)
-    let
-      thunkName = "thunk_" <> show i
-      thunkBodyName = "thunk_body_" <> show i
+    (topDefs, thunkBody) <- local (const (Set.toList envVarsSet)) (toC tm)
+    (thunkTopDef, inits, thunkItem) <- thunkOfCode envVarsSet thunkBody
+    pure (thunkTopDef : topDefs, inits, thunkItem)
+    where
       envVarsSet = freeVarOfTm tm
-      envVars = Set.toList envVarsSet
-      withEnv = Set.size envVarsSet /= 0
-      initialEnv = if withEnv
-                   then "malloc(" <> show (Set.size envVarsSet) <> "* sizeof(item))"
-                   else "NULL"
-      initializations =
-        ("item " <> thunkName <> " = {.thunk_item = {.env = " <> initialEnv <> ", .body = " <> thunkBodyName <> "}};")
-        : fmap ((<> ";") . ((thunkName <> ".thunk_item.env = ") <>) . toVar) envVars
-    (topDefs, thunkBody) <- local (const envVars) $ toC tm
-    pure (ThunkBodyDef {..} : topDefs, unlines initializations, thunkName)
+
+thunkOfCode :: Set Ident -> String -> WithClosure (TopDef, String, String)
+thunkOfCode envVarsSet thunkBody = do
+  i <- get
+  modify' (1 +)
+  let
+    thunkItem = "thunk_" <> show i
+    thunkBodyName = "thunk_body_" <> show i
+    envVarsSize = Set.size envVarsSet
+    withEnv = envVarsSize /= 0
+    initialEnv = if withEnv
+                 then "malloc(" <> show envVarsSize <> "* sizeof(item))"
+                 else "NULL"
+    initializations =
+      ("item " <> thunkItem <> " = {.thunk_item = {.env = " <> initialEnv <> ", .body = " <> thunkBodyName <> "}};")
+      : zipWith (\x idx -> thunkItem <> ".thunk_item.env[" <> show idx <> "] = " <> toVar x <> ";") (Set.toList envVarsSet) [(0 :: Int)..]
+  pure (ThunkBodyDef {..}, unlines initializations, thunkItem)
 
 instance ToC (Tm 'Com) where
   type CData (Tm 'Com) = ([TopDef], String)
@@ -81,6 +88,12 @@ instance ToC (Tm 'Com) where
     (topDefs0, inits, tm0Code) <- toC tm0
     (topDefs1, tm1Code) <- toC tm1
     pure (topDefs1 <> topDefs0, inits <> "printf(\"%d\\n\", " <> tm0Code <> ".int_item);\n" <> tm1Code)
+  toC (TmRec x tm) = do
+    (topDefs, tmCode) <- toC tm
+    (thunkTopDef, inits, thunkItem) <- thunkOfCode envVarsSet tmCode
+    pure (thunkTopDef : topDefs, inits <> "\nitem " <> toVar x <> " = " <> thunkItem <> ";\n" <> tmCode)
+    where
+      envVarsSet = freeVarOfTm tm
 
 runToC :: Tm 'Com -> String
 runToC = showC . (`runReader` []) . (`evalStateT` 0) . toC

@@ -21,4 +21,5 @@ data Tm where
   TmLam :: Ident -> Tm -> Tm
   TmApp :: Tm -> Tm -> Tm
   TmPrint :: Tm -> Tm -> Tm
+  TmRec :: Ident -> Tm -> Tm
   deriving stock (Eq, Ord, Show, Read)

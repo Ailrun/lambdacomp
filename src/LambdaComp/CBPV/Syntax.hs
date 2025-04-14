@@ -46,6 +46,8 @@ data Tm (c :: Class) where
 
   TmPrint :: Tm 'Val -> Tm 'Com -> Tm 'Com
 
+  TmRec :: Ident -> Tm 'Com -> Tm 'Com
+
 deriving stock instance Eq (Tm c)
 deriving stock instance Ord (Tm c)
 deriving stock instance Show (Tm c)
@@ -62,4 +64,5 @@ freeVarOfTm (TmForce tm)       = freeVarOfTm tm
 freeVarOfTm (TmReturn tm)      = freeVarOfTm tm
 freeVarOfTm (TmThen tm0 x tm1) = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
 freeVarOfTm (TmPrint tm0 tm1)  = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
+freeVarOfTm (TmRec x tm)       = x `Set.delete` freeVarOfTm tm
 freeVarOfTm _                  = Set.empty -- ground values
