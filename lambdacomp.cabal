@@ -48,10 +48,12 @@ library
   exposed-modules:
     LambdaComp.CBPV.Syntax
     LambdaComp.CBPV.ToC
+    LambdaComp.CBPV.TypeCheck
     LambdaComp.FreshName
     LambdaComp.Ident
     LambdaComp.Syntax
     LambdaComp.ToCBPV
+    LambdaComp.TypeCheck
 
   -- Modules included in this library but not exported.
   -- other-modules:

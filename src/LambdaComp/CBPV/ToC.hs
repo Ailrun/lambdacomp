@@ -20,7 +20,6 @@ import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName        (FreshNameT, freshNamesOf)
-import LambdaComp.Ident
 
 type WithClosure = FreshNameT (Reader [Ident])
 
@@ -43,7 +42,7 @@ instance ToC (Tm 'Val) where
   toC (TmVar x)    = getVar x >>= valueOfConst
   toC TmUnit       = valueOfConst $ intItemCons <> "(0)"
   toC (TmInt n)    = valueOfConst $ intItemCons <> "(" <> show n <> ")"
-  toC (TmDouble f) = valueOfConst $ floatItemCons <> "(" <> show f <> ")"
+  toC (TmDouble f) = valueOfConst $ doubleItemCons <> "(" <> show f <> ")"
   toC (TmThunk tm) = runWriterT $ do
     thunkBody <- WriterT $ local (const $ Set.toList envVarsSet) $ toC tm
     first (uncurry (:)) <$> WriterT (thunkOfCode envVarsSet (comment (show tm) : thunkBody))
@@ -95,7 +94,7 @@ instance ToC (Tm 'Com) where
     (inits, tm0Code) <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
     pure (inits <> underScope (defineConstItemStmt (toVar x) tm0Code : tm1Code))
-  toC (TmPrint tm0 tm1) = runWriterT $ do
+  toC (TmPrintInt tm0 tm1) = runWriterT $ do
     (inits, tm0Code) <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
     pure (inits <> (printlnAsIntStmt (tm0Code <> ".int_item") : tm1Code))
@@ -166,12 +165,12 @@ defaultHeaders =
   , "typedef void (*thunk)(item *const ret);"
   , ""
   , "inline item " <> intItemCons <> "(const int value);"
-  , "inline item " <> floatItemCons <> "(const float value);"
+  , "inline item " <> doubleItemCons <> "(const double value);"
   , ""
   , "union item"
   , "{"
   , "int int_item;"
-  , "float float_item;"
+  , "double double_item;"
   , "thunk thunk_item;"
   , "};"
   , ""
@@ -189,9 +188,9 @@ defaultHeaders =
   , "return a;"
   , "}"
   , ""
-  , "item " <> floatItemCons <> "(const float value)"
+  , "item " <> doubleItemCons <> "(const double value)"
   , "{"
-  , defineConstItemStmt "a" "{.float_item = value}"
+  , defineConstItemStmt "a" "{.double_item = value}"
   , "return a;"
   , "}"
   , ""
@@ -245,8 +244,8 @@ globalStack = "global_stack"
 intItemCons :: String
 intItemCons = "int_item"
 
-floatItemCons :: String
-floatItemCons = "float_item"
+doubleItemCons :: String
+doubleItemCons = "double_item"
 
 comment :: String -> String
 comment s = "/* " <> s <> " */"

@@ -32,13 +32,13 @@ instance ToCBPV Tm where
   type CBPVData Tm = CBPV.Tm 'CBPV.Com
 
   toCBPV :: Tm -> FreshName (CBPVData Tm)
-  toCBPV (tm `TmAnn` _)    = toCBPV tm
-  toCBPV (TmVar x)         = pure $ CBPV.TmReturn $ CBPV.TmVar x
-  toCBPV TmUnit            = pure $ CBPV.TmReturn CBPV.TmUnit
-  toCBPV (TmInt n)         = pure $ CBPV.TmReturn $ CBPV.TmInt n
-  toCBPV (TmDouble f)      = pure $ CBPV.TmReturn $ CBPV.TmDouble f
-  toCBPV (TmLam x tm)      = CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam x <$> toCBPV tm
-  toCBPV (tmf `TmApp` tma) = do
+  toCBPV (tm `TmAnn` _)       = toCBPV tm
+  toCBPV (TmVar x)            = pure $ CBPV.TmReturn $ CBPV.TmVar x
+  toCBPV TmUnit               = pure $ CBPV.TmReturn CBPV.TmUnit
+  toCBPV (TmInt n)            = pure $ CBPV.TmReturn $ CBPV.TmInt n
+  toCBPV (TmDouble f)         = pure $ CBPV.TmReturn $ CBPV.TmDouble f
+  toCBPV (TmLam x tm)         = CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam x <$> toCBPV tm
+  toCBPV (tmf `TmApp` tma)    = do
     tma' <- toCBPV tma
     a <- freshNameOf "a___"
 
@@ -46,11 +46,11 @@ instance ToCBPV Tm where
     f <- freshNameOf "f___"
 
     pure $ CBPV.TmThen tma' a $ CBPV.TmThen tmf' f $ CBPV.TmForce (CBPV.TmVar f) `CBPV.TmApp` CBPV.TmVar a
-  toCBPV (TmPrint tm0 tm1) = do
+  toCBPV (TmPrintInt tm0 tm1) = do
     tm0' <- toCBPV tm0
     v <- freshNameOf "v___"
-    CBPV.TmThen tm0' v . CBPV.TmPrint (CBPV.TmVar v) <$> toCBPV tm1
-  toCBPV (TmRec x tm)      = do
+    CBPV.TmThen tm0' v . CBPV.TmPrintInt (CBPV.TmVar v) <$> toCBPV tm1
+  toCBPV (TmRec x tm)         = do
     tm' <- toCBPV tm
     v <- freshNameOf "r___"
     pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec x $ CBPV.TmThen tm' v $ CBPV.TmForce (CBPV.TmVar v)
