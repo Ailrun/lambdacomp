@@ -46,6 +46,9 @@ library
 
   -- Modules exported by the library.
   exposed-modules:
+    LambdaComp.CBPV.Optimization
+    LambdaComp.CBPV.BindingConversion
+    LambdaComp.CBPV.SkipReturn
     LambdaComp.CBPV.Syntax
     LambdaComp.CBPV.ToC
     LambdaComp.CBPV.TypeCheck

@@ -4,6 +4,7 @@ module Main where
 import LambdaComp.Syntax
 import LambdaComp.ToCBPV
 import LambdaComp.CBPV.ToC
+import LambdaComp.CBPV.Optimization (topOptimizeDefault)
 
 test0 :: Tm
 test0 = TmPrintInt (TmLam "x" ("x" `TmApp` TmInt 5) `TmApp` TmLam "x" "x") $ TmInt 0
@@ -15,7 +16,7 @@ test2 :: Tm
 test2 = TmRec "f" (TmLam "x" $ TmPrintInt "x" $ TmPrintInt (TmInt 2) $ "f" `TmApp` "x") `TmApp` TmInt 3
 
 allSteps :: Tm -> FilePath -> IO ()
-allSteps tm fp = writeFile fp $ runToC $ runToCBPV tm
+allSteps tm fp = writeFile fp $ runToC $ topOptimizeDefault $ runToCBPV tm
 
 main :: IO ()
 main = do
