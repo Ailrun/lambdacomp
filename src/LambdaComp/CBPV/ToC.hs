@@ -2,22 +2,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TypeFamilies      #-}
-{-# LANGUAGE ViewPatterns      #-}
 module LambdaComp.CBPV.ToC where
 
+import Control.Applicative         (Applicative (liftA2))
 import Control.Monad               (zipWithM)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict  (evalStateT)
-import Control.Monad.Writer.Strict (WriterT (WriterT, runWriterT))
-import Data.Bifunctor              (Bifunctor (first))
-import Data.Functor.Identity       (Identity (Identity))
-import Data.Functor.Product        (Product (Pair))
+import Control.Monad.Writer.Strict (WriterT (WriterT, runWriterT), lift)
+import Data.Bifunctor              (Bifunctor (first, second))
 import Data.List                   (elemIndex)
+import Data.Maybe                  (fromMaybe)
 import Data.Semigroup              (Dual (Dual, getDual))
 import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
-import LambdaComp.FreshName        (FreshNameT, freshNamesOf)
+import LambdaComp.FreshName        (FreshNameT, freshNameOf)
 
 type WithClosure = FreshNameT (Reader [Ident])
 
@@ -33,23 +32,31 @@ data TopDef
     }
 
 instance ToC (Tm 'Val) where
-  type CData (Tm 'Val) = (([String], String), Dual [TopDef])
+  type CData (Tm 'Val) = (Bool -> String -> [String], Dual [TopDef])
 
   toC :: Tm 'Val -> WithClosure (CData (Tm 'Val))
-  toC (TmVar x)    = getVar x >>= valueOfConst
-  toC TmUnit       = valueOfConst $ intItemCons <> "(0)"
-  toC (TmInt n)    = valueOfConst $ intItemCons <> "(" <> show n <> ")"
-  toC (TmDouble f) = valueOfConst $ doubleItemCons <> "(" <> show f <> ")"
+  toC (TmVar x)    = getVar x >>= valueOfConst Nothing
+  toC TmUnit       = valueOfConst (Just ".int_item") "0"
+  toC (TmInt n)    = valueOfConst (Just ".int_item") $ show n
+  toC (TmDouble f) = valueOfConst (Just ".double_item") $ show f
   toC (TmThunk tm) = runWriterT $ do
     thunkBody <- WriterT $ local (const thunkEnvVars) $ toC tm
-    first (uncurry (:)) <$> WriterT (thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : thunkBody))
+    uncurry (<>) . second const <$> WriterT (thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : thunkBody))
     where
       thunkEnvSize = Set.size thunkEnv
       thunkEnv = freeVarOfTm tm
       thunkEnvVars = Set.toList thunkEnv
 
-valueOfConst :: String -> WithClosure (CData (Tm 'Val))
-valueOfConst c = pure (([], c), Dual [])
+valueOfConst :: Maybe String -> String -> WithClosure (CData (Tm 'Val))
+valueOfConst mayMem c =
+  pure
+  ( \isDef y ->
+      [ if isDef
+        then defineConstItemStmt y (maybe c (\mem -> "{" <> mem <> " = " <> c <> "}") mayMem)
+        else assignStmt (y <> fromMaybe "" mayMem) c
+      ]
+  , Dual []
+  )
 
 getVar :: Ident -> WithClosure String
 getVar x = do
@@ -58,16 +65,18 @@ getVar x = do
       Just i  -> nthEnvItem i
       Nothing -> toVar x
 
-thunkOfCode :: Int -> [Ident] -> [String] -> WithClosure (((String, [String]), String), Dual [TopDef])
+thunkOfCode :: Int -> [Ident] -> [String] -> WithClosure ((Bool -> String -> [String], String -> [String]), Dual [TopDef])
 thunkOfCode thunkEnvSize thunkEnvVars thunkBody = do
-  Identity thunkItem `Pair` Identity thunkBodyName <- freshNamesOf (Identity "thunk_" `Pair` Identity "thunk_body_")
+  thunkBodyName <- freshNameOf "sys_thunk"
   let
-    initialThunk = "{.thunk_item = {.code = " <> thunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"
+    initializeThunk ifDef y
+      | ifDef     = [defineConstItemStmt y $ "{.thunk_item = {.code = " <> thunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"]
+      | otherwise = [assignStmt (y <> ".thunk_item.code") thunkBodyName, assignStmt (y <> ".thunk_item.env") initialThunkEnv]
   envInitializations <- zipWithM
-                        (\x idx -> assignStmt (nthItem (thunkItem <> ".thunk_item.env") idx) <$> getVar x)
+                        (\x idx -> (\v y -> assignStmt (nthItem (y <> ".thunk_item.env") idx) v) <$> getVar x)
                         thunkEnvVars
                         [(0 :: Int)..]
-  pure (((defineConstItemStmt thunkItem initialThunk, envInitializations), thunkItem), Dual [ThunkBodyDef {..}])
+  pure ((initializeThunk, sequence envInitializations), Dual [ThunkBodyDef {..}])
   where
     initialThunkEnv
       | thunkEnvSize > 0 = "(item *) malloc(" <> show thunkEnvSize <> " * sizeof(item))"
@@ -78,33 +87,33 @@ instance ToC (Tm 'Com) where
 
   toC :: Tm 'Com -> WithClosure (CData (Tm 'Com))
   toC (TmLam x tm) = first (underScope . (globalStackPopStmt (toVar x) :)) <$> toC tm
-  toC (tmf `TmApp` tma) = runWriterT $ do
-    (inits, globalStackPushStmt -> tmaCode) <- WriterT $ toC tma
-    tmfCode <- WriterT $ toC tmf
-    pure (inits <> (tmaCode : tmfCode))
+  toC (tmf `TmApp` tma) = runWriterT $ liftA2 (<>) (globalStackPushStmt <$> WriterT (toC tma)) (WriterT $ toC tmf)
   toC (TmForce tm) = runWriterT $ do
-    (inits, tmCode) <- WriterT $ toC tm
-    pure (inits <> [forceThunkStmt tmCode])
+    tmCode <- WriterT $ toC tm
+    thunk <- lift $ freshNameOf "sys_t"
+    pure (tmCode True thunk <> [forceThunkStmt thunk])
   toC (TmReturn tm) = runWriterT $ do
-    (inits, assignStmt retValue -> tmCode) <- WriterT $ toC tm
-    pure (inits <> [tmCode])
+    tmCode <- WriterT $ toC tm
+    pure $ tmCode False retValue
   toC (TmThen tm0 x tm1) = runWriterT $ do
     tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
     pure (tm0Code <> underScope (defineConstItemStmt (toVar x) retValue : tm1Code))
   toC (TmLet x tm0 tm1) = runWriterT $ do
-    (inits, tm0Code) <- WriterT $ toC tm0
+    tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
-    pure (inits <> underScope (defineConstItemStmt (toVar x) tm0Code : tm1Code))
+    pure (underScope (tm0Code True (toVar x) <> tm1Code))
   toC (TmPrintInt tm0 tm1) = runWriterT $ do
-    (inits, tm0Code) <- WriterT $ toC tm0
+    tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
-    pure (inits <> (printlnAsIntStmt (tm0Code <> ".int_item") : tm1Code))
+    msg <- lift $ freshNameOf "sys_msg"
+    pure (tm0Code True msg <> (printlnAsIntStmt (msg <> ".int_item") : tm1Code))
   toC (TmRec x tm) = runWriterT $ do
     tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
-    ((thunkInit, inits), thunkItem) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
-    pure (thunkInit : defineConstItemStmt (toVar x) thunkItem : inits <> [forceThunkStmt thunkItem])
+    (thunkInit, inits) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
+    pure (thunkInit True xVar <> inits xVar <> [forceThunkStmt xVar])
     where
+      xVar = toVar x
       thunkEnv = freeVarOfTm tm
       thunkEnvSize = Set.size thunkEnv
       thunkEnvVars = Set.toList thunkEnv
@@ -203,8 +212,8 @@ defaultHeaders =
   , ""
   ]
 
-globalStackPushStmt :: String -> String
-globalStackPushStmt = assignStmt . nthGlobalStackItem $ globalStack <> ".top++"
+globalStackPushStmt :: (Bool -> String -> [String]) -> [String]
+globalStackPushStmt f = f False . nthGlobalStackItem $ globalStack <> ".top++"
 
 globalStackPopStmt :: String -> String
 globalStackPopStmt var = defineConstItemStmt var . nthGlobalStackItem $ "--" <> globalStack <> ".top"
@@ -216,13 +225,13 @@ printlnAsIntStmt :: String -> String
 printlnAsIntStmt s = "printf(\"%d\\n\", " <> s <> ");"
 
 nthGlobalStackItem :: String -> String
-nthGlobalStackItem idx = globalStack <> ".items[" <> idx <> "]"
+nthGlobalStackItem idx = "(" <> globalStack <> ".items[" <> idx <> "])"
 
 nthEnvItem :: Int -> String
-nthEnvItem i = "env[" <> show i <> "]"
+nthEnvItem = nthItem "env"
 
 nthItem :: String -> Int -> String
-nthItem arr i = arr <> "[" <> show i <> "]"
+nthItem arr i = "(" <> arr <> "[" <> show i <> "])"
 
 defineConstItemStmt :: String -> String -> String
 defineConstItemStmt var val = "const item " <> var <> " = " <> val <> ";"
@@ -234,13 +243,13 @@ assignStmt :: String -> String -> String
 assignStmt var val = var <> " = " <> val <> ";"
 
 underScope :: [String] -> [String]
-underScope = (["{"] <>) . (<> ["}"])
+underScope = id -- (["{"] <>) . (<> ["}"])
 
 toVar :: Ident -> String
 toVar (Ident x) = "var_" <> x
 
 retValue :: String
-retValue = "*" <> retPointer
+retValue = "(*" <> retPointer <> ")"
 
 retPointer :: String
 retPointer = "ret"
