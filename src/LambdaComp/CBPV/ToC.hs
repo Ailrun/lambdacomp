@@ -131,7 +131,7 @@ showTopDef ThunkBodyDef {..} =
      ]
   <> envDef
   <> thunkBody
-  <> ["}" ]
+  <> ["}"]
   where
     thunkEnvDecl = ["static item " <> thunkEnv <> "[" <> show thunkEnvLength <> "];" | thunkEnvLength /= 0]
     envDef = ["const item *env = " <> thunkEnv <> ";" | thunkEnvLength /= 0]
