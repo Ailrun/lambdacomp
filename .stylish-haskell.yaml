@@ -322,7 +322,7 @@ steps:
       #   > import Control.Monad.MonadError
       #
       # Default: false
-      group_imports: false
+      group_imports: true
 
       # A list of rules specifying how to group modules and how to
       # order the groups.
@@ -393,8 +393,8 @@ steps:
       #
       # Default: [{ "match" : ".*", "sub_group": "^[^.]+" }]
       group_rules:
-        - match: ".*"
-          sub_group: "^[^.]+"
+        - match: "^([^L].*|L[^a].*|La[^m].*|Lam[^b].*|Lamb[^d].*|Lambd[^a].*|Lambda[^C].*|LambdaC[^o].*|LambdaCo[^m].*|LambdaCom[^p].*|LambdaComp[^\\.].*)"
+        - match: "^LambdaComp\\>"
 
   # Language pragmas
   - language_pragmas:
@@ -451,7 +451,7 @@ steps:
 # Set this to null to disable all line wrapping.
 #
 # Default: 80.
-columns: 80
+columns: null
 
 # By default, line endings are converted according to the OS. You can override
 # preferred format here.

@@ -6,8 +6,7 @@
 module LambdaComp.CBPV.ToC where
 
 import Control.Monad               (zipWithM)
-import Control.Monad.Reader        (MonadReader (local), Reader, asks,
-                                    runReader)
+import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict  (evalStateT)
 import Control.Monad.Writer.Strict (WriterT (WriterT, runWriterT))
 import Data.Bifunctor              (Bifunctor (first))
