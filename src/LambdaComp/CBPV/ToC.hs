@@ -15,7 +15,6 @@ import Data.Functor.Identity       (Identity (Identity))
 import Data.Functor.Product        (Product (Pair))
 import Data.List                   (elemIndex)
 import Data.Semigroup              (Dual (Dual, getDual))
-import Data.Set                    (Set)
 import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
@@ -29,10 +28,9 @@ class ToC a where
 
 data TopDef
   = ThunkBodyDef
-    { thunkBodyName  :: String
-    , thunkBody      :: [String]
-    , thunkEnv       :: String
-    , thunkEnvLength :: Int
+    { thunkBodyName :: String
+    , thunkBody     :: [String]
+    , thunkEnvSize  :: Int
     }
 
 instance ToC (Tm 'Val) where
@@ -44,10 +42,12 @@ instance ToC (Tm 'Val) where
   toC (TmInt n)    = valueOfConst $ intItemCons <> "(" <> show n <> ")"
   toC (TmDouble f) = valueOfConst $ doubleItemCons <> "(" <> show f <> ")"
   toC (TmThunk tm) = runWriterT $ do
-    thunkBody <- WriterT $ local (const $ Set.toList envVarsSet) $ toC tm
-    first (uncurry (:)) <$> WriterT (thunkOfCode envVarsSet (comment (show tm) : thunkBody))
+    thunkBody <- WriterT $ local (const thunkEnvVars) $ toC tm
+    first (uncurry (:)) <$> WriterT (thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : thunkBody))
     where
-      envVarsSet = freeVarOfTm tm
+      thunkEnvSize = Set.size thunkEnv
+      thunkEnv = freeVarOfTm tm
+      thunkEnvVars = Set.toList thunkEnv
 
 valueOfConst :: String -> WithClosure (CData (Tm 'Val))
 valueOfConst c = pure (([], c), Dual [])
@@ -59,17 +59,20 @@ getVar x = do
       Just i  -> nthEnvItem i
       Nothing -> toVar x
 
-thunkOfCode :: Set Ident -> [String] -> WithClosure (((String, [String]), String), Dual [TopDef])
-thunkOfCode envVarsSet thunkBody = do
-  Identity thunkItem `Pair` Identity thunkBodyName `Pair` Identity thunkEnv <- freshNamesOf (Identity "thunk_" `Pair` Identity "thunk_body_" `Pair` Identity "thunk_env_")
+thunkOfCode :: Int -> [Ident] -> [String] -> WithClosure (((String, [String]), String), Dual [TopDef])
+thunkOfCode thunkEnvSize thunkEnvVars thunkBody = do
+  Identity thunkItem `Pair` Identity thunkBodyName <- freshNamesOf (Identity "thunk_" `Pair` Identity "thunk_body_")
   let
-    thunkEnvLength = Set.size envVarsSet
-    initialThunk = "{.thunk_item = " <> thunkBodyName <> "}"
+    initialThunk = "{.thunk_item = {.code = " <> thunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"
   envInitializations <- zipWithM
-                        (\x idx -> assignStmt (nthItem thunkEnv  idx) <$> getVar x)
-                        (Set.toList envVarsSet)
+                        (\x idx -> assignStmt (nthItem (thunkItem <> ".thunk_item.env") idx) <$> getVar x)
+                        thunkEnvVars
                         [(0 :: Int)..]
   pure (((defineConstItemStmt thunkItem initialThunk, envInitializations), thunkItem), Dual [ThunkBodyDef {..}])
+  where
+    initialThunkEnv
+      | thunkEnvSize > 0 = "(item *) malloc(" <> show thunkEnvSize <> " * sizeof(item))"
+      | otherwise        = nullPointer
 
 instance ToC (Tm 'Com) where
   type CData (Tm 'Com) = ([String], Dual [TopDef])
@@ -99,11 +102,13 @@ instance ToC (Tm 'Com) where
     tm1Code <- WriterT $ toC tm1
     pure (inits <> (printlnAsIntStmt (tm0Code <> ".int_item") : tm1Code))
   toC (TmRec x tm) = runWriterT $ do
-    tmCode <- WriterT $ local (const $ Set.toList envVarsSet) $ toC tm
-    ((thunkInit, inits), thunkItem) <- WriterT $ thunkOfCode envVarsSet (comment (show tm) : tmCode)
+    tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
+    ((thunkInit, inits), thunkItem) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
     pure (thunkInit : defineConstItemStmt (toVar x) thunkItem : inits <> [forceThunkStmt thunkItem])
     where
-      envVarsSet = freeVarOfTm tm
+      thunkEnv = freeVarOfTm tm
+      thunkEnvSize = Set.size thunkEnv
+      thunkEnvVars = Set.toList thunkEnv
 
 runToC :: Tm 'Com -> String
 runToC tm = showC . first (comment (show tm) :) . (`runReader` []) . (`evalStateT` 0) $ toC tm
@@ -120,21 +125,20 @@ showC (mainBody, topDefs) =
     realTopDefs = reverse . getDual $ topDefs
 
 showTopDefPrototype :: TopDef -> String
-showTopDefPrototype ThunkBodyDef {..} = "void " <> thunkBodyName <> "(item *const);"
+showTopDefPrototype ThunkBodyDef {..} = "void " <> thunkBodyName <> "(item *const env, item *const ret);"
 
 showTopDef :: TopDef -> String
 showTopDef ThunkBodyDef {..} =
   unlines
-  $ thunkEnvDecl
-  <> [ "void " <> thunkBodyName <> "(item *ret)"
-     , "{"
-     ]
-  <> envDef
+  $ [ "void " <> thunkBodyName <> "(" <> thunkEnvArg <> ", item *const ret)"
+    , "{"
+    ]
   <> thunkBody
   <> ["}"]
   where
-    thunkEnvDecl = ["static item " <> thunkEnv <> "[" <> show thunkEnvLength <> "];" | thunkEnvLength /= 0]
-    envDef = ["const item *env = " <> thunkEnv <> ";" | thunkEnvLength /= 0]
+    thunkEnvArg
+      | thunkEnvSize > 0 = "item *const env"
+      | otherwise        = "item *const _"
 
 showMain :: [String] -> String
 showMain mainBody =
@@ -161,11 +165,15 @@ defaultHeaders =
   , ""
   , "typedef union item item;"
   , "typedef struct stack stack;"
-  , ""
-  , "typedef void (*thunk)(item *const ret);"
+  , "typedef struct thunk thunk;"
   , ""
   , "inline item " <> intItemCons <> "(const int value);"
   , "inline item " <> doubleItemCons <> "(const double value);"
+  , ""
+  , "struct thunk {"
+  , "void (*code)(item *const env, item *const ret);"
+  , "item *env;"
+  , "};"
   , ""
   , "union item"
   , "{"
@@ -203,7 +211,7 @@ globalStackPopStmt :: String -> String
 globalStackPopStmt var = defineConstItemStmt var . nthGlobalStackItem $ "--" <> globalStack <> ".top"
 
 forceThunkStmt :: String -> String
-forceThunkStmt thunk = thunk <> ".thunk_item(" <> retPointer <> ");"
+forceThunkStmt thunk = thunk <> ".thunk_item.code(" <> thunk <> ".thunk_item.env, " <> retPointer <> ");"
 
 printlnAsIntStmt :: String -> String
 printlnAsIntStmt s = "printf(\"%d\\n\", " <> s <> ");"
