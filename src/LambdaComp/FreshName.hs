@@ -1,7 +1,7 @@
 module LambdaComp.FreshName where
 
 import Control.Monad.Identity     (Identity)
-import Control.Monad.State.Strict (MonadState (get), StateT, modify')
+import Control.Monad.State.Strict (MonadState (get), StateT, evalState, evalStateT, modify')
 import Data.String                (IsString (fromString))
 
 type FreshNameT = StateT Integer
@@ -18,3 +18,9 @@ freshNamesOf stems = do
   i <- get
   modify' (1 +)
   pure $ fmap (<> fromString (show i)) stems
+
+runFreshNameT :: Monad m => FreshNameT m a -> m a
+runFreshNameT = (`evalStateT` 0)
+
+runFreshName :: FreshName a -> a
+runFreshName = (`evalState` 0)
