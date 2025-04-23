@@ -27,6 +27,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         ghc-version: ['9.8.4']
+        cabal-version: ['3.14.2.0']
 
     steps:
       - name: Get the repository content
@@ -37,7 +38,7 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: '3.14.2.0'
+          cabal-version: ${{ matrix.cabal-version }}
 
       - name: Configure the build
         run: |
