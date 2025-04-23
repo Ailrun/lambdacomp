@@ -1,7 +1,6 @@
-{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies      #-}
-module LambdaComp.ToCBPV where
+module LambdaComp.CBV.ToCBPV where
 
 import Control.Monad.State.Strict (evalState)
 
@@ -9,7 +8,7 @@ import LambdaComp.CBPV.Syntax     qualified as CBPV
 import LambdaComp.FreshName
 import LambdaComp.Syntax
 
-runToCBPV :: Tm -> CBPV.Tm 'CBPV.Com
+runToCBPV :: Tm -> CBPV.Tm CBPV.Com
 runToCBPV = (`evalState` 0) . toCBPV
 
 class ToCBPV a where
@@ -17,19 +16,19 @@ class ToCBPV a where
   toCBPV :: a -> FreshName (CBPVData a)
 
 instance ToCBPV Tp where
-  type CBPVData Tp = CBPV.Tp 'CBPV.Com
+  type CBPVData Tp = CBPV.Tp CBPV.Com
 
   toCBPV :: Tp -> FreshName (CBPVData Tp)
   toCBPV = pure . CBPV.TpDown . helper
     where
-      helper :: Tp -> CBPV.Tp 'CBPV.Val
+      helper :: Tp -> CBPV.Tp CBPV.Val
       helper TpUnit            = CBPV.TpUnit
       helper TpInt             = CBPV.TpInt
       helper TpDouble          = CBPV.TpDouble
       helper (ty0 `TpFun` ty1) = CBPV.TpUp $ helper ty0 `CBPV.TpFun` CBPV.TpDown (helper ty1)
 
 instance ToCBPV Tm where
-  type CBPVData Tm = CBPV.Tm 'CBPV.Com
+  type CBPVData Tm = CBPV.Tm CBPV.Com
 
   toCBPV :: Tm -> FreshName (CBPVData Tm)
   toCBPV (tm `TmAnn` _)       = toCBPV tm

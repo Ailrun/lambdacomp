@@ -5,8 +5,8 @@ import LambdaComp.AM.Eval           (topEval)
 import LambdaComp.CBPV.Optimization (topOptimizeDefault)
 import LambdaComp.CBPV.ToAM         (runToAM)
 import LambdaComp.CBPV.ToC          (runToC)
+import LambdaComp.CBV.ToCBPV        (runToCBPV)
 import LambdaComp.Syntax
-import LambdaComp.ToCBPV            (runToCBPV)
 
 test0 :: Tm
 test0 = TmPrintInt (TmLam "x" ("x" `TmApp` TmInt 5) `TmApp` TmLam "x" "x") $ TmInt 0
@@ -21,10 +21,7 @@ allSteps :: Tm -> FilePath -> IO ()
 allSteps tm fp = writeFile fp $ runToC $ topOptimizeDefault $ runToCBPV tm
 
 allAMSteps :: Tm -> IO ()
-allAMSteps tm = do
-  let (code, sections) = runToAM $ topOptimizeDefault $ runToCBPV tm
-  item <- topEval sections code
-  print item
+allAMSteps tm = topEval (runToAM $ topOptimizeDefault $ runToCBPV tm) >>= print
 
 main :: IO ()
 main = do

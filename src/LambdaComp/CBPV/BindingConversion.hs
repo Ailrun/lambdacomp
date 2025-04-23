@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds    #-}
 {-# LANGUAGE GADTs        #-}
 {-# LANGUAGE TypeFamilies #-}
 module LambdaComp.CBPV.BindingConversion where
@@ -10,19 +9,19 @@ import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
 
-topCommutingThen :: Tm 'Com -> Tm 'Com
+topCommutingThen :: Tm Com -> Tm Com
 topCommutingThen = uncurry commitThen . runWriter . commutingThen
 
-topLiftingLet :: Tm 'Com -> Tm 'Com
+topLiftingLet :: Tm Com -> Tm Com
 topLiftingLet = uncurry commitLet . runWriter . liftingLet
 
-data TmThenPrefix = TmThenPrefix (Set Ident) (Tm 'Com) Ident
+data TmThenPrefix = TmThenPrefix (Set Ident) (Tm Com) Ident
 
 type family CommutingThen (c :: Class) (a :: Type) where
-  CommutingThen 'Com a = Writer [TmThenPrefix] a
-  CommutingThen 'Val a = a
+  CommutingThen Com a = Writer [TmThenPrefix] a
+  CommutingThen Val a = a
 
-commutingThenUnder :: Ident -> Tm 'Com -> CommutingThen 'Com (Tm 'Com)
+commutingThenUnder :: Ident -> Tm Com -> CommutingThen Com (Tm Com)
 commutingThenUnder x = uncurry (commitThenUnder x) . runWriter . commutingThen
 
 commutingThen :: Tm c -> CommutingThen c (Tm c)
@@ -43,23 +42,23 @@ commutingThen (TmLet x tm0 tm1)    = TmLet x (commutingThen tm0) <$> commutingTh
 commutingThen (TmPrintInt tm0 tm1) = TmPrintInt (commutingThen tm0) <$> commutingThen tm1
 commutingThen (TmRec f tm)         = TmRec f <$> commutingThenUnder f tm
 
-commitThenUnder :: Ident -> Tm 'Com -> [TmThenPrefix] -> CommutingThen 'Com (Tm 'Com)
+commitThenUnder :: Ident -> Tm Com -> [TmThenPrefix] -> CommutingThen Com (Tm Com)
 commitThenUnder x tm1 prefixes = do
   tell prefixes0
   pure $ foldr (\(TmThenPrefix _ tm0 y) -> TmThen tm0 y) tm1 prefixes1
   where
     (prefixes0, prefixes1) = break (\(TmThenPrefix fv _ y) -> x `Set.member` fv || y == x) prefixes
 
-commitThen :: Tm 'Com -> [TmThenPrefix] -> Tm 'Com
+commitThen :: Tm Com -> [TmThenPrefix] -> Tm Com
 commitThen = foldr (\(TmThenPrefix _ tm0 x) -> TmThen tm0 x)
 
-data TmLetPrefix = TmLetPrefix (Set Ident) Ident (Tm 'Val)
+data TmLetPrefix = TmLetPrefix (Set Ident) Ident (Tm Val)
 
 type family LiftingLet (c :: Class) (a :: Type) where
-  LiftingLet 'Com a = Writer [TmLetPrefix] a
-  LiftingLet 'Val a = a
+  LiftingLet Com a = Writer [TmLetPrefix] a
+  LiftingLet Val a = a
 
-liftingLetUnder :: Ident -> Tm 'Com -> LiftingLet 'Com (Tm 'Com)
+liftingLetUnder :: Ident -> Tm Com -> LiftingLet Com (Tm Com)
 liftingLetUnder x = uncurry (commitLetUnder x) . runWriter . liftingLet
 
 liftingLet :: Tm c -> LiftingLet c (Tm c)
@@ -81,12 +80,12 @@ liftingLet (TmLet x tm0 tm1)    = do
 liftingLet (TmPrintInt tm0 tm1) = TmPrintInt (liftingLet tm0) <$> liftingLet tm1
 liftingLet (TmRec f tm)         = TmRec f <$> liftingLetUnder f tm
 
-commitLetUnder :: Ident -> Tm 'Com -> [TmLetPrefix] -> LiftingLet 'Com (Tm 'Com)
+commitLetUnder :: Ident -> Tm Com -> [TmLetPrefix] -> LiftingLet Com (Tm Com)
 commitLetUnder x tm1 prefixes = do
   tell prefixes0
   pure $ foldr (\(TmLetPrefix _ y tm0) -> TmLet y tm0) tm1 prefixes1
   where
     (prefixes0, prefixes1) = break (\(TmLetPrefix fv y _) -> x `Set.member` fv || y == x) prefixes
 
-commitLet :: Tm 'Com -> [TmLetPrefix] -> Tm 'Com
+commitLet :: Tm Com -> [TmLetPrefix] -> Tm Com
 commitLet = foldr (\(TmLetPrefix _ tm0 x) -> TmLet tm0 x)

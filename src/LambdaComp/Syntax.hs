@@ -16,14 +16,14 @@ data Tp where
 
 data Tm where
   TmAnn      :: Tm -> Tp -> Tm
-  TmVar      :: Ident -> Tm
+  TmVar      :: !Ident -> Tm
   TmUnit     :: Tm
   TmInt      :: !Int -> Tm
   TmDouble   :: !Double -> Tm
-  TmLam      :: Ident -> Tm -> Tm
+  TmLam      :: !Ident -> Tm -> Tm
   TmApp      :: Tm -> Tm -> Tm
   TmPrintInt :: Tm -> Tm -> Tm
-  TmRec      :: Ident -> Tm -> Tm
+  TmRec      :: !Ident -> Tm -> Tm
   deriving stock (Eq, Ord, Show, Read)
 
 instance IsString Tm where

@@ -1,10 +1,8 @@
-{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TypeFamilies      #-}
 module LambdaComp.CBPV.ToC where
 
-import Control.Applicative         (Applicative (liftA2))
 import Control.Monad               (zipWithM)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict  (evalStateT)
@@ -14,6 +12,7 @@ import Data.List                   (elemIndex)
 import Data.Maybe                  (fromMaybe)
 import Data.Semigroup              (Dual (Dual, getDual))
 import Data.Set                    qualified as Set
+import Data.Text                   qualified as Text
 
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName        (FreshNameT, freshNameOf)
@@ -31,10 +30,10 @@ data TopDef
     , thunkEnvSize  :: Int
     }
 
-instance ToC (Tm 'Val) where
-  type CData (Tm 'Val) = (Bool -> String -> [String], Dual [TopDef])
+instance ToC (Tm Val) where
+  type CData (Tm Val) = (Bool -> String -> [String], Dual [TopDef])
 
-  toC :: Tm 'Val -> WithClosure (CData (Tm 'Val))
+  toC :: Tm Val -> WithClosure (CData (Tm Val))
   toC (TmVar x)    = getVar x >>= valueOfConst Nothing
   toC TmUnit       = valueOfConst (Just ".int_item") "0"
   toC (TmInt n)    = valueOfConst (Just ".int_item") $ show n
@@ -47,7 +46,7 @@ instance ToC (Tm 'Val) where
       thunkEnv = freeVarOfTm tm
       thunkEnvVars = Set.toList thunkEnv
 
-valueOfConst :: Maybe String -> String -> WithClosure (CData (Tm 'Val))
+valueOfConst :: Maybe String -> String -> WithClosure (CData (Tm Val))
 valueOfConst mayMem c =
   pure
   ( \isDef y ->
@@ -82,10 +81,10 @@ thunkOfCode thunkEnvSize thunkEnvVars thunkBody = do
       | thunkEnvSize > 0 = "(item *) malloc(" <> show thunkEnvSize <> " * sizeof(item))"
       | otherwise        = nullPointer
 
-instance ToC (Tm 'Com) where
-  type CData (Tm 'Com) = ([String], Dual [TopDef])
+instance ToC (Tm Com) where
+  type CData (Tm Com) = ([String], Dual [TopDef])
 
-  toC :: Tm 'Com -> WithClosure (CData (Tm 'Com))
+  toC :: Tm Com -> WithClosure (CData (Tm Com))
   toC (TmLam x tm) = first (underScope . (globalStackPopStmt (toVar x) :)) <$> toC tm
   toC (tmf `TmApp` tma) = runWriterT $ liftA2 (<>) (globalStackPushStmt <$> WriterT (toC tma)) (WriterT $ toC tmf)
   toC (TmForce tm) = runWriterT $ do
@@ -118,7 +117,7 @@ instance ToC (Tm 'Com) where
       thunkEnvSize = Set.size thunkEnv
       thunkEnvVars = Set.toList thunkEnv
 
-runToC :: Tm 'Com -> String
+runToC :: Tm Com -> String
 runToC tm = showC . first (comment (show tm) :) . (`runReader` []) . (`evalStateT` 0) $ toC tm
 
 showC :: ([String], Dual [TopDef]) -> String
@@ -246,7 +245,7 @@ underScope :: [String] -> [String]
 underScope = id -- (["{"] <>) . (<> ["}"])
 
 toVar :: Ident -> String
-toVar (Ident x) = "var_" <> x
+toVar (Ident x) = "var_" <> Text.unpack x
 
 retValue :: String
 retValue = "(*" <> retPointer <> ")"

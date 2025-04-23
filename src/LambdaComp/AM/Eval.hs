@@ -1,32 +1,36 @@
+{-# LANGUAGE OverloadedLists   #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
-{-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE RecursiveDo       #-}
 module LambdaComp.AM.Eval where
 
-import Control.Monad.Reader       (ReaderT (runReaderT), asks, MonadIO (liftIO))
+import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
 import Control.Monad.State.Strict (StateT, execStateT, gets, modify')
-import Data.Array                 qualified as Array
 import Data.List                  (foldl')
 import Data.List.NonEmpty         (NonEmpty)
 import Data.List.NonEmpty         qualified as NonEmpty
 import Data.Map.Strict            (Map)
 import Data.Map.Strict            qualified as Map
 import Data.Maybe                 (mapMaybe)
-import GHC.Arr                    qualified as Arr
+import Data.Vector                (Vector)
+import Data.Vector                qualified as Vector
 
 import LambdaComp.AM.Syntax
 import LambdaComp.Ident           (Ident)
 
 data Item where
   ItUnit   :: Item
-  ItInt    :: Int -> Item
-  ItDouble :: Double -> Item
-  ItThunk  :: Ident -> [Item] -> Item
+  ItInt    :: !Int -> Item
+  ItDouble :: !Double -> Item
+  ItThunk  :: !Ident -> !(Vector Item) -> Item
   deriving Show
 
-type GlobalStack = [Item]
+type StackLike a = [a]
+type GlobalStack = StackLike Item
 type Envs = NonEmpty (Map Ident Item)
-type LocalEnv = [Item]
+type LocalEnv = Vector Item
+type CallStackEntry = ((Ident, Int), LocalEnv)
+type CallStack = StackLike CallStackEntry
 
 type EvalData = Map Ident Code
 
@@ -36,19 +40,19 @@ data EvalState
     , globalStack :: GlobalStack
     , globalEnvs  :: Envs
     , localEnv    :: LocalEnv
-    , callStack   :: [((Ident, Int), LocalEnv)]
+    , callStack   :: CallStack
     , returnReg   :: Item
     }
 
 type Eval = StateT EvalState (ReaderT EvalData IO)
 
-topEval :: [CodeSection] -> Code -> IO Item
-topEval cs c = returnReg <$> runMachine evalData evalState
+topEval :: [CodeSection] -> IO Item
+topEval cs = returnReg <$> runMachine evalData evalState
   where
-    evalData = foldl' insertCodeSection (Map.singleton "main" c) cs
+    evalData = foldl' insertCodeSection Map.empty cs
     evalState =
       EvalState
-      { codePointer = ("main", 0)
+      { codePointer = (mainName, 0)
       , globalStack = []
       , globalEnvs = Map.empty NonEmpty.:| [Map.empty]
       , localEnv = []
@@ -57,6 +61,7 @@ topEval cs c = returnReg <$> runMachine evalData evalState
       }
 
 insertCodeSection :: EvalData -> CodeSection -> EvalData
+insertCodeSection ed MainCodeSection {..}  = Map.insert mainName mainCode ed
 insertCodeSection ed ThunkCodeSection {..} = Map.insert thunkCodeSectionName thunkCode ed
 
 runMachine :: EvalData -> EvalState -> IO EvalState
@@ -76,11 +81,10 @@ fetchInst = do
   helper funId code index
   where
     helper funId code index
-      | b <- Array.bounds code
-      , Array.inRange b index = do
+      | Just it <- code Vector.!? index = do
           modify' (\m -> m{ codePointer = (funId, index + 1) })
-          pure . Just . Arr.unsafeAt code $ Arr.unsafeIndex b index
-      | otherwise             = pure Nothing
+          pure $ Just it
+      | otherwise                       = pure Nothing
 
 evalInst :: Inst -> Eval ()
 evalInst IScope                  = iScope
@@ -107,7 +111,7 @@ embodyAddr (AIdent x)    = do
   case its of
     []     -> error $ show x <> " is not in scope!!"
     it : _ -> pure it
-embodyAddr (ALocalEnv n) = gets $ (!! n) . localEnv
+embodyAddr (ALocalEnv n) = gets $ (Vector.! n) . localEnv
 
 iScope :: Eval ()
 iScope = modify' (\m -> m{ globalEnvs = Map.empty NonEmpty.<| globalEnvs m })
@@ -122,12 +126,11 @@ iPop addr = do
     h : t -> do
       modify' (\m -> m{ globalStack = t })
       iAssign addr h
-    _ ->
-      error "Impossible!"
+    []    -> error "Impossible!"
 
 iAssign :: Addr -> Item -> Eval ()
 iAssign (AIdent x)    it = modify' (\m -> let h NonEmpty.:| t = globalEnvs m in m{ globalEnvs = Map.insert x it h NonEmpty.:| t })
-iAssign (ALocalEnv n) it = modify' (\m -> let (h, t) = splitAt (n - 1) $ localEnv m in m{ localEnv = h <> (it : tail t) })
+iAssign (ALocalEnv n) it = modify' (\m -> m{ localEnv = localEnv m Vector.// [(n, it)] })
 
 iJump :: Item -> Eval ()
 iJump (ItThunk x env) =
@@ -147,11 +150,10 @@ iReceive addr = do
   it <- gets returnReg
   iAssign addr it
 
-iRecAssign :: Addr -> Ident -> [Addr] -> Eval ()
+iRecAssign :: Addr -> Ident -> Vector Addr -> Eval ()
 iRecAssign addr x env = do
   rec
-    thunk <- do
-      ItThunk x <$> traverse (embodyEnv thunk) env
+    thunk <- ItThunk x <$> traverse (embodyEnv thunk) env
   iAssign addr thunk
   where
     embodyEnv :: Item -> Addr -> Eval Item
@@ -167,7 +169,8 @@ iExit :: Eval ()
 iExit = do
   prevCallStack <- gets callStack
   case prevCallStack of
-    []                                  -> pure ()
-    (codePointer, localEnv) : callStack -> do
-      modify' (\m -> m{ codePointer, localEnv, callStack })
+    []                                  -> error "Impossible!"
+    (codePointer, localEnv) : callStack -> modify' (\m -> m{ codePointer, localEnv, callStack })
 
+mainName :: Ident
+mainName = "main"

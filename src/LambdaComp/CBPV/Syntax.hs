@@ -1,5 +1,5 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs     #-}
+{-# LANGUAGE GADTs    #-}
+{-# LANGUAGE TypeData #-}
 module LambdaComp.CBPV.Syntax
   ( module LambdaComp.CBPV.Syntax
   , module LambdaComp.Ident
@@ -10,17 +10,17 @@ import Data.Set         qualified as Set
 
 import LambdaComp.Ident
 
-data Class where
+type data Class where
   Val, Com :: Class
 
 data Tp (c :: Class) where
-  TpUnit   :: Tp 'Val
-  TpInt    :: Tp 'Val
-  TpDouble :: Tp 'Val
-  TpUp     :: Tp 'Com -> Tp 'Val
+  TpUnit   :: Tp Val
+  TpInt    :: Tp Val
+  TpDouble :: Tp Val
+  TpUp     :: Tp Com -> Tp Val
 
-  TpFun  :: Tp 'Val -> Tp 'Com -> Tp 'Com
-  TpDown :: Tp 'Val -> Tp 'Com
+  TpFun  :: Tp Val -> Tp Com -> Tp Com
+  TpDown :: Tp Val -> Tp Com
 deriving stock instance Eq (Tp c)
 deriving stock instance Ord (Tp c)
 deriving stock instance Show (Tp c)
@@ -29,26 +29,26 @@ instance Read (Tp c) where
   readsPrec = undefined
 
 data Tm (c :: Class) where
-  TmVar      :: Ident -> Tm 'Val
-  TmUnit     :: Tm 'Val
-  TmInt      :: !Int -> Tm 'Val
-  TmDouble   :: !Double -> Tm 'Val
+  TmVar      :: Ident -> Tm Val
+  TmUnit     :: Tm Val
+  TmInt      :: !Int -> Tm Val
+  TmDouble   :: !Double -> Tm Val
 
-  TmThunk    :: Tm 'Com -> Tm 'Val
+  TmThunk    :: Tm Com -> Tm Val
 
-  TmLam      :: Ident -> Tm 'Com -> Tm 'Com
-  TmApp      :: Tm 'Com -> Tm 'Val -> Tm 'Com
+  TmLam      :: Ident -> Tm Com -> Tm Com
+  TmApp      :: Tm Com -> Tm Val -> Tm Com
 
-  TmForce    :: Tm 'Val -> Tm 'Com
+  TmForce    :: Tm Val -> Tm Com
 
-  TmReturn   :: Tm 'Val -> Tm 'Com
-  TmThen     :: Tm 'Com -> Ident -> Tm 'Com -> Tm 'Com
+  TmReturn   :: Tm Val -> Tm Com
+  TmThen     :: Tm Com -> Ident -> Tm Com -> Tm Com
 
-  TmLet      :: Ident -> Tm 'Val -> Tm 'Com -> Tm 'Com
+  TmLet      :: Ident -> Tm Val -> Tm Com -> Tm Com
 
-  TmPrintInt :: Tm 'Val -> Tm 'Com -> Tm 'Com
+  TmPrintInt :: Tm Val -> Tm Com -> Tm Com
 
-  TmRec      :: Ident -> Tm 'Com -> Tm 'Com
+  TmRec      :: Ident -> Tm Com -> Tm Com
 
 deriving stock instance Eq (Tm c)
 deriving stock instance Ord (Tm c)

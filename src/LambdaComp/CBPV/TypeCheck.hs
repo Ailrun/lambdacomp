@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds  #-}
 {-# LANGUAGE GADTs      #-}
 {-# LANGUAGE LambdaCase #-}
 module LambdaComp.CBPV.TypeCheck
@@ -16,7 +15,7 @@ import Data.Map               qualified as Map
 
 import LambdaComp.CBPV.Syntax
 
-type TypeCheck = ReaderT (Map Ident (Tp 'Val)) (Either TypeError)
+type TypeCheck = ReaderT (Map Ident (Tp Val)) (Either TypeError)
 
 topCheck :: Tm c -> Tp c -> Either TypeError ()
 topCheck tm = (`runReaderT` initialContext) . check tm
@@ -98,10 +97,10 @@ infer tm                   = throwError $ NeedTypeAnn tm
 data TypeError where
   NotInScope      :: Ident -> TypeError
   TypeMismatch    :: Tp c -> Tp c -> TypeError
-  InvalidConsType :: Tp 'Val -> [Tp 'Val] -> TypeError
-  NonFunType      :: Tp 'Com -> TypeError
-  NonUpType       :: Tp 'Val -> TypeError
-  NonDownType     :: Tp 'Com -> TypeError
+  InvalidConsType :: Tp Val -> [Tp Val] -> TypeError
+  NonFunType      :: Tp Com -> TypeError
+  NonUpType       :: Tp Val -> TypeError
+  NonDownType     :: Tp Com -> TypeError
   NeedTypeAnn     :: Tm c -> TypeError
 
 deriving stock instance Show TypeError
