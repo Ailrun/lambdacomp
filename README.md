@@ -10,6 +10,7 @@ a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CB
 - [ ] Call-By-Name $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Need $\lambda$-calculus-To-CBPV pass
 - [x] Simple CBPV optimization pass
+- [ ] Tail call optimization pass (or lowering pass)
 - [ ] CBPV interpreter
 - [x] CBPV-to-C pass without GC
 - [x] CBPV-to-AM pass without GC
