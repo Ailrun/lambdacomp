@@ -1,14 +1,19 @@
 # Lambda Comp
 
-A Primitive Compiler from $\lambda$-calculus
+A Primitive Compiler from $\lambda$-calculus + $\alpha$ (e.g. primitive operations, recursion, and effects)
 
 ## Current Status
 Currently, this repository implements a primitive compiler from Call-By-Value $\lambda$-calculus to C based on Call-By-Push-Value (CBPV) and
 a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CBPV. This repository also comes with an interpreter for AM.
 
+- [ ] Frontend Parser for $\lambda$-calculus
+- [x] Simple bidirectional type-checker for $\lambda$-calculus
+- [ ] Constraint-based bidirectional type checker for $\lambda$-calculus
 - [x] Call-By-Value $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Name $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Need $\lambda$-calculus-To-CBPV pass
+- [x] Simple bidirectional type-checker for CBPV
+- [ ] Constraint-based bidirectional type checker for CBPV
 - [x] Simple CBPV optimization pass
 - [ ] Tail call optimization pass (or lowering pass)
 - [ ] CBPV interpreter
