@@ -18,9 +18,9 @@ license-files:   LICENSE
 
 author:          Junyoung/"Clare" Jang
 maintainer:      jjc9310@gmail.com
-synopsis:        An educational compiler for lambda calculus using CBPV
-
--- description:
+synopsis:        A primitive compiler for λ-calculus + α using CBPV
+description:
+  See [README.md](https://github.com/Ailrun/lambdacomp/blob/master/README.md)
 
 category:
   Language
@@ -135,3 +135,8 @@ test-suite lambdacomp-test
 
   -- Base language which the package is written in.
   default-language: GHC2021
+
+source-repository head
+  type:     git
+  location: https://github.com/Ailrun/lambdacomp.git
+  branch:   master
