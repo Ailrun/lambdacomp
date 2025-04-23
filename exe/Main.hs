@@ -1,11 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import LambdaComp.AM.Eval           (topEval)
-import LambdaComp.CBPV.Optimization (topOptimizeDefault)
-import LambdaComp.CBPV.ToAM         (runToAM)
-import LambdaComp.CBPV.ToC          (runToC)
-import LambdaComp.CBV.ToCBPV        (runToCBPV)
+import LambdaComp.Driver (mainForAM, mainForC)
 import LambdaComp.Syntax
 
 test0 :: Tm
@@ -17,17 +13,11 @@ test1 = TmPrintInt (TmLam "x" (TmLam "y" (TmPrintInt "y" "x") `TmApp` TmInt 2) `
 test2 :: Tm
 test2 = TmRec "f" (TmLam "x" $ TmPrintInt "x" $ TmPrintInt (TmInt 2) $ "f" `TmApp` "x") `TmApp` TmInt 3
 
-allSteps :: Tm -> FilePath -> IO ()
-allSteps tm fp = writeFile fp $ runToC $ topOptimizeDefault $ runToCBPV tm
-
-allAMSteps :: Tm -> IO ()
-allAMSteps tm = topEval (runToAM $ topOptimizeDefault $ runToCBPV tm) >>= print
-
 main :: IO ()
 main = do
-  allSteps test0 "./output/test0.c"
-  allSteps test1 "./output/test1.c"
-  allSteps test2 "./output/test2.c"
-  allAMSteps test0
-  allAMSteps test1
-  allAMSteps test2
+  mainForC test0 "output/test0"
+  mainForC test1 "output/test1"
+  mainForC test2 "output/test2"
+  mainForAM test0
+  mainForAM test1
+  mainForAM test2
