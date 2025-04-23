@@ -15,7 +15,7 @@ import Data.Set                    qualified as Set
 import Data.Text                   qualified as Text
 
 import LambdaComp.CBPV.Syntax
-import LambdaComp.FreshName        (FreshNameT, freshNameOf)
+import LambdaComp.FreshName   (FreshNameT, freshNameOf)
 
 type WithClosure = FreshNameT (Reader [Ident])
 

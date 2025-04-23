@@ -3,7 +3,7 @@ module LambdaComp.Syntax
   , module LambdaComp.Ident
   ) where
 
-import Data.String      (IsString (fromString))
+import Data.String (IsString (fromString))
 
 import LambdaComp.Ident
 

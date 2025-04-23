@@ -7,11 +7,11 @@ module LambdaComp.CBPV.TypeCheck
   , TypeError
   ) where
 
-import Control.Monad          (when)
-import Control.Monad.Except   (MonadError (throwError))
-import Control.Monad.Reader   (MonadReader (local), ReaderT (runReaderT), asks)
-import Data.Map               (Map)
-import Data.Map               qualified as Map
+import Control.Monad        (when)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.Reader (MonadReader (local), ReaderT (runReaderT), asks)
+import Data.Map             (Map)
+import Data.Map             qualified as Map
 
 import LambdaComp.CBPV.Syntax
 

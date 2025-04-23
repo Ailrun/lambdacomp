@@ -4,7 +4,7 @@ module LambdaComp.CBV.ToCBPV where
 
 import Control.Monad.State.Strict (evalState)
 
-import LambdaComp.CBPV.Syntax     qualified as CBPV
+import LambdaComp.CBPV.Syntax qualified as CBPV
 import LambdaComp.FreshName
 import LambdaComp.Syntax
 

@@ -1,7 +1,9 @@
-{-# LANGUAGE DataKinds #-}
-module LambdaComp.AM.Syntax where
+module LambdaComp.AM.Syntax
+  ( module LambdaComp.AM.Syntax
+  , module LambdaComp.Ident
+  ) where
 
-import Data.Vector      (Vector)
+import Data.Vector (Vector)
 
 import LambdaComp.Ident
 

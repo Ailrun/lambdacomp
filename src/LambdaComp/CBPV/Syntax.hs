@@ -5,8 +5,8 @@ module LambdaComp.CBPV.Syntax
   , module LambdaComp.Ident
   ) where
 
-import Data.Set         (Set)
-import Data.Set         qualified as Set
+import Data.Set (Set)
+import Data.Set qualified as Set
 
 import LambdaComp.Ident
 

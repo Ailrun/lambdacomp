@@ -5,49 +5,6 @@
 # are a list, so they have an order, and one specific step may appear more than
 # once (if needed). Each file is processed by these steps in the given order.
 steps:
-  # Convert some ASCII sequences to their Unicode equivalents. This is disabled
-  # by default.
-  # - unicode_syntax:
-  #     # In order to make this work, we also need to insert the UnicodeSyntax
-  #     # language pragma. If this flag is set to true, we insert it when it's
-  #     # not already present. You may want to disable it if you configure
-  #     # language extensions using some other method than pragmas. Default:
-  #     # true.
-  #     add_language_pragma: true
-
-  # Format module header
-  #
-  # Currently, this option is not configurable and will format all exports and
-  # module declarations to minimize diffs
-  #
-  # - module_header:
-  #     # How many spaces use for indentation in the module header.
-  #     indent: 4
-  #
-  #     # Should export lists be sorted?  Sorting is only performed within the
-  #     # export section, as delineated by Haddock comments.
-  #     sort: true
-  #
-  #     # See `separate_lists` for the `imports` step.
-  #     separate_lists: true
-  #
-  #     # When to break the "where".
-  #     # Possible values:
-  #     # - exports: only break when there is an explicit export list.
-  #     # - single: only break when the export list counts more than one export.
-  #     # - inline: only break when the export list is too long. This is
-  #     #   determined by the `columns` setting. Not applicable when the export
-  #     #   list contains comments as newlines will be required.
-  #     # - always: always break before the "where".
-  #     break_where: exports
-  #
-  #     # Where to put open bracket
-  #     # Possible values:
-  #     # - same_line: put open bracket on the same line as the module name, before the
-  #     #              comment of the module
-  #     # - next_line: put open bracket on the next line, after module comment
-  #     open_bracket: next_line
-
   # Format record definitions. This is disabled by default.
   #
   # You can control the layout of record fields. The only rules that can't be configured
@@ -112,11 +69,11 @@ steps:
   # - adjacent - Align statements that are on adjacent lines in groups.
   # - never - Never align statements.
   # All default to always.
-  - simple_align:
-      cases: always
-      top_level_patterns: always
-      records: always
-      multi_way_if: always
+  # - simple_align:
+  #     cases: always
+  #     top_level_patterns: always
+  #     records: always
+  #     multi_way_if: always
 
   # Import cleanup
   - imports:
@@ -134,65 +91,10 @@ steps:
       # - none: Do not perform any alignment.
       #
       # Default: global.
-      align: global
+      align: group
 
-      # The following options affect only import list alignment.
-      #
-      # List align has following options:
-      #
-      # - after_alias: Import list is aligned with end of import including
-      #   'as' and 'hiding' keywords.
-      #
-      #   > import qualified Data.List      as List (concat, foldl, foldr, head,
-      #   >                                          init, last, length)
-      #
-      # - with_alias: Import list is aligned with start of alias or hiding.
-      #
-      #   > import qualified Data.List      as List (concat, foldl, foldr, head,
-      #   >                                 init, last, length)
-      #
-      # - with_module_name: Import list is aligned `list_padding` spaces after
-      #   the module name.
-      #
-      #   > import qualified Data.List      as List (concat, foldl, foldr, head,
-      #                          init, last, length)
-      #
-      #   This is mainly intended for use with `pad_module_names: false`.
-      #
-      #   > import qualified Data.List as List (concat, foldl, foldr, head,
-      #                          init, last, length, scanl, scanr, take, drop,
-      #                          sort, nub)
-      #
-      # - new_line: Import list starts always on new line.
-      #
-      #   > import qualified Data.List      as List
-      #   >     (concat, foldl, foldr, head, init, last, length)
-      #
-      # - repeat: Repeat the module name to align the import list.
-      #
-      #   > import qualified Data.List      as List (concat, foldl, foldr, head)
-      #   > import qualified Data.List      as List (init, last, length)
-      #
-      # Default: after_alias
       list_align: after_alias
 
-      # Right-pad the module names to align imports in a group:
-      #
-      # - true: a little more readable
-      #
-      #   > import qualified Data.List       as List (concat, foldl, foldr,
-      #   >                                           init, last, length)
-      #   > import qualified Data.List.Extra as List (concat, foldl, foldr,
-      #   >                                           init, last, length)
-      #
-      # - false: diff-safe
-      #
-      #   > import qualified Data.List as List (concat, foldl, foldr, init,
-      #   >                                     last, length)
-      #   > import qualified Data.List.Extra as List (concat, foldl, foldr,
-      #   >                                           init, last, length)
-      #
-      # Default: true
       pad_module_names: true
 
       # Long list align style takes effect when import is too long. This is
@@ -218,17 +120,6 @@ steps:
       # Default: inline
       long_list_align: inline
 
-      # Align empty list (importing instances)
-      #
-      # Empty list align has following options
-      #
-      # - inherit: inherit list_align setting
-      #
-      # - right_after: () is right after the module name:
-      #
-      #   > import Vector.Instances ()
-      #
-      # Default: inherit
       empty_list_align: inherit
 
       # List padding determines indentation of import list on lines after import.
@@ -393,6 +284,7 @@ steps:
       #
       # Default: [{ "match" : ".*", "sub_group": "^[^.]+" }]
       group_rules:
+        - match: "^Paths_lambdacomp$"
         - match: "^([^L].*|L[^a].*|La[^m].*|Lam[^b].*|Lamb[^d].*|Lambd[^a].*|Lambda[^C].*|LambdaC[^o].*|LambdaCo[^m].*|LambdaCom[^p].*|LambdaComp[^\\.].*)"
         - match: "^LambdaComp\\>"
 
@@ -426,11 +318,6 @@ steps:
       # is set to true, it will remove those redundant pragmas. Default: true.
       remove_redundant: true
 
-      # Language prefix to be used for pragma declaration, this allows you to
-      # use other options non case-sensitive like "language" or "Language".
-      # If a non correct String is provided, it will default to: LANGUAGE.
-      language_prefix: LANGUAGE
-
   # Replace tabs by spaces. This is disabled by default.
   # - tabs:
   #     # Number of spaces to use for each tab. Default: 8, as specified by the
@@ -453,17 +340,7 @@ steps:
 # Default: 80.
 columns: null
 
-# By default, line endings are converted according to the OS. You can override
-# preferred format here.
-#
-# - native: Native newline format. CRLF on Windows, LF on other OSes.
-#
-# - lf: Convert to LF ("\n").
-#
-# - crlf: Convert to CRLF ("\r\n").
-#
-# Default: native.
-newline: native
+newline: lf
 
 # Sometimes, language extensions are specified in a cabal file or from the
 # command line instead of using language pragmas in the file. stylish-haskell

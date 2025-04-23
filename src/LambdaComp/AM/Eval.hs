@@ -16,7 +16,6 @@ import Data.Vector                (Vector)
 import Data.Vector                qualified as Vector
 
 import LambdaComp.AM.Syntax
-import LambdaComp.Ident           (Ident)
 
 data Item where
   ItUnit   :: Item

@@ -13,7 +13,7 @@ import Data.Vector                 qualified as Vector
 
 import LambdaComp.AM.Syntax
 import LambdaComp.CBPV.Syntax
-import LambdaComp.FreshName        (FreshNameT, freshNameOf, runFreshNameT)
+import LambdaComp.FreshName   (FreshNameT, freshNameOf, runFreshNameT)
 
 type WithAMInfo = WriterT [CodeSection] (FreshNameT (Reader [Ident]))
 
