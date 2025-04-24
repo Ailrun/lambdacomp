@@ -1,3 +1,4 @@
+{-# LANGUAGE GADTs             #-}
 {-# LANGUAGE OverloadedStrings #-}
 module LambdaComp.Driver where
 
@@ -7,27 +8,41 @@ import Control.Monad   (void)
 import System.FilePath (takeBaseName, (<.>))
 import System.IO       (hFlush, hPutStr)
 import System.IO.Temp  (withSystemTempFile)
-import System.Process  (rawSystem)
+import System.Process  (callProcess, rawSystem)
 
 import LambdaComp.AM.Eval           (topEval)
 import LambdaComp.CBPV.Optimization (topOptimizeDefault)
 import LambdaComp.CBPV.ToAM         (runToAM)
 import LambdaComp.CBPV.ToC          (runToC)
 import LambdaComp.CBV.ToCBPV        (runToCBPV)
+import LambdaComp.Driver.Argument   (Options (Options),
+                                     Phase (ExecuteExe, Interpret, UntilAM, UntilC, UntilCBPV, UntilCBPVOpt, UntilExe),
+                                     parseOptions)
 import LambdaComp.Syntax            (Tm)
+import System.Directory (makeAbsolute)
 
-mainForC :: Tm -> FilePath -> IO ()
-mainForC tm fp = do
+mainFunc :: IO ()
+mainFunc = do
+  Options tm _backend phase fp <- parseOptions
+  let cbpvTm    = runToCBPV tm
+      cbpvOptTm = topOptimizeDefault cbpvTm
+      cCode     = runToC cbpvOptTm
+      amTm      = runToAM cbpvOptTm
+  case phase of
+    UntilCBPV    -> print cbpvTm
+    UntilCBPVOpt -> print cbpvOptTm
+    UntilC       -> makeAbsolute fp >>= (`writeFile` cCode)
+    UntilExe     -> generateExe tm fp
+    ExecuteExe   -> generateExe tm fp >> makeAbsolute fp >>= (`callProcess` [])
+    UntilAM      -> print amTm
+    Interpret    -> topEval amTm >>= print
+
+generateExe :: Tm -> FilePath -> IO ()
+generateExe tm fp = do
   dataDir <- getDataDir
+  let tempCFileName = takeBaseName fp <.> "c"
   void $ withSystemTempFile tempCFileName $ \tempCfp handle -> do
     hPutStr handle $ runToC $ topOptimizeDefault $ runToCBPV tm
     hFlush handle
-    rawSystem "gcc" ["-O2", "-I", dataDir, "-o", fp <> ".out", tempCfp]
-  where
-    tempCFileName = takeBaseName fp <.> "temp" <.> "c"
-
-mainForAM :: Tm -> IO ()
-mainForAM tm = do
-  it <- topEval $ runToAM $ topOptimizeDefault $ runToCBPV tm
-  print it
-
+    absfp <- makeAbsolute fp
+    rawSystem "gcc" ["-O2", "-I", dataDir, "-o", absfp, tempCfp]

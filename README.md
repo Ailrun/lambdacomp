@@ -1,6 +1,20 @@
-# Lambda Comp
+# $\lambda$-Compiler
 
 A Primitive Compiler from $\lambda$-calculus + $\alpha$ (e.g. primitive operations, recursion, and effects)
+
+## Usage
+
+```
+$ lambdacomp [EXAMPLE_ID] [(-c|--direct-c) (-o|--output OUTPUT_FILE) | [--am]]
+```
+
+For details of each option, please check `lambdacomp --help`.
+
+### Autocompletion
+
+$\lambda$-compiler supports bash, zsh, and fish completion provided by
+[`optparse-applicative`](https://hackage.haskell.org/package/optparse-applicative).
+To use that, users can check [their documentation about autocompletion](https://github.com/pcapriotti/optparse-applicative?tab=readme-ov-file#bash-zsh-and-fish-completions).
 
 ## Current Status
 Currently, this repository implements a primitive compiler from Call-By-Value $\lambda$-calculus to C based on Call-By-Push-Value (CBPV) and

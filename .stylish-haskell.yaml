@@ -338,7 +338,7 @@ steps:
 # Set this to null to disable all line wrapping.
 #
 # Default: 80.
-columns: null
+columns: 120
 
 newline: lf
 
