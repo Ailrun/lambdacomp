@@ -18,9 +18,8 @@ data Phase (c :: BackendType) where
   UntilCBPVOpt :: Phase c
   UntilC       :: Phase DirectCBackendType
   UntilExe     :: Phase DirectCBackendType
-  ExecuteExe   :: Phase DirectCBackendType
   UntilAM      :: Phase AMBackendType
-  Interpret    :: Phase AMBackendType
+  Run          :: Phase c
 
 type family FilePathFor (c :: BackendType) = r | r -> c where
   FilePathFor DirectCBackendType = FilePath
@@ -64,14 +63,11 @@ getDirectCPhase =
   getCommonPhase
   <|> flag' UntilC (long "until-c"
                     <> hidden
-                    <> help "Stop after generating a C and write that to the given output path. Available only for direct-c backend.")
+                    <> help "Stop after generating a C and write that to the given output path. Available only for Direct-C backend.")
   <|> flag' UntilExe (long "until-exe"
                       <> hidden
-                      <> help "Stop after generating an executable using C, which is written to the given output path. Currently available only for the direct-c backend.")
-  <|> flag' ExecuteExe (long "execute"
-                        <> hidden
-                        <> help "Generate and execute an executable using C, which is written to the given output path. Currently available only for the direct-c backend. This is the default for the direct-c backend.")
-  <|> pure ExecuteExe
+                      <> help "Stop after generating an executable using C, which is written to the given output path. Currently available only for the direct-c backend. This is the default for the Direct-C backend.")
+  <|> pure UntilExe
 
 getOptionsForAMBackend :: Parser (Tm -> Options)
 getOptionsForAMBackend = (\backend phase tm -> Options tm backend phase ())
@@ -89,11 +85,8 @@ getAMPhase =
   getCommonPhase
   <|> flag' UntilAM (long "until-am"
                      <> hidden
-                     <> help "Stop after generating an abstract machine (AM) term and print it. Available only for the AM backend.")
-  <|> flag' Interpret (long "interpret"
-                       <> hidden
-                       <> help "Interpret an abstract machine (AM) term and print the result value. Available only for the AM backend. This is the default for the AM backend.")
-  <|> pure Interpret
+                     <> help "Stop after generating an abstract machine (AM) term and print it. Available only for the AM backend. This is the default for the AM backend.")
+  <|> pure UntilAM
 
 getCommonPhase :: Parser (Phase c)
 getCommonPhase =
@@ -103,6 +96,9 @@ getCommonPhase =
   <|> flag' UntilCBPVOpt (long "until-cbpv-opt"
                           <> hidden
                           <> help "Stop after optimizing a CBPV term and print it.")
+  <|> flag' Run (long "run"
+                 <> hidden
+                 <> help "Run the example term using the given backend. For the Direct-C backend, this generates and executes an executable using C, which is written to the given output path. For the AM backend, this interprets an abstract machine (AM) term and prints the result value.")
 
 getFilePath :: Parser FilePath
 getFilePath =
