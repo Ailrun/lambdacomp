@@ -182,7 +182,9 @@ instance ToC (PrimOp Unary) where
 showC :: ([String], Dual [TopDef]) -> String
 showC (mainBody, topDefs) =
   unlines
-  $ defaultHeaders
+  $ [ "#include <runtime.h>"
+    , ""
+    ]
   <> (showTopDefPrototype <$> realTopDefs)
   <> [""]
   <> (showTopDef <$> realTopDefs)
@@ -222,53 +224,6 @@ showMain mainBody =
      ]
   where
     retValueVar = "retv";
-
-defaultHeaders :: [String]
-defaultHeaders =
-  [ "#include <stdlib.h>"
-  , "#include <stdio.h>"
-  , "#define STACK_MAX 10000"
-  , ""
-  , "typedef union item item;"
-  , "typedef struct stack stack;"
-  , "typedef struct thunk thunk;"
-  , ""
-  , "inline item " <> intItemCons <> "(const int value);"
-  , "inline item " <> doubleItemCons <> "(const double value);"
-  , ""
-  , "struct thunk {"
-  , "void (*code)(item *const env, item *const ret);"
-  , "item *env;"
-  , "};"
-  , ""
-  , "union item"
-  , "{"
-  , "int int_item;"
-  , "double double_item;"
-  , "thunk thunk_item;"
-  , "};"
-  , ""
-  , "struct stack"
-  , "{"
-  , "int top;"
-  , "item items[STACK_MAX];"
-  , "};"
-  , ""
-  , "stack " <> globalStack <> " = {0};"
-  , ""
-  , "item " <> intItemCons <> "(const int value)"
-  , "{"
-  , defineConstItemStmt "a" "{.int_item = value}"
-  , "return a;"
-  , "}"
-  , ""
-  , "item " <> doubleItemCons <> "(const double value)"
-  , "{"
-  , defineConstItemStmt "a" "{.double_item = value}"
-  , "return a;"
-  , "}"
-  , ""
-  ]
 
 globalStackPushStmt :: (Bool -> String -> [String]) -> [String]
 globalStackPushStmt f = f False . nthGlobalStackItem $ globalStack <> ".top++"

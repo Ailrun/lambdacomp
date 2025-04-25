@@ -27,7 +27,8 @@ category:
   , Compiler
 
 tested-with:     GHC ==9.8.4
-data-files:      data/runtime.h
+data-files:      runtime.h
+data-dir:        data
 
 -- Extra source files to be distributed with the package, such as examples, or a tutorial module.
 -- extra-source-files:
