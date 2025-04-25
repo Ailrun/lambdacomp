@@ -8,11 +8,15 @@ import Data.Vector (Vector)
 
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
+import Data.String (IsString (..))
 
 data Addr where
   AIdent    :: !Ident -> Addr
   ALocalEnv :: !Int -> Addr
   deriving (Eq, Show)
+
+instance IsString Addr where
+  fromString = AIdent . fromString
 
 data Value where
   VaUnit   :: Value
@@ -22,6 +26,9 @@ data Value where
   VaThunk  :: !Ident -> !(Vector Addr) -> Value
   VaAddr   :: !Addr -> Value
   deriving Show
+
+instance IsString Value where
+  fromString = VaAddr . fromString
 
 data Inst where
   IScope     :: Inst
@@ -49,7 +56,8 @@ data CodeSection
     , thunkCode            :: !Code
     , thunkEnvSize         :: !Int
     }
-  | MainCodeSection
-    { mainCode             :: !Code
+  | TmDefCodeSection
+    { tmDefCodeSectionName :: !Ident
+    , tmDefValue           :: !Value
     }
   deriving Show

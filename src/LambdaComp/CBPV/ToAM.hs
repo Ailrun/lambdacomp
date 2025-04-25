@@ -8,7 +8,6 @@ module LambdaComp.CBPV.ToAM
 
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.Writer.Strict (MonadWriter (tell), WriterT (runWriterT), lift)
-import Data.Bifunctor              (Bifunctor (first))
 import Data.List                   (elemIndex)
 import Data.Set                    qualified as Set
 import Data.Vector                 qualified as Vector
@@ -18,13 +17,32 @@ import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName   (FreshNameT, freshNameOf, runFreshNameT)
 
 runToAM :: Tm Com -> [CodeSection]
-runToAM tm = uncurry (:) . first MainCodeSection . (`runReader` []) . runFreshNameT . runWriterT $ toAM tm
+runToAM tm = uncurry (:) . (`runReader` []) . runFreshNameT . runWriterT $ toAM (TopTmDef "u_main" TpInt (TmThunk tm))
 
 type WithAMInfo = WriterT [CodeSection] (FreshNameT (Reader [Ident]))
 
 class ToAM a where
   type AMData a
   toAM :: a -> WithAMInfo (AMData a)
+
+instance ToAM Program where
+  type AMData Program = [CodeSection]
+
+  toAM :: Program -> WithAMInfo (AMData Program)
+  toAM tops =
+    if withMain tops
+    then traverse toAM tops
+    else error "No main function is given!"
+    where
+      withMain []                        = False
+      withMain (TopTmDef "u_main" _ _:_) = True
+      withMain (_:ts)                    = withMain ts
+
+instance ToAM Top where
+  type AMData Top = CodeSection
+
+  toAM :: Top -> WithAMInfo (AMData Top)
+  toAM TopTmDef {..} = TmDefCodeSection (toVarIdent tmDefName) <$> toAM tmDefBody
 
 instance ToAM (Tm Val) where
   type AMData (Tm Val) = Value
@@ -92,4 +110,7 @@ getVar x = do
     Nothing -> toVarAddr x
 
 toVarAddr :: Ident -> Addr
-toVarAddr = AIdent . ("var_" <>)
+toVarAddr = AIdent . toVarIdent
+
+toVarIdent :: Ident -> Ident
+toVarIdent = ("var_" <>)

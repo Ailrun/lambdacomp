@@ -9,6 +9,16 @@ import Data.String (IsString (..))
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp(..), PrimOpArity (..))
 
+type Program = [Top]
+
+data Top
+  = TopTmDef
+    { tmDefName :: Ident
+    , tmDefType :: Tp
+    , tmDefBody :: Tm
+    }
+  deriving stock (Show)
+
 data Tp where
   TpUnit   :: Tp
   TpBool   :: Tp

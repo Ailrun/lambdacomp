@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TypeFamilies      #-}
 module LambdaComp.CBV.ToCBPV where
 
@@ -16,6 +17,21 @@ runToCBPV = (`evalState` 0) . toCBPV
 class ToCBPV a where
   type CBPVData a
   toCBPV :: a -> FreshName (CBPVData a)
+
+instance ToCBPV Program where
+  type CBPVData Program = CBPV.Program
+
+  toCBPV :: Program -> FreshName (CBPVData Program)
+  toCBPV = traverse toCBPV
+
+instance ToCBPV Top where
+  type CBPVData Top = CBPV.Top
+
+  toCBPV :: Top -> FreshName (CBPVData Top)
+  toCBPV TopTmDef {..} = do
+    tmDefType' <- CBPV.TpUp <$> toCBPV tmDefType
+    tmDefBody' <- CBPV.TmThunk <$> toCBPV tmDefBody
+    pure $ CBPV.TopTmDef { tmDefName = "u_" <> tmDefName, tmDefType = tmDefType', tmDefBody = tmDefBody' }
 
 instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Com

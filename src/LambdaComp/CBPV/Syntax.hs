@@ -15,6 +15,16 @@ import LambdaComp.PrimOp (PrimOp(..), PrimOpArity (..))
 type data Class where
   Val, Com :: Class
 
+type Program = [Top]
+
+data Top
+  = TopTmDef
+    { tmDefName :: Ident
+    , tmDefType :: Tp Val
+    , tmDefBody :: Tm Val
+    }
+  deriving stock (Show)
+
 data Tp (c :: Class) where
   TpUnit   :: Tp Val
   TpBool   :: Tp Val

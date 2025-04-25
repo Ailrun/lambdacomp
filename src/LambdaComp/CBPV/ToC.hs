@@ -5,10 +5,10 @@ module LambdaComp.CBPV.ToC
   ( runToC
   ) where
 
-import Control.Monad               (zipWithM)
+import Control.Monad               (zipWithM, join)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict  (evalStateT)
-import Control.Monad.Writer.Strict (WriterT (..), lift)
+import Control.Monad.Writer.Strict (WriterT (..), lift, MonadWriter (tell))
 import Data.Bifunctor              (Bifunctor (..))
 import Data.Functor.Identity       (Identity (..))
 import Data.Functor.Product        (Product (Pair))
@@ -24,18 +24,46 @@ import LambdaComp.FreshName   (FreshNameT, freshNameOf, freshNamesOf)
 runToC :: Tm Com -> String
 runToC tm = showC . first (comment (show tm) :) . (`runReader` []) . (`evalStateT` 0) $ toC tm
 
-type WithClosure = FreshNameT (Reader [Ident])
-
-class ToC a where
-  type CData a
-  toC :: a -> WithClosure (CData a)
-
 data TopDef
   = ThunkBodyDef
     { thunkBodyName :: String
     , thunkBody     :: [String]
     , thunkEnvSize  :: Int
     }
+  | TmDef
+    { tmDefName :: String
+    }
+
+type WithClosure = FreshNameT (Reader [Ident])
+
+class ToC a where
+  type CData a
+  toC :: a -> WithClosure (CData a)
+
+instance ToC Program where
+  type CData Program = String
+
+  toC :: Program -> WithClosure (CData Program)
+  toC tops = if withMain tops
+    then
+      fmap showC
+      . runWriterT
+      . fmap ((<> [forceThunkStmt (toVar "u_main")]) . join)
+      $ traverse (WriterT . toC) tops
+    else error "No main function is given!"
+    where
+      withMain []                        = False
+      withMain (TopTmDef "u_main" _ _:_) = True
+      withMain (_:ts)                    = withMain ts
+
+instance ToC Top where
+  type CData Top = ([String], Dual [TopDef])
+
+  toC :: Top -> WithClosure (CData Top)
+  toC TopTmDef {..} = runWriterT $ do
+    tmDefBody' <- WriterT $ toC tmDefBody
+    tell $ Dual [TmDef $ toVar tmDefName]
+    pure $ tmDefBody' False (toVar tmDefName)
 
 instance ToC (Tm Val) where
   type CData (Tm Val) = (Bool -> String -> [String], Dual [TopDef])
@@ -194,6 +222,7 @@ showC (mainBody, topDefs) =
 
 showTopDefPrototype :: TopDef -> String
 showTopDefPrototype ThunkBodyDef {..} = "void " <> thunkBodyName <> "(item *const env, item *const ret);"
+showTopDefPrototype TmDef {..}        = "item " <> tmDefName <> ";"
 
 showTopDef :: TopDef -> String
 showTopDef ThunkBodyDef {..} =
@@ -207,6 +236,7 @@ showTopDef ThunkBodyDef {..} =
     thunkEnvArg
       | thunkEnvSize > 0 = "item *const env"
       | otherwise        = "item *const _"
+showTopDef TmDef{}           = ""
 
 showMain :: [String] -> String
 showMain mainBody =
@@ -282,12 +312,6 @@ intItem = (<> ".int_item")
 
 doubleItem :: String -> String
 doubleItem = (<> ".double_item")
-
-intItemCons :: String
-intItemCons = "int_item"
-
-doubleItemCons :: String
-doubleItemCons = "double_item"
 
 comment :: String -> String
 comment s = "/* " <> s <> " */"

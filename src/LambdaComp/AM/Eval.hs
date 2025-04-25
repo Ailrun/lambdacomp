@@ -10,7 +10,7 @@ module LambdaComp.AM.Eval
   ) where
 
 import Control.Monad              (unless)
-import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
+import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks, MonadReader (ask))
 import Control.Monad.State.Strict (StateT, execStateT, gets, modify')
 import Data.Bifunctor             (Bifunctor (second))
 import Data.List                  (foldl')
@@ -18,12 +18,13 @@ import Data.List.NonEmpty         (NonEmpty)
 import Data.List.NonEmpty         qualified as NonEmpty
 import Data.Map.Strict            (Map)
 import Data.Map.Strict            qualified as Map
-import Data.Maybe                 (mapMaybe)
+import Data.Maybe                 (mapMaybe, maybeToList)
 import Data.Tuple                 (swap)
 import Data.Vector                (Vector)
 import Data.Vector                qualified as Vector
 
 import LambdaComp.AM.Syntax
+import Data.Either (lefts)
 
 data Item where
   ItUnit   :: Item
@@ -36,7 +37,7 @@ data Item where
 topEval :: [CodeSection] -> IO Item
 topEval cs = returnReg <$> runMachine evalData evalState
   where
-    evalData = foldl' insertCodeSection Map.empty cs
+    evalData = foldl' insertCodeSection (Map.singleton mainName $ Right [ICall "var_u_main"]) cs
     evalState =
       EvalState
       { codePointer = (mainName, 0)
@@ -54,7 +55,7 @@ type LocalEnv = Vector Item
 type CallStackEntry = ((Ident, Int), LocalEnv)
 type CallStack = StackLike CallStackEntry
 
-type EvalData = Map Ident Code
+type EvalData = Map Ident (Either Value Code)
 
 data EvalState
   = EvalState
@@ -69,8 +70,8 @@ data EvalState
 type Eval = StateT EvalState (ReaderT EvalData IO)
 
 insertCodeSection :: EvalData -> CodeSection -> EvalData
-insertCodeSection ed MainCodeSection {..}  = Map.insert mainName mainCode ed
-insertCodeSection ed ThunkCodeSection {..} = Map.insert thunkCodeSectionName thunkCode ed
+insertCodeSection ed TmDefCodeSection {..} = Map.insert tmDefCodeSectionName (Left tmDefValue) ed
+insertCodeSection ed ThunkCodeSection {..} = Map.insert thunkCodeSectionName (Right thunkCode) ed
 
 runMachine :: EvalData -> EvalState -> IO EvalState
 runMachine evalData evalState = go `execStateT` evalState `runReaderT` evalData
@@ -88,11 +89,11 @@ fetchInst = do
   code <- asks (Map.! funId)
   helper funId code index
   where
-    helper funId code index
+    helper funId (Right code) index
       | Just it <- code Vector.!? index = do
           modify' (\m -> m{ codePointer = (funId, index + 1) })
           pure $ Just it
-      | otherwise                       = pure Nothing
+    helper _     _            _         = pure Nothing
 
 evalInst :: Inst -> Eval ()
 evalInst IScope                  = iScope
@@ -124,7 +125,9 @@ embodyValue (VaAddr addr)          = embodyAddr addr
 embodyAddr :: Addr -> Eval Item
 embodyAddr (AIdent x)    = do
   its <- gets $ mapMaybe (Map.lookup x) . NonEmpty.toList . globalEnvs
-  case its of
+  vs <- asks $ lefts . maybeToList . Map.lookup x
+  its' <- traverse embodyValue vs
+  case its <> its' of
     []     -> error $ show x <> " is not in scope."
     it : _ -> pure it
 embodyAddr (ALocalEnv n) = gets $ (Vector.! n) . localEnv
