@@ -14,6 +14,7 @@ data Addr where
 
 data Value where
   VaUnit   :: Value
+  VaBool   :: !Bool -> Value
   VaInt    :: !Int -> Value
   VaDouble :: !Double -> Value
   VaThunk  :: !Ident -> !(Vector Addr) -> Value
@@ -25,12 +26,15 @@ data Inst where
   IPush      :: !Value -> Inst
   IPop       :: !Addr -> Inst
   IAssign    :: !Addr -> !Value -> Inst
-  IJump      :: !Value -> Inst
-  IReturn    :: !Value -> Inst
+  IJump      :: !Int -> Inst
+  ICondJump  :: !Value -> !Int -> Inst
+  ICall      :: !Value -> Inst
+  ISetReturn :: !Value -> Inst
   IReceive   :: !Addr -> Inst
   IRecAssign :: !Addr -> !Ident -> !(Vector Addr) -> Inst
   IPrintInt  :: !Value -> Inst
   IExit      :: Inst
+  IEndScope  :: Inst
   deriving Show
 
 type Code = Vector Inst

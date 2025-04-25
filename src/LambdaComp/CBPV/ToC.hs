@@ -36,6 +36,8 @@ instance ToC (Tm Val) where
   toC :: Tm Val -> WithClosure (CData (Tm Val))
   toC (TmVar x)    = getVar x >>= valueOfConst Nothing
   toC TmUnit       = valueOfConst (Just ".int_item") "0"
+  toC TmTrue       = valueOfConst (Just ".int_item") "1"
+  toC TmFalse      = valueOfConst (Just ".int_item") "0"
   toC (TmInt n)    = valueOfConst (Just ".int_item") $ show n
   toC (TmDouble f) = valueOfConst (Just ".double_item") $ show f
   toC (TmThunk tm) = runWriterT $ do
@@ -85,6 +87,12 @@ instance ToC (Tm Com) where
   type CData (Tm Com) = ([String], Dual [TopDef])
 
   toC :: Tm Com -> WithClosure (CData (Tm Com))
+  toC (TmIf tm0 tm1 tm2) = runWriterT $ do
+    tm0Code <- WriterT $ toC tm0
+    tm1Code <- WriterT $ toC tm1
+    tm2Code <- WriterT $ toC tm2
+    c <- lift $ freshNameOf "sys_c"
+    pure (tm0Code True c <> [ifStmt (c <> ".int_item") tm1Code tm2Code])
   toC (TmLam x tm) = first (underScope . (globalStackPopStmt (toVar x) :)) <$> toC tm
   toC (tmf `TmApp` tma) = runWriterT $ liftA2 (<>) (globalStackPushStmt <$> WriterT (toC tma)) (WriterT $ toC tmf)
   toC (TmForce tm) = runWriterT $ do
@@ -94,7 +102,7 @@ instance ToC (Tm Com) where
   toC (TmReturn tm) = runWriterT $ do
     tmCode <- WriterT $ toC tm
     pure $ tmCode False retValue
-  toC (TmThen tm0 x tm1) = runWriterT $ do
+  toC (TmTo tm0 x tm1) = runWriterT $ do
     tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
     pure (tm0Code <> underScope (defineConstItemStmt (toVar x) retValue : tm1Code))
@@ -219,6 +227,16 @@ globalStackPopStmt var = defineConstItemStmt var . nthGlobalStackItem $ "--" <> 
 
 forceThunkStmt :: String -> String
 forceThunkStmt thunk = thunk <> ".thunk_item.code(" <> thunk <> ".thunk_item.env, " <> retPointer <> ");"
+
+ifStmt :: String -> [String] -> [String] -> String
+ifStmt c b1 b2 =
+  unlines
+  $ [ "if (" <> c <> ")"
+    , "{"
+    ]
+  <> b1
+  <> ("}" : "else" : "{" : b2)
+  <> ["}"]
 
 printlnAsIntStmt :: String -> String
 printlnAsIntStmt s = "printf(\"%d\\n\", " <> s <> ");"

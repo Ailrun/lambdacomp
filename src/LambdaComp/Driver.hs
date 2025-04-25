@@ -4,12 +4,14 @@ module LambdaComp.Driver where
 
 import Paths_lambdacomp (getDataDir)
 
-import Control.Monad    (void)
-import System.Directory (makeAbsolute)
-import System.FilePath  (takeBaseName, (<.>))
-import System.IO        (hFlush, hPutStr)
-import System.IO.Temp   (withSystemTempFile)
-import System.Process   (callProcess, rawSystem)
+import Control.Monad      (void)
+import System.Directory   (makeAbsolute)
+import System.Exit        (exitWith)
+import System.FilePath    (takeBaseName, (<.>))
+import System.IO          (hFlush, hPutStr)
+import System.IO.Temp     (withSystemTempFile)
+import System.Process     (createProcess, proc, rawSystem, waitForProcess)
+import Text.Pretty.Simple (pPrintNoColor)
 
 import LambdaComp.AM.Eval           (topEval)
 import LambdaComp.CBPV.Optimization (topOptimizeDefault)
@@ -28,22 +30,30 @@ mainFunc = do
       cCode     = runToC cbpvOptTm
       amTm      = runToAM cbpvOptTm
   case phase of
-    UntilCBPV    -> print cbpvTm
-    UntilCBPVOpt -> print cbpvOptTm
+    UntilCBPV    -> pPrintNoColor cbpvTm
+    UntilCBPVOpt -> pPrintNoColor cbpvOptTm
     UntilC       -> makeAbsolute fp >>= (`writeFile` cCode)
-    UntilExe     -> generateExe tm fp
-    UntilAM      -> print amTm
+    UntilExe     -> makeAbsolute fp >>= generateExe tm fp
+    UntilAM      -> pPrintNoColor amTm
     Run          ->
       case backend of
-        DirectCBackend -> generateExe tm fp >> makeAbsolute fp >>= (`callProcess` [])
-        AMBackend      -> topEval amTm >>= print
+        DirectCBackend -> do
+          absFp <- makeAbsolute fp
+          generateExe tm fp absFp
+          executeExe absFp
+        AMBackend      -> topEval amTm >>= pPrintNoColor
 
-generateExe :: Tm -> FilePath -> IO ()
-generateExe tm fp = do
+generateExe :: Tm -> FilePath -> FilePath -> IO ()
+generateExe tm fp absFp = do
   dataDir <- getDataDir
   let tempCFileName = takeBaseName fp <.> "c"
   void $ withSystemTempFile tempCFileName $ \tempCfp handle -> do
     hPutStr handle $ runToC $ topOptimizeDefault $ runToCBPV tm
     hFlush handle
-    absfp <- makeAbsolute fp
-    rawSystem "gcc" ["-O2", "-I", dataDir, "-o", absfp, tempCfp]
+    rawSystem "gcc" ["-O2", "-I", dataDir, "-o", absFp, tempCfp]
+
+executeExe :: FilePath -> IO ()
+executeExe absFp = do
+  (_, _, _, handle) <- createProcess (proc absFp [])
+  e <- waitForProcess handle
+  exitWith e

@@ -30,6 +30,8 @@ instance ToAM (Tm Val) where
   toAM :: Tm Val -> WithAMInfo (AMData (Tm Val))
   toAM (TmVar x)    = VaAddr <$> getVar x
   toAM TmUnit       = pure VaUnit
+  toAM TmTrue       = pure $ VaBool True
+  toAM TmFalse      = pure $ VaBool False
   toAM (TmInt n)    = pure $ VaInt n
   toAM (TmDouble d) = pure $ VaDouble d
   toAM (TmThunk tm) = do
@@ -46,18 +48,23 @@ instance ToAM (Tm Com) where
   type AMData (Tm Com) = Code
 
   toAM :: Tm Com -> WithAMInfo (AMData (Tm Com))
+  toAM (TmIf tm0 tm1 tm2) = do
+    val0 <- toAM tm0
+    code1 <- toAM tm1
+    code2 <- toAM tm2
+    pure $ Vector.cons (ICondJump val0 (length code1)) code1 <> Vector.cons (IJump (length code2)) code2
   toAM (TmLam x tm) = ([IPop (toVarAddr x)] <>) <$> toAM tm
   toAM (tmf `TmApp` tma) = liftA2 Vector.cons (IPush <$> toAM tma) (toAM tmf)
   toAM (TmForce tm) = do
     thunk <- toAM tm
-    pure [IJump thunk]
+    pure [ICall thunk]
   toAM (TmReturn tm) = do
     val <- toAM tm
-    pure [IReturn val]
-  toAM (TmThen tm0 x tm1) = do
+    pure [ISetReturn val]
+  toAM (TmTo tm0 x tm1) = do
     code0 <- toAM tm0
     code1 <- toAM tm1
-    pure ([IScope] <> code0 <> [IReceive (toVarAddr x)] <> code1)
+    pure ([IScope] <> code0 <> [IEndScope, IReceive (toVarAddr x)] <> code1)
   toAM (TmLet x tm0 tm1) = do
     val0 <- toAM tm0
     code1 <- toAM tm1
@@ -71,7 +78,7 @@ instance ToAM (Tm Com) where
     thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"
     tell [ThunkCodeSection {..}]
     initCode <- IRecAssign xVar thunkCodeSectionName . Vector.fromList <$> traverse getVar thunkEnvVars
-    pure [initCode, IJump (VaAddr xVar)]
+    pure [initCode, ICall (VaAddr xVar)]
     where
       xVar = toVarAddr x
       thunkEnvVars = Set.toList thunkEnv

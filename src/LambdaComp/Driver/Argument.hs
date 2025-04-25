@@ -1,9 +1,13 @@
+{-# LANGUAGE OverloadedStrings      #-}
 {-# LANGUAGE TypeData               #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
-{-# LANGUAGE OverloadedStrings #-}
 module LambdaComp.Driver.Argument where
 
+import Data.List           ((!?))
+import Data.Maybe          (fromMaybe)
 import Options.Applicative
+
+import LambdaComp.Driver.Example (examples)
 import LambdaComp.Syntax
 
 type data BackendType where
@@ -39,12 +43,16 @@ getOptions :: Parser Options
 getOptions = getTestTmArg <**> (getOptionsForDirectCBackend <|> getOptionsForAMBackend)
 
 getTestTmArg :: Parser Tm
-getTestTmArg = toTestTm <$> argument auto (metavar "EXAMPLE_ID" <> value 0 <> help "Use the example corresponding to the given number. The number should be 0, 1, or 2." <> completeWith ["0", "1", "2"])
+getTestTmArg = toTestTm <$> argument auto (metavar "EXAMPLE_ID" <> value 0 <> help ("Use the example corresponding to the given number. The number should be " <> helpMessageFor options <> ".") <> completeWith options)
   where
+    options = fmap show [0..length examples]
+
+    helpMessageFor []     = error "A compiler bug"
+    helpMessageFor [x]    = "or " <> x
+    helpMessageFor (x:xs) = x <> ", " <> helpMessageFor xs
+
     toTestTm :: Int -> Tm
-    toTestTm 0 = TmPrintInt (TmLam "x" ("x" `TmApp` TmInt 5) `TmApp` TmLam "x" "x") $ TmInt 0
-    toTestTm 1 = TmPrintInt (TmLam "x" (TmLam "y" (TmPrintInt "y" "x") `TmApp` TmInt 2) `TmApp` TmPrintInt (TmInt 7) (TmInt 3)) $ TmInt 0
-    toTestTm _ = TmRec "f" (TmLam "x" $ TmPrintInt "x" $ TmPrintInt (TmInt 2) $ "f" `TmApp` "x") `TmApp` TmInt 3
+    toTestTm n = fromMaybe (last examples) (examples !? n)
 
 getOptionsForDirectCBackend :: Parser (Tm -> Options)
 getOptionsForDirectCBackend = (\backend phase fp tm -> Options tm backend phase fp)
@@ -97,7 +105,7 @@ getCommonPhase =
                           <> hidden
                           <> help "Stop after optimizing a CBPV term and print it.")
   <|> flag' Run (long "run"
-                 <> hidden
+                 <> short 'r'
                  <> help "Run the example term using the given backend. For the Direct-C backend, this generates and executes an executable using C, which is written to the given output path. For the AM backend, this interprets an abstract machine (AM) term and prints the result value.")
 
 getFilePath :: Parser FilePath

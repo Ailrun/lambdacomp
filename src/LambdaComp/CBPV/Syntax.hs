@@ -15,6 +15,7 @@ type data Class where
 
 data Tp (c :: Class) where
   TpUnit   :: Tp Val
+  TpBool   :: Tp Val
   TpInt    :: Tp Val
   TpDouble :: Tp Val
   TpUp     :: Tp Com -> Tp Val
@@ -31,10 +32,14 @@ instance Read (Tp c) where
 data Tm (c :: Class) where
   TmVar      :: Ident -> Tm Val
   TmUnit     :: Tm Val
+  TmTrue     :: Tm Val
+  TmFalse    :: Tm Val
   TmInt      :: !Int -> Tm Val
   TmDouble   :: !Double -> Tm Val
 
   TmThunk    :: Tm Com -> Tm Val
+
+  TmIf       :: Tm Val -> Tm Com -> Tm Com -> Tm Com
 
   TmLam      :: Ident -> Tm Com -> Tm Com
   TmApp      :: Tm Com -> Tm Val -> Tm Com
@@ -42,7 +47,7 @@ data Tm (c :: Class) where
   TmForce    :: Tm Val -> Tm Com
 
   TmReturn   :: Tm Val -> Tm Com
-  TmThen     :: Tm Com -> Ident -> Tm Com -> Tm Com
+  TmTo       :: Tm Com -> Ident -> Tm Com -> Tm Com
 
   TmLet      :: Ident -> Tm Val -> Tm Com -> Tm Com
 
@@ -60,11 +65,12 @@ instance Read (Tm c) where
 freeVarOfTm :: Tm c -> Set Ident
 freeVarOfTm (TmVar x)            = Set.singleton x
 freeVarOfTm (TmThunk tm)         = freeVarOfTm tm
+freeVarOfTm (TmIf tm0 tm1 tm2)   = Set.unions [freeVarOfTm tm0, freeVarOfTm tm1, freeVarOfTm tm2]
 freeVarOfTm (TmLam x tm)         = x `Set.delete` freeVarOfTm tm
 freeVarOfTm (tmf `TmApp` tma)    = freeVarOfTm tmf `Set.union` freeVarOfTm tma
 freeVarOfTm (TmForce tm)         = freeVarOfTm tm
 freeVarOfTm (TmReturn tm)        = freeVarOfTm tm
-freeVarOfTm (TmThen tm0 x tm1)   = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
+freeVarOfTm (TmTo tm0 x tm1)   = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
 freeVarOfTm (TmLet x tm0 tm1)    = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
 freeVarOfTm (TmPrintInt tm0 tm1) = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
 freeVarOfTm (TmRec x tm)         = x `Set.delete` freeVarOfTm tm

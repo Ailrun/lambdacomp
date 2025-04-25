@@ -4,8 +4,10 @@
 {-# LANGUAGE RecursiveDo       #-}
 module LambdaComp.AM.Eval where
 
+import Control.Monad              (unless)
 import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
 import Control.Monad.State.Strict (StateT, execStateT, gets, modify')
+import Data.Bifunctor             (Bifunctor (second))
 import Data.List                  (foldl')
 import Data.List.NonEmpty         (NonEmpty)
 import Data.List.NonEmpty         qualified as NonEmpty
@@ -19,6 +21,7 @@ import LambdaComp.AM.Syntax
 
 data Item where
   ItUnit   :: Item
+  ItBool   :: !Bool -> Item
   ItInt    :: !Int -> Item
   ItDouble :: !Double -> Item
   ItThunk  :: !Ident -> !(Vector Item) -> Item
@@ -90,15 +93,21 @@ evalInst IScope                  = iScope
 evalInst (IPush v)               = embodyValue v >>= iPush
 evalInst (IPop addr)             = iPop addr
 evalInst (IAssign addr v)        = embodyValue v >>= iAssign addr
-evalInst (IJump v)               = embodyValue v >>= iJump
-evalInst (IReturn v)             = embodyValue v >>= iReturn
+evalInst (IJump l)               = iJump l
+evalInst (ICondJump v l)         = do
+  it <- embodyValue v
+  iCondJump it l
+evalInst (ICall v)               = embodyValue v >>= iCall
+evalInst (ISetReturn v)          = embodyValue v >>= iSetReturn
 evalInst (IReceive x)            = iReceive x
 evalInst (IRecAssign addr x env) = iRecAssign addr x env
 evalInst (IPrintInt v)           = embodyValue v >>= iPrintInt
 evalInst IExit                   = iExit
+evalInst IEndScope               = iEndScope
 
 embodyValue :: Value -> Eval Item
 embodyValue VaUnit                 = pure ItUnit
+embodyValue (VaBool b)             = pure $ ItBool b
 embodyValue (VaInt n)              = pure $ ItInt n
 embodyValue (VaDouble d)           = pure $ ItDouble d
 embodyValue (VaThunk c globalEnvs) = ItThunk c <$> traverse embodyAddr globalEnvs
@@ -108,7 +117,7 @@ embodyAddr :: Addr -> Eval Item
 embodyAddr (AIdent x)    = do
   its <- gets $ mapMaybe (Map.lookup x) . NonEmpty.toList . globalEnvs
   case its of
-    []     -> error $ show x <> " is not in scope!!"
+    []     -> error $ show x <> " is not in scope."
     it : _ -> pure it
 embodyAddr (ALocalEnv n) = gets $ (Vector.! n) . localEnv
 
@@ -131,18 +140,30 @@ iAssign :: Addr -> Item -> Eval ()
 iAssign (AIdent x)    it = modify' (\m -> let h NonEmpty.:| t = globalEnvs m in m{ globalEnvs = Map.insert x it h NonEmpty.:| t })
 iAssign (ALocalEnv n) it = modify' (\m -> m{ localEnv = localEnv m Vector.// [(n, it)] })
 
-iJump :: Item -> Eval ()
-iJump (ItThunk x env) =
+iJump :: Int -> Eval ()
+iJump l =
+  modify' $ \m ->
+              m{ codePointer = second (+ l) $ codePointer m}
+
+iCondJump :: Item -> Int -> Eval ()
+iCondJump (ItBool b) l = unless b $ iJump l
+iCondJump _          _ = error "Impossible!"
+
+iCall :: Item -> Eval ()
+iCall (ItThunk x env) =
   modify' $ \m ->
               m
               { codePointer = (x, 0)
               , localEnv = env
               , callStack = (codePointer m, localEnv m) : callStack m
               }
-iJump _               = error "Impossible!"
+iCall _               = error "Impossible!"
 
-iReturn :: Item -> Eval ()
-iReturn it = modify' (\m -> m{ returnReg = it, globalEnvs = NonEmpty.fromList $ NonEmpty.tail $ globalEnvs m })
+iSetReturn :: Item -> Eval ()
+iSetReturn it = modify' (\m -> m{ returnReg = it })
+
+iEndScope :: Eval ()
+iEndScope = modify' (\m -> m{ globalEnvs = NonEmpty.fromList $ NonEmpty.tail $ globalEnvs m })
 
 iReceive :: Addr -> Eval ()
 iReceive addr = do

@@ -9,6 +9,7 @@ import LambdaComp.Ident
 
 data Tp where
   TpUnit   :: Tp
+  TpBool   :: Tp
   TpInt    :: Tp
   TpDouble :: Tp
   TpFun    :: Tp -> Tp -> Tp
@@ -18,6 +19,9 @@ data Tm where
   TmAnn      :: Tm -> Tp -> Tm
   TmVar      :: !Ident -> Tm
   TmUnit     :: Tm
+  TmTrue     :: Tm
+  TmFalse    :: Tm
+  TmIf       :: Tm -> Tm -> Tm -> Tm
   TmInt      :: !Int -> Tm
   TmDouble   :: !Double -> Tm
   TmLam      :: !Ident -> Tm -> Tm
