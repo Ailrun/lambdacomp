@@ -1,8 +1,13 @@
+{-# LANGUAGE GADTs             #-}
 {-# LANGUAGE OverloadedLists   #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE RecursiveDo       #-}
-module LambdaComp.AM.Eval where
+module LambdaComp.AM.Eval
+  ( Item(..)
+
+  , topEval
+  ) where
 
 import Control.Monad              (unless)
 import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
@@ -14,6 +19,7 @@ import Data.List.NonEmpty         qualified as NonEmpty
 import Data.Map.Strict            (Map)
 import Data.Map.Strict            qualified as Map
 import Data.Maybe                 (mapMaybe)
+import Data.Tuple                 (swap)
 import Data.Vector                (Vector)
 import Data.Vector                qualified as Vector
 
@@ -26,6 +32,20 @@ data Item where
   ItDouble :: !Double -> Item
   ItThunk  :: !Ident -> !(Vector Item) -> Item
   deriving Show
+
+topEval :: [CodeSection] -> IO Item
+topEval cs = returnReg <$> runMachine evalData evalState
+  where
+    evalData = foldl' insertCodeSection Map.empty cs
+    evalState =
+      EvalState
+      { codePointer = (mainName, 0)
+      , globalStack = []
+      , globalEnvs = Map.empty NonEmpty.:| [Map.empty]
+      , localEnv = []
+      , callStack = []
+      , returnReg = ItUnit
+      }
 
 type StackLike a = [a]
 type GlobalStack = StackLike Item
@@ -47,20 +67,6 @@ data EvalState
     }
 
 type Eval = StateT EvalState (ReaderT EvalData IO)
-
-topEval :: [CodeSection] -> IO Item
-topEval cs = returnReg <$> runMachine evalData evalState
-  where
-    evalData = foldl' insertCodeSection Map.empty cs
-    evalState =
-      EvalState
-      { codePointer = (mainName, 0)
-      , globalStack = []
-      , globalEnvs = Map.empty NonEmpty.:| [Map.empty]
-      , localEnv = []
-      , callStack = []
-      , returnReg = ItUnit
-      }
 
 insertCodeSection :: EvalData -> CodeSection -> EvalData
 insertCodeSection ed MainCodeSection {..}  = Map.insert mainName mainCode ed
@@ -101,6 +107,8 @@ evalInst (ICall v)               = embodyValue v >>= iCall
 evalInst (ISetReturn v)          = embodyValue v >>= iSetReturn
 evalInst (IReceive x)            = iReceive x
 evalInst (IRecAssign addr x env) = iRecAssign addr x env
+evalInst (IPrimBinOp op)         = iPrimBinOp op
+evalInst (IPrimUnOp op)          = iPrimUnOp op
 evalInst (IPrintInt v)           = embodyValue v >>= iPrintInt
 evalInst IExit                   = iExit
 evalInst IEndScope               = iEndScope
@@ -128,13 +136,7 @@ iPush :: Item -> Eval ()
 iPush it = modify' (\m -> m{ globalStack = it : globalStack m })
 
 iPop :: Addr -> Eval ()
-iPop addr = do
-  stack <- gets globalStack
-  case stack of
-    h : t -> do
-      modify' (\m -> m{ globalStack = t })
-      iAssign addr h
-    []    -> error "Impossible!"
+iPop addr = stackPop >>= iAssign addr
 
 iAssign :: Addr -> Item -> Eval ()
 iAssign (AIdent x)    it = modify' (\m -> let h NonEmpty.:| t = globalEnvs m in m{ globalEnvs = Map.insert x it h NonEmpty.:| t })
@@ -181,16 +183,85 @@ iRecAssign addr x env = do
       | addr == addr' = pure thunk
       | otherwise     = embodyAddr addr'
 
+iPrimBinOp :: PrimOp Binary -> Eval ()
+iPrimBinOp PrimIAdd = stackIntPop2 >>= iSetReturn . ItInt . uncurry (+) . swap
+iPrimBinOp PrimISub = stackIntPop2 >>= iSetReturn . ItInt . uncurry (-) . swap
+iPrimBinOp PrimIMul = stackIntPop2 >>= iSetReturn . ItInt . uncurry (*) . swap
+iPrimBinOp PrimIDiv = stackIntPop2 >>= iSetReturn . ItInt . uncurry quot . swap
+iPrimBinOp PrimIMod = stackIntPop2 >>= iSetReturn . ItInt . uncurry rem . swap
+iPrimBinOp PrimIEq  = stackIntPop2 >>= iSetReturn . ItBool . uncurry (==) . swap
+iPrimBinOp PrimINEq = stackIntPop2 >>= iSetReturn . ItBool . uncurry (/=) . swap
+iPrimBinOp PrimILt  = stackIntPop2 >>= iSetReturn . ItBool . uncurry (<) . swap
+iPrimBinOp PrimILe  = stackIntPop2 >>= iSetReturn . ItBool . uncurry (<=) . swap
+iPrimBinOp PrimIGt  = stackIntPop2 >>= iSetReturn . ItBool . uncurry (>) . swap
+iPrimBinOp PrimIGe  = stackIntPop2 >>= iSetReturn . ItBool . uncurry (>=) . swap
+iPrimBinOp PrimDAdd = stackDoublePop2 >>= iSetReturn . ItDouble . uncurry (+) . swap
+iPrimBinOp PrimDSub = stackDoublePop2 >>= iSetReturn . ItDouble . uncurry (-) . swap
+iPrimBinOp PrimDMul = stackDoublePop2 >>= iSetReturn . ItDouble . uncurry (*) . swap
+iPrimBinOp PrimDDiv = stackDoublePop2 >>= iSetReturn . ItDouble . uncurry (/) . swap
+iPrimBinOp PrimDEq  = stackDoublePop2 >>= iSetReturn . ItBool . uncurry (==) . swap
+iPrimBinOp PrimDNEq = stackDoublePop2 >>= iSetReturn . ItBool . uncurry (/=) . swap
+iPrimBinOp PrimDLt  = stackDoublePop2 >>= iSetReturn . ItBool . uncurry (<) . swap
+iPrimBinOp PrimDLe  = stackDoublePop2 >>= iSetReturn . ItBool . uncurry (<=) . swap
+iPrimBinOp PrimDGt  = stackDoublePop2 >>= iSetReturn . ItBool . uncurry (>) . swap
+iPrimBinOp PrimDGe  = stackDoublePop2 >>= iSetReturn . ItBool . uncurry (>=) . swap
+iPrimBinOp PrimBAnd = stackBoolPop2 >>= iSetReturn . ItBool . uncurry (&&) . swap
+iPrimBinOp PrimBOr  = stackBoolPop2 >>= iSetReturn . ItBool . uncurry (||) . swap
+
+iPrimUnOp :: PrimOp Unary -> Eval ()
+iPrimUnOp PrimINeg = stackIntPop >>= iSetReturn . ItInt . negate
+iPrimUnOp PrimDNeg = stackDoublePop >>= iSetReturn . ItDouble . negate
+iPrimUnOp PrimBNot = stackBoolPop >>= iSetReturn . ItBool . not
+
 iPrintInt :: Item -> Eval ()
 iPrintInt (ItInt n) = liftIO $ print n
-iPrintInt _         = error "Impossible!"
+iPrintInt _         = error "Invalid PrintInt argument"
 
 iExit :: Eval ()
 iExit = do
   prevCallStack <- gets callStack
   case prevCallStack of
-    []                                  -> error "Impossible!"
+    []                                  -> error "Invalid Exit"
     (codePointer, localEnv) : callStack -> modify' (\m -> m{ codePointer, localEnv, callStack })
+
+stackIntPop2 :: Eval (Int, Int)
+stackIntPop2 = liftA2 (,) stackIntPop stackIntPop
+
+stackIntPop :: Eval Int
+stackIntPop = do
+  it <- stackPop
+  case it of
+    ItInt n -> pure n
+    _       -> error "Stack pop gives a non-int item"
+
+stackDoublePop2 :: Eval (Double, Double)
+stackDoublePop2 = liftA2 (,) stackDoublePop stackDoublePop
+
+stackDoublePop :: Eval Double
+stackDoublePop = do
+  it <- stackPop
+  case it of
+    ItDouble d -> pure d
+    _          -> error "Stack pop gives a non-double item"
+
+stackBoolPop2 :: Eval (Bool, Bool)
+stackBoolPop2 = liftA2 (,) stackBoolPop stackBoolPop
+
+stackBoolPop :: Eval Bool
+stackBoolPop = do
+  it <- stackPop
+  case it of
+    ItBool b -> pure b
+    _        -> error "Stack pop gives a non-bool item"
+
+stackPop :: Eval Item
+stackPop = do
+  stack <- gets globalStack
+  case stack of
+    h : t -> do
+      modify' (\m -> m{ globalStack = t })
+      pure h
+    []    -> error "Invalid stack pop"
 
 mainName :: Ident
 mainName = "main"

@@ -1,4 +1,6 @@
-module LambdaComp.CBPV.Optimization where
+module LambdaComp.CBPV.Optimization
+  ( topOptimizeDefault
+  ) where
 
 import LambdaComp.CBPV.BindingConversion
 import LambdaComp.CBPV.SkipReturn

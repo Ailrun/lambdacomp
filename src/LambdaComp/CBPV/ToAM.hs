@@ -2,7 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TypeFamilies      #-}
-module LambdaComp.CBPV.ToAM where
+module LambdaComp.CBPV.ToAM
+  ( runToAM
+  ) where
 
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.Writer.Strict (MonadWriter (tell), WriterT (runWriterT), lift)
@@ -15,10 +17,10 @@ import LambdaComp.AM.Syntax
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName   (FreshNameT, freshNameOf, runFreshNameT)
 
-type WithAMInfo = WriterT [CodeSection] (FreshNameT (Reader [Ident]))
-
 runToAM :: Tm Com -> [CodeSection]
 runToAM tm = uncurry (:) . first MainCodeSection . (`runReader` []) . runFreshNameT . runWriterT $ toAM tm
+
+type WithAMInfo = WriterT [CodeSection] (FreshNameT (Reader [Ident]))
 
 class ToAM a where
   type AMData a
@@ -52,27 +54,24 @@ instance ToAM (Tm Com) where
     val0 <- toAM tm0
     code1 <- toAM tm1
     code2 <- toAM tm2
-    pure $ Vector.cons (ICondJump val0 (length code1)) code1 <> Vector.cons (IJump (length code2)) code2
-  toAM (TmLam x tm) = ([IPop (toVarAddr x)] <>) <$> toAM tm
+    pure $ Vector.cons (ICondJump val0 (1 + length code1)) code1 <> Vector.cons (IJump (length code2)) code2
+  toAM (TmLam x tm) = Vector.cons (IPop (toVarAddr x)) <$> toAM tm
   toAM (tmf `TmApp` tma) = liftA2 Vector.cons (IPush <$> toAM tma) (toAM tmf)
-  toAM (TmForce tm) = do
-    thunk <- toAM tm
-    pure [ICall thunk]
-  toAM (TmReturn tm) = do
-    val <- toAM tm
-    pure [ISetReturn val]
+  toAM (TmForce tm) = pure . ICall <$> toAM tm
+  toAM (TmReturn tm) = pure . ISetReturn <$> toAM tm
   toAM (TmTo tm0 x tm1) = do
     code0 <- toAM tm0
     code1 <- toAM tm1
     pure ([IScope] <> code0 <> [IEndScope, IReceive (toVarAddr x)] <> code1)
-  toAM (TmLet x tm0 tm1) = do
+  toAM (TmLet x tm0 tm1) = liftA2 Vector.cons (IAssign (toVarAddr x) <$> toAM tm0) (toAM tm1)
+  toAM (TmPrimBinOp op tm0 tm1) = do
     val0 <- toAM tm0
-    code1 <- toAM tm1
-    pure ([IAssign (toVarAddr x) val0] <> code1)
-  toAM (TmPrintInt tm0 tm1) = do
-    val0 <- toAM tm0
-    code1 <- toAM tm1
-    pure ([IPrintInt val0] <> code1)
+    val1 <- toAM tm1
+    pure [IPush val0, IPush val1, IPrimBinOp op]
+  toAM (TmPrimUnOp op tm) = do
+    val <- toAM tm
+    pure [IPush val, IPrimUnOp op]
+  toAM (TmPrintInt tm0 tm1) = liftA2 Vector.cons (IPrintInt <$> toAM tm0) (toAM tm1)
   toAM (TmRec x tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
     thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"

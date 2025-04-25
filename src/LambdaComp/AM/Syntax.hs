@@ -1,11 +1,13 @@
 module LambdaComp.AM.Syntax
   ( module LambdaComp.AM.Syntax
   , module LambdaComp.Ident
+  , module LambdaComp.PrimOp
   ) where
 
 import Data.Vector (Vector)
 
 import LambdaComp.Ident
+import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 
 data Addr where
   AIdent    :: !Ident -> Addr
@@ -32,6 +34,8 @@ data Inst where
   ISetReturn :: !Value -> Inst
   IReceive   :: !Addr -> Inst
   IRecAssign :: !Addr -> !Ident -> !(Vector Addr) -> Inst
+  IPrimBinOp :: !(PrimOp Binary) -> Inst
+  IPrimUnOp  :: !(PrimOp Unary) -> Inst
   IPrintInt  :: !Value -> Inst
   IExit      :: Inst
   IEndScope  :: Inst

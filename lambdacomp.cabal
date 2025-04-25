@@ -66,13 +66,14 @@ library
     LambdaComp.Driver.Example
     LambdaComp.FreshName
     LambdaComp.Ident
+    LambdaComp.PrimOp
     LambdaComp.Syntax
     LambdaComp.TypeCheck
 
   -- Other library packages from which modules are imported.
   build-depends:
     , base                  ^>=4.19.2.0
-    , containers            ^>=0.8
+    , containers            ^>=0.7
     , directory             ^>=1.3.9.0
     , filepath              ^>=1.5.4.0
     , mtl                   ^>=2.3.1

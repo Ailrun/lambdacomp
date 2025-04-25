@@ -1,7 +1,18 @@
 {-# LANGUAGE OverloadedStrings      #-}
 {-# LANGUAGE TypeData               #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
-module LambdaComp.Driver.Argument where
+module LambdaComp.Driver.Argument
+  ( BackendType(..)
+  , Backend(..)
+  , Phase(..)
+  , FilePathFor
+  , Options(..)
+
+  , parseOptions
+
+  , printHelpForError
+  , showPhaseOption
+  ) where
 
 import Data.List           ((!?))
 import Data.Maybe          (fromMaybe)
@@ -26,16 +37,28 @@ data Phase (c :: BackendType) where
   Run          :: Phase c
 
 type family FilePathFor (c :: BackendType) = r | r -> c where
-  FilePathFor DirectCBackendType = FilePath
+  FilePathFor DirectCBackendType = Maybe FilePath
   FilePathFor AMBackendType      = ()
 
 data Options where
   Options :: { testTm :: Tm, pass :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
 
 parseOptions :: IO Options
-parseOptions =
-  execParser
-  $ info (getOptions <**> helper)
+parseOptions = execParser progInfo
+
+printHelpForError :: String -> IO a
+printHelpForError h = handleParseResult . Failure $ parserFailure (prefs showHelpOnError) progInfo (ErrorMsg h) mempty
+
+showPhaseOption :: Phase c -> String
+showPhaseOption UntilCBPV    = "--until-cbpv option"
+showPhaseOption UntilCBPVOpt = "--until-cbpv-opt option"
+showPhaseOption UntilC       = "--until-c option"
+showPhaseOption UntilExe     = "--until-exe option"
+showPhaseOption UntilAM      = "--until-am option"
+showPhaseOption Run          = "--run option"
+
+progInfo :: ParserInfo Options
+progInfo = info (getOptions <**> helper)
   $ progDesc "A primitive λ-calculus (+ α) compiler using CBPV"
   <> failureCode 1
 
@@ -58,7 +81,7 @@ getOptionsForDirectCBackend :: Parser (Tm -> Options)
 getOptionsForDirectCBackend = (\backend phase fp tm -> Options tm backend phase fp)
   <$> getDirectCBackend
   <*> getDirectCPhase
-  <*> getFilePath
+  <*> optional getFilePath
 
 getDirectCBackend :: Parser (Backend DirectCBackendType)
 getDirectCBackend =

@@ -1,21 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TypeFamilies      #-}
-module LambdaComp.CBPV.ToC where
+module LambdaComp.CBPV.ToC
+  ( runToC
+  ) where
 
 import Control.Monad               (zipWithM)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict  (evalStateT)
-import Control.Monad.Writer.Strict (WriterT (WriterT, runWriterT), lift)
-import Data.Bifunctor              (Bifunctor (first, second))
+import Control.Monad.Writer.Strict (WriterT (..), lift)
+import Data.Bifunctor              (Bifunctor (..))
+import Data.Functor.Identity       (Identity (..))
+import Data.Functor.Product        (Product (Pair))
 import Data.List                   (elemIndex)
 import Data.Maybe                  (fromMaybe)
-import Data.Semigroup              (Dual (Dual, getDual))
+import Data.Semigroup              (Dual (..))
 import Data.Set                    qualified as Set
 import Data.Text                   qualified as Text
 
 import LambdaComp.CBPV.Syntax
-import LambdaComp.FreshName   (FreshNameT, freshNameOf)
+import LambdaComp.FreshName   (FreshNameT, freshNameOf, freshNamesOf)
+
+runToC :: Tm Com -> String
+runToC tm = showC . first (comment (show tm) :) . (`runReader` []) . (`evalStateT` 0) $ toC tm
 
 type WithClosure = FreshNameT (Reader [Ident])
 
@@ -92,7 +99,7 @@ instance ToC (Tm Com) where
     tm1Code <- WriterT $ toC tm1
     tm2Code <- WriterT $ toC tm2
     c <- lift $ freshNameOf "sys_c"
-    pure (tm0Code True c <> [ifStmt (c <> ".int_item") tm1Code tm2Code])
+    pure (tm0Code True c <> [ifStmt (intItem c) tm1Code tm2Code])
   toC (TmLam x tm) = first (underScope . (globalStackPopStmt (toVar x) :)) <$> toC tm
   toC (tmf `TmApp` tma) = runWriterT $ liftA2 (<>) (globalStackPushStmt <$> WriterT (toC tma)) (WriterT $ toC tmf)
   toC (TmForce tm) = runWriterT $ do
@@ -110,11 +117,22 @@ instance ToC (Tm Com) where
     tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
     pure (underScope (tm0Code True (toVar x) <> tm1Code))
+  toC (TmPrimBinOp op tm0 tm1) = runWriterT $ do
+    tm0Code <- WriterT $ toC tm0
+    tm1Code <- WriterT $ toC tm1
+    Pair (Identity arg0) (Identity arg1) <- lift $ freshNamesOf (Pair "sys_arg0" "sys_arg1")
+    opCode <- WriterT $ toC op
+    pure (underScope (tm0Code True arg0 <> tm1Code True arg1 <> [opCode arg0 arg1 retValue]))
+  toC (TmPrimUnOp op tm) = runWriterT $ do
+    tmCode <- WriterT $ toC tm
+    arg <- lift $ freshNameOf "sys_arg"
+    opCode <- WriterT $ toC op
+    pure (underScope (tmCode True arg <> [opCode arg retPointer]))
   toC (TmPrintInt tm0 tm1) = runWriterT $ do
     tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
     msg <- lift $ freshNameOf "sys_msg"
-    pure (tm0Code True msg <> (printlnAsIntStmt (msg <> ".int_item") : tm1Code))
+    pure (tm0Code True msg <> (printlnAsIntStmt msg : tm1Code))
   toC (TmRec x tm) = runWriterT $ do
     tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
     (thunkInit, inits) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
@@ -125,8 +143,41 @@ instance ToC (Tm Com) where
       thunkEnvSize = Set.size thunkEnv
       thunkEnvVars = Set.toList thunkEnv
 
-runToC :: Tm Com -> String
-runToC tm = showC . first (comment (show tm) :) . (`runReader` []) . (`evalStateT` 0) $ toC tm
+instance ToC (PrimOp Binary) where
+  type CData (PrimOp Binary) = (String -> String -> String -> String, Dual [TopDef])
+
+  toC :: PrimOp Binary -> WithClosure (CData (PrimOp Binary))
+  toC PrimIAdd = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " + " <> intItem arg1)
+  toC PrimISub = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " - " <> intItem arg1)
+  toC PrimIMul = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " * " <> intItem arg1)
+  toC PrimIDiv = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " / " <> intItem arg1)
+  toC PrimIMod = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " % " <> intItem arg1)
+  toC PrimIEq  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " == " <> intItem arg1)
+  toC PrimINEq = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " != " <> intItem arg1)
+  toC PrimILt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " < " <> intItem arg1)
+  toC PrimILe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " <= " <> intItem arg1)
+  toC PrimIGt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " > " <> intItem arg1)
+  toC PrimIGe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " >= " <> intItem arg1)
+  toC PrimDAdd = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " + " <> doubleItem arg1)
+  toC PrimDSub = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " - " <> doubleItem arg1)
+  toC PrimDMul = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " * " <> doubleItem arg1)
+  toC PrimDDiv = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " / " <> doubleItem arg1)
+  toC PrimDEq  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " == " <> doubleItem arg1)
+  toC PrimDNEq = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " != " <> doubleItem arg1)
+  toC PrimDLt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " < " <> doubleItem arg1)
+  toC PrimDLe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " <= " <> doubleItem arg1)
+  toC PrimDGt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " > " <> doubleItem arg1)
+  toC PrimDGe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " >= " <> doubleItem arg1)
+  toC PrimBAnd = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " && " <> intItem arg1)
+  toC PrimBOr  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " || " <> intItem arg1)
+
+instance ToC (PrimOp Unary) where
+  type CData (PrimOp Unary) = (String -> String -> String, Dual [TopDef])
+
+  toC :: PrimOp Unary -> WithClosure (CData (PrimOp Unary))
+  toC PrimINeg = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("- " <> intItem arg)
+  toC PrimDNeg = runWriterT . pure $ \arg ret -> assignStmt (doubleItem ret) ("- " <> doubleItem arg)
+  toC PrimBNot = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("! " <> intItem arg)
 
 showC :: ([String], Dual [TopDef]) -> String
 showC (mainBody, topDefs) =
@@ -166,7 +217,7 @@ showMain mainBody =
     ]
   <> mainBody
   <> [ "}"
-     , "return " <> retValueVar <> ".int_item;"
+     , "return " <> intItem retValueVar <> ";"
      , "}"
      ]
   where
@@ -239,7 +290,7 @@ ifStmt c b1 b2 =
   <> ["}"]
 
 printlnAsIntStmt :: String -> String
-printlnAsIntStmt s = "printf(\"%d\\n\", " <> s <> ");"
+printlnAsIntStmt s = "printf(\"%d\\n\", " <> intItem s <> ");"
 
 nthGlobalStackItem :: String -> String
 nthGlobalStackItem idx = "(" <> globalStack <> ".items[" <> idx <> "])"
@@ -252,9 +303,6 @@ nthItem arr i = "(" <> arr <> "[" <> show i <> "])"
 
 defineConstItemStmt :: String -> String -> String
 defineConstItemStmt var val = "const item " <> var <> " = " <> val <> ";"
-
-updateRetStmts :: String -> [String]
-updateRetStmts val = [assignStmt retValue val]
 
 assignStmt :: String -> String -> String
 assignStmt var val = var <> " = " <> val <> ";"
@@ -273,6 +321,12 @@ retPointer = "ret"
 
 globalStack :: String
 globalStack = "global_stack"
+
+intItem :: String -> String
+intItem = (<> ".int_item")
+
+doubleItem :: String -> String
+doubleItem = (<> ".double_item")
 
 intItemCons :: String
 intItemCons = "int_item"

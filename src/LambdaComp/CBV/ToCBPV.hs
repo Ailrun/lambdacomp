@@ -3,6 +3,8 @@
 module LambdaComp.CBV.ToCBPV where
 
 import Control.Monad.State.Strict (evalState)
+import Data.Functor.Identity      (Identity (..))
+import Data.Functor.Product       (Product (..))
 
 import LambdaComp.CBPV.Syntax qualified as CBPV
 import LambdaComp.FreshName
@@ -32,31 +34,37 @@ instance ToCBPV Tm where
   type CBPVData Tm = CBPV.Tm CBPV.Com
 
   toCBPV :: Tm -> FreshName (CBPVData Tm)
-  toCBPV (tm `TmAnn` _)       = toCBPV tm
-  toCBPV (TmVar x)            = pure $ CBPV.TmReturn $ CBPV.TmVar $ "u_" <> x
-  toCBPV TmUnit               = pure $ CBPV.TmReturn CBPV.TmUnit
-  toCBPV TmTrue               = pure $ CBPV.TmReturn CBPV.TmTrue
-  toCBPV TmFalse               = pure $ CBPV.TmReturn CBPV.TmFalse
-  toCBPV (TmInt n)            = pure $ CBPV.TmReturn $ CBPV.TmInt n
-  toCBPV (TmDouble f)         = pure $ CBPV.TmReturn $ CBPV.TmDouble f
-  toCBPV (TmIf tm0 tm1 tm2)   = do
+  toCBPV (tm `TmAnn` _)           = toCBPV tm
+  toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar $ "u_" <> x
+  toCBPV TmUnit                   = pure $ CBPV.TmReturn CBPV.TmUnit
+  toCBPV TmTrue                   = pure $ CBPV.TmReturn CBPV.TmTrue
+  toCBPV TmFalse                  = pure $ CBPV.TmReturn CBPV.TmFalse
+  toCBPV (TmInt n)                = pure $ CBPV.TmReturn $ CBPV.TmInt n
+  toCBPV (TmDouble f)             = pure $ CBPV.TmReturn $ CBPV.TmDouble f
+  toCBPV (TmIf tm0 tm1 tm2)       = do
     tm0' <- toCBPV tm0
     c <- freshNameOf "c_c"
     CBPV.TmTo tm0' c <$> liftA2 (CBPV.TmIf (CBPV.TmVar c)) (toCBPV tm1) (toCBPV tm2)
-  toCBPV (TmLam x tm)         = CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam ("u_" <> x) <$> toCBPV tm
-  toCBPV (tmf `TmApp` tma)    = do
+  toCBPV (TmLam x tm)             = CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam ("u_" <> x) <$> toCBPV tm
+  toCBPV (tmf `TmApp` tma)        = do
     tma' <- toCBPV tma
-    a <- freshNameOf "c_a"
-
     tmf' <- toCBPV tmf
-    f <- freshNameOf "c_f"
-
+    Pair (Identity a) (Identity f) <- freshNamesOf (Pair "c_a" "c_f")
     pure $ CBPV.TmTo tma' a $ CBPV.TmTo tmf' f $ CBPV.TmForce (CBPV.TmVar f) `CBPV.TmApp` CBPV.TmVar a
-  toCBPV (TmPrintInt tm0 tm1) = do
+  toCBPV (TmPrimBinOp op tm0 tm1) = do
+    tm0' <- toCBPV tm0
+    tm1' <- toCBPV tm1
+    Pair (Identity inp0) (Identity inp1) <- freshNamesOf (Pair "c_inp0" "c_inp1")
+    pure $ CBPV.TmTo tm0' inp0 $ CBPV.TmTo tm1' inp1 $ CBPV.TmPrimBinOp op (CBPV.TmVar inp0) (CBPV.TmVar inp1)
+  toCBPV (TmPrimUnOp op tm)       = do
+    tm' <- toCBPV tm
+    inp <- freshNameOf "c_inp"
+    pure $ CBPV.TmTo tm' inp $ CBPV.TmPrimUnOp op (CBPV.TmVar inp)
+  toCBPV (TmPrintInt tm0 tm1)     = do
     tm0' <- toCBPV tm0
     v <- freshNameOf "c_v"
     CBPV.TmTo tm0' v . CBPV.TmPrintInt (CBPV.TmVar v) <$> toCBPV tm1
-  toCBPV (TmRec x tm)         = do
+  toCBPV (TmRec x tm)             = do
     tm' <- toCBPV tm
     v <- freshNameOf "c_r"
     pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec ("u_" <> x) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)

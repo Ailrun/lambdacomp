@@ -1,6 +1,9 @@
 {-# LANGUAGE GADTs        #-}
 {-# LANGUAGE TypeFamilies #-}
-module LambdaComp.CBPV.BindingConversion where
+module LambdaComp.CBPV.BindingConversion
+  ( topCommutingThen
+  , topLiftingLet
+  ) where
 
 import Control.Monad.Writer.Strict (MonadWriter (tell), Writer, runWriter)
 import Data.Kind                   (Type)
@@ -25,25 +28,27 @@ commutingThenUnder :: Ident -> Tm Com -> CommutingThen Com (Tm Com)
 commutingThenUnder x = uncurry (commitThenUnder x) . runWriter . commutingThen
 
 commutingThen :: Tm c -> CommutingThen c (Tm c)
-commutingThen tm@(TmVar _)         = tm
-commutingThen tm@TmUnit            = tm
-commutingThen tm@TmTrue            = tm
-commutingThen tm@TmFalse           = tm
-commutingThen tm@(TmInt _)         = tm
-commutingThen tm@(TmDouble _)      = tm
-commutingThen (TmThunk tm)         = TmThunk $ topCommutingThen tm
-commutingThen (TmIf tm0 tm1 tm2)   = liftA2 (TmIf $ commutingThen tm0) (commutingThen tm1) (commutingThen tm2)
-commutingThen (TmLam x tm)         = TmLam x <$> commutingThenUnder x tm
-commutingThen (tmf `TmApp` tma)    = (`TmApp` commutingThen tma) <$> commutingThen tmf
-commutingThen (TmForce tm)         = pure . TmForce $ commutingThen tm
-commutingThen (TmReturn tm)        = pure . TmReturn $ commutingThen tm
-commutingThen (TmTo tm0 x tm1)     = do
+commutingThen tm@(TmVar _)             = tm
+commutingThen tm@TmUnit                = tm
+commutingThen tm@TmTrue                = tm
+commutingThen tm@TmFalse               = tm
+commutingThen tm@(TmInt _)             = tm
+commutingThen tm@(TmDouble _)          = tm
+commutingThen (TmThunk tm)             = TmThunk $ topCommutingThen tm
+commutingThen (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ commutingThen tm0) (commutingThen tm1) (commutingThen tm2)
+commutingThen (TmLam x tm)             = TmLam x <$> commutingThenUnder x tm
+commutingThen (tmf `TmApp` tma)        = (`TmApp` commutingThen tma) <$> commutingThen tmf
+commutingThen (TmForce tm)             = pure . TmForce $ commutingThen tm
+commutingThen (TmReturn tm)            = pure . TmReturn $ commutingThen tm
+commutingThen (TmTo tm0 x tm1)         = do
   tm0' <- commutingThen tm0
   tell [TmToPrefix (freeVarOfTm tm0') tm0' x]
   commutingThen tm1
-commutingThen (TmLet x tm0 tm1)    = TmLet x (commutingThen tm0) <$> commutingThenUnder x tm1
-commutingThen (TmPrintInt tm0 tm1) = TmPrintInt (commutingThen tm0) <$> commutingThen tm1
-commutingThen (TmRec f tm)         = TmRec f <$> commutingThenUnder f tm
+commutingThen (TmLet x tm0 tm1)        = TmLet x (commutingThen tm0) <$> commutingThenUnder x tm1
+commutingThen (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingThen tm0) (commutingThen tm1)
+commutingThen (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (commutingThen tm)
+commutingThen (TmPrintInt tm0 tm1)     = TmPrintInt (commutingThen tm0) <$> commutingThen tm1
+commutingThen (TmRec f tm)             = TmRec f <$> commutingThenUnder f tm
 
 commitThenUnder :: Ident -> Tm Com -> [TmToPrefix] -> CommutingThen Com (Tm Com)
 commitThenUnder x tm1 prefixes = do
@@ -65,26 +70,28 @@ liftingLetUnder :: Ident -> Tm Com -> LiftingLet Com (Tm Com)
 liftingLetUnder x = uncurry (commitLetUnder x) . runWriter . liftingLet
 
 liftingLet :: Tm c -> LiftingLet c (Tm c)
-liftingLet tm@(TmVar _)         = tm
-liftingLet tm@TmUnit            = tm
-liftingLet tm@TmTrue            = tm
-liftingLet tm@TmFalse           = tm
-liftingLet tm@(TmInt _)         = tm
-liftingLet tm@(TmDouble _)      = tm
-liftingLet (TmThunk tm)         = TmThunk $ topLiftingLet tm
-liftingLet (TmIf tm0 tm1 tm2)   = liftA2 (TmIf $ liftingLet tm0) (liftingLet tm1) (liftingLet tm2)
-liftingLet (TmLam x tm)         = TmLam x <$> liftingLetUnder x tm
-liftingLet (tmf `TmApp` tma)    = (`TmApp` liftingLet tma) <$> liftingLet tmf
-liftingLet (TmForce tm)         = pure . TmForce $ liftingLet tm
-liftingLet (TmReturn tm)        = pure . TmReturn $ liftingLet tm
-liftingLet (TmTo tm0 x tm1)     = do
+liftingLet tm@(TmVar _)             = tm
+liftingLet tm@TmUnit                = tm
+liftingLet tm@TmTrue                = tm
+liftingLet tm@TmFalse               = tm
+liftingLet tm@(TmInt _)             = tm
+liftingLet tm@(TmDouble _)          = tm
+liftingLet (TmThunk tm)             = TmThunk $ topLiftingLet tm
+liftingLet (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ liftingLet tm0) (liftingLet tm1) (liftingLet tm2)
+liftingLet (TmLam x tm)             = TmLam x <$> liftingLetUnder x tm
+liftingLet (tmf `TmApp` tma)        = (`TmApp` liftingLet tma) <$> liftingLet tmf
+liftingLet (TmForce tm)             = pure . TmForce $ liftingLet tm
+liftingLet (TmReturn tm)            = pure . TmReturn $ liftingLet tm
+liftingLet (TmTo tm0 x tm1)         = do
   tm0' <- liftingLet tm0
   TmTo tm0' x <$> liftingLetUnder x tm1
-liftingLet (TmLet x tm0 tm1)    = do
+liftingLet (TmLet x tm0 tm1)        = do
   tell [TmLetPrefix (freeVarOfTm tm0) x (liftingLet tm0)]
   liftingLet tm1
-liftingLet (TmPrintInt tm0 tm1) = TmPrintInt (liftingLet tm0) <$> liftingLet tm1
-liftingLet (TmRec f tm)         = TmRec f <$> liftingLetUnder f tm
+liftingLet (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (liftingLet tm0) (liftingLet tm1)
+liftingLet (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (liftingLet tm)
+liftingLet (TmPrintInt tm0 tm1)     = TmPrintInt (liftingLet tm0) <$> liftingLet tm1
+liftingLet (TmRec f tm)             = TmRec f <$> liftingLetUnder f tm
 
 commitLetUnder :: Ident -> Tm Com -> [TmLetPrefix] -> LiftingLet Com (Tm Com)
 commitLetUnder x tm1 prefixes = do
