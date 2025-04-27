@@ -1,8 +1,8 @@
 {-# LANGUAGE GADTs        #-}
 {-# LANGUAGE TypeFamilies #-}
 module LambdaComp.CBPV.BindingConversion
-  ( topCommutingThen
-  , topLiftingLet
+  ( runCommutingThen
+  , runLiftingLet
   ) where
 
 import Control.Monad.Writer.Strict (MonadWriter (tell), Writer, runWriter)
@@ -12,17 +12,20 @@ import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
 
-topCommutingThen :: Tm Com -> Tm Com
-topCommutingThen = uncurry commitThen . runWriter . commutingThen
+runCommutingThen :: Tm Val -> Tm Val
+runCommutingThen = commutingThen
 
-topLiftingLet :: Tm Com -> Tm Com
-topLiftingLet = uncurry commitLet . runWriter . liftingLet
+runLiftingLet :: Tm Val -> Tm Val
+runLiftingLet = liftingLet
 
 data TmToPrefix = TmToPrefix (Set Ident) (Tm Com) Ident
 
 type family CommutingThen (c :: Class) (a :: Type) where
   CommutingThen Com a = Writer [TmToPrefix] a
   CommutingThen Val a = a
+
+closedCommutingThen :: Tm Com -> Tm Com
+closedCommutingThen = uncurry commitThen . runWriter . commutingThen
 
 commutingThenUnder :: Ident -> Tm Com -> CommutingThen Com (Tm Com)
 commutingThenUnder x = uncurry (commitThenUnder x) . runWriter . commutingThen
@@ -34,7 +37,7 @@ commutingThen tm@TmTrue                = tm
 commutingThen tm@TmFalse               = tm
 commutingThen tm@(TmInt _)             = tm
 commutingThen tm@(TmDouble _)          = tm
-commutingThen (TmThunk tm)             = TmThunk $ topCommutingThen tm
+commutingThen (TmThunk tm)             = TmThunk $ closedCommutingThen tm
 commutingThen (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ commutingThen tm0) (commutingThen tm1) (commutingThen tm2)
 commutingThen (TmLam x tm)             = TmLam x <$> commutingThenUnder x tm
 commutingThen (tmf `TmApp` tma)        = (`TmApp` commutingThen tma) <$> commutingThen tmf
@@ -66,6 +69,9 @@ type family LiftingLet (c :: Class) (a :: Type) where
   LiftingLet Com a = Writer [TmLetPrefix] a
   LiftingLet Val a = a
 
+closedLiftingLet :: Tm Com -> Tm Com
+closedLiftingLet = uncurry commitLet . runWriter . liftingLet
+
 liftingLetUnder :: Ident -> Tm Com -> LiftingLet Com (Tm Com)
 liftingLetUnder x = uncurry (commitLetUnder x) . runWriter . liftingLet
 
@@ -76,7 +82,7 @@ liftingLet tm@TmTrue                = tm
 liftingLet tm@TmFalse               = tm
 liftingLet tm@(TmInt _)             = tm
 liftingLet tm@(TmDouble _)          = tm
-liftingLet (TmThunk tm)             = TmThunk $ topLiftingLet tm
+liftingLet (TmThunk tm)             = TmThunk $ closedLiftingLet tm
 liftingLet (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ liftingLet tm0) (liftingLet tm1) (liftingLet tm2)
 liftingLet (TmLam x tm)             = TmLam x <$> liftingLetUnder x tm
 liftingLet (tmf `TmApp` tma)        = (`TmApp` liftingLet tma) <$> liftingLet tmf

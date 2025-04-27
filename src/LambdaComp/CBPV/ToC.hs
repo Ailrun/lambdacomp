@@ -21,8 +21,8 @@ import Data.Text                   qualified as Text
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName   (FreshNameT, freshNameOf, freshNamesOf)
 
-runToC :: Tm Com -> String
-runToC tm = showC . first (comment (show tm) :) . (`runReader` []) . (`evalStateT` 0) $ toC tm
+runToC :: Program -> String
+runToC = (`runReader` []) . (`evalStateT` 0) . toC
 
 data TopDef
   = ThunkBodyDef
@@ -63,7 +63,7 @@ instance ToC Top where
   toC TopTmDef {..} = runWriterT $ do
     tmDefBody' <- WriterT $ toC tmDefBody
     tell $ Dual [TmDef $ toVar tmDefName]
-    pure $ tmDefBody' False (toVar tmDefName)
+    pure $ comment (show tmDefBody) : tmDefBody' False (toVar tmDefName)
 
 instance ToC (Tm Val) where
   type CData (Tm Val) = (Bool -> String -> [String], Dual [TopDef])

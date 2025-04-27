@@ -11,7 +11,7 @@ import LambdaComp.CBPV.Syntax qualified as CBPV
 import LambdaComp.FreshName
 import LambdaComp.Syntax
 
-runToCBPV :: Tm -> CBPV.Tm CBPV.Com
+runToCBPV :: Program -> CBPV.Program
 runToCBPV = (`evalState` 0) . toCBPV
 
 class ToCBPV a where

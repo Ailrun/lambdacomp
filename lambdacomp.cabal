@@ -55,7 +55,7 @@ library
     LambdaComp.AM.Eval
     LambdaComp.AM.Syntax
     LambdaComp.CBPV.BindingConversion
-    LambdaComp.CBPV.Optimization
+    LambdaComp.CBPV.LocalOptimization
     LambdaComp.CBPV.SkipReturn
     LambdaComp.CBPV.Syntax
     LambdaComp.CBPV.ToAM

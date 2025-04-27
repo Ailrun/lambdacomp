@@ -13,33 +13,32 @@ import System.IO.Temp     (withSystemTempDirectory, withSystemTempFile)
 import System.Process     (createProcess, proc, rawSystem, waitForProcess)
 import Text.Pretty.Simple (pPrintNoColor)
 
-import LambdaComp.AM.Eval           (topEval)
-import LambdaComp.CBPV.Optimization (topOptimizeDefault)
-import LambdaComp.CBPV.ToAM         (runToAM)
-import LambdaComp.CBPV.ToC          (runToC)
-import LambdaComp.CBV.ToCBPV        (runToCBPV)
+import LambdaComp.AM.Eval                (topEval)
+import LambdaComp.CBPV.LocalOptimization (runLocalOptDefault)
+import LambdaComp.CBPV.ToAM              (runToAM)
+import LambdaComp.CBPV.ToC               (runToC)
+import LambdaComp.CBV.ToCBPV             (runToCBPV)
 import LambdaComp.Driver.Argument
-import LambdaComp.Syntax            (Tm)
 
 mainFunc :: IO ()
 mainFunc = do
   Options tm backend phase mayFp <- parseOptions
   let cbpvTm    = runToCBPV tm
-      cbpvOptTm = topOptimizeDefault cbpvTm
+      cbpvOptTm = runLocalOptDefault cbpvTm
       cCode     = runToC cbpvOptTm
       amTm      = runToAM cbpvOptTm
   case phase of
     UntilCBPV    -> pPrintNoColor cbpvTm
     UntilCBPVOpt -> pPrintNoColor cbpvOptTm
     UntilC       -> requireFp phase mayFp >>= makeAbsolute >>= (`writeFile` cCode)
-    UntilExe     -> requireFp phase mayFp >>= makeAbsolute >>= genCExe tm
+    UntilExe     -> requireFp phase mayFp >>= makeAbsolute >>= genCExe cCode
     UntilAM      -> pPrintNoColor amTm
     Run          ->
       case backend of
         DirectCBackend -> do
           case mayFp of
-            Just fp -> makeAbsolute fp >>= genAndExeCExe tm
-            Nothing -> withLambdaCompTempFile $ genAndExeCExe tm
+            Just fp -> makeAbsolute fp >>= genAndExeCExe cCode
+            Nothing -> withLambdaCompTempFile $ genAndExeCExe cCode
         AMBackend      -> topEval amTm >>= pPrintNoColor
 
 withLambdaCompTempFile :: (FilePath -> IO a) -> IO a
@@ -50,18 +49,18 @@ requireFp :: Phase c -> Maybe FilePath -> IO FilePath
 requireFp _      (Just fp) = pure fp
 requireFp phase  Nothing   = printHelpForError $ showPhaseOption phase <> " requires output file path."
 
-genAndExeCExe :: Tm -> FilePath -> IO ()
-genAndExeCExe tm fp = do
-  genCExe tm fp
+genAndExeCExe :: String -> FilePath -> IO ()
+genAndExeCExe cCode fp = do
+  genCExe cCode fp
   (_, _, _, handle) <- createProcess (proc fp [])
   e <- waitForProcess handle
   exitWith e
 
-genCExe :: Tm -> FilePath -> IO ()
-genCExe tm fp = do
+genCExe :: String -> FilePath -> IO ()
+genCExe cCode fp = do
   dataDir <- getDataDir
   let tempCFileName = takeBaseName fp <.> "c"
   void $ withSystemTempFile tempCFileName $ \tempCfp handle -> do
-    hPutStr handle $ runToC $ topOptimizeDefault $ runToCBPV tm
+    hPutStr handle cCode
     hFlush handle
     rawSystem "gcc" ["-O2", "-I", dataDir, "-o", fp, tempCfp]

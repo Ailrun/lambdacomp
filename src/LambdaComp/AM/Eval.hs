@@ -10,7 +10,7 @@ module LambdaComp.AM.Eval
   ) where
 
 import Control.Monad              (unless)
-import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks, MonadReader (ask))
+import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
 import Control.Monad.State.Strict (StateT, execStateT, gets, modify')
 import Data.Bifunctor             (Bifunctor (second))
 import Data.List                  (foldl')
@@ -128,7 +128,7 @@ embodyAddr (AIdent x)    = do
   vs <- asks $ lefts . maybeToList . Map.lookup x
   its' <- traverse embodyValue vs
   case its <> its' of
-    []     -> error $ show x <> " is not in scope."
+    []     -> fail $ show x <> " is not in scope."
     it : _ -> pure it
 embodyAddr (ALocalEnv n) = gets $ (Vector.! n) . localEnv
 
@@ -152,7 +152,7 @@ iJump l =
 
 iCondJump :: Item -> Int -> Eval ()
 iCondJump (ItBool b) l = unless b $ iJump l
-iCondJump _          _ = error "Impossible!"
+iCondJump _          _ = fail "Impossible!"
 
 iCall :: Item -> Eval ()
 iCall (ItThunk x env) =
@@ -162,7 +162,7 @@ iCall (ItThunk x env) =
               , localEnv = env
               , callStack = (codePointer m, localEnv m) : callStack m
               }
-iCall _               = error "Impossible!"
+iCall _               = fail "Impossible!"
 
 iSetReturn :: Item -> Eval ()
 iSetReturn it = modify' (\m -> m{ returnReg = it })
@@ -218,13 +218,13 @@ iPrimUnOp PrimBNot = stackBoolPop >>= iSetReturn . ItBool . not
 
 iPrintInt :: Item -> Eval ()
 iPrintInt (ItInt n) = liftIO $ print n
-iPrintInt _         = error "Invalid PrintInt argument"
+iPrintInt _         = fail "Invalid PrintInt argument"
 
 iExit :: Eval ()
 iExit = do
   prevCallStack <- gets callStack
   case prevCallStack of
-    []                                  -> error "Invalid Exit"
+    []                                  -> fail "Invalid Exit"
     (codePointer, localEnv) : callStack -> modify' (\m -> m{ codePointer, localEnv, callStack })
 
 stackIntPop2 :: Eval (Int, Int)
@@ -235,7 +235,7 @@ stackIntPop = do
   it <- stackPop
   case it of
     ItInt n -> pure n
-    _       -> error "Stack pop gives a non-int item"
+    _       -> fail "Stack pop gives a non-int item"
 
 stackDoublePop2 :: Eval (Double, Double)
 stackDoublePop2 = liftA2 (,) stackDoublePop stackDoublePop
@@ -245,7 +245,7 @@ stackDoublePop = do
   it <- stackPop
   case it of
     ItDouble d -> pure d
-    _          -> error "Stack pop gives a non-double item"
+    _          -> fail "Stack pop gives a non-double item"
 
 stackBoolPop2 :: Eval (Bool, Bool)
 stackBoolPop2 = liftA2 (,) stackBoolPop stackBoolPop
@@ -255,7 +255,7 @@ stackBoolPop = do
   it <- stackPop
   case it of
     ItBool b -> pure b
-    _        -> error "Stack pop gives a non-bool item"
+    _        -> fail "Stack pop gives a non-bool item"
 
 stackPop :: Eval Item
 stackPop = do
@@ -264,7 +264,7 @@ stackPop = do
     h : t -> do
       modify' (\m -> m{ globalStack = t })
       pure h
-    []    -> error "Invalid stack pop"
+    []    -> fail "Invalid stack pop"
 
 mainName :: Ident
 mainName = "main"

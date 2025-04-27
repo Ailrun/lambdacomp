@@ -41,7 +41,7 @@ type family FilePathFor (c :: BackendType) = r | r -> c where
   FilePathFor AMBackendType      = ()
 
 data Options where
-  Options :: { testTm :: Tm, pass :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
+  Options :: { testProgram :: Program, pass :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
 
 parseOptions :: IO Options
 parseOptions = execParser progInfo
@@ -63,10 +63,10 @@ progInfo = info (getOptions <**> helper)
   <> failureCode 1
 
 getOptions :: Parser Options
-getOptions = getTestTmArg <**> (getOptionsForDirectCBackend <|> getOptionsForAMBackend)
+getOptions = getTestProgramArg <**> (getOptionsForDirectCBackend <|> getOptionsForAMBackend)
 
-getTestTmArg :: Parser Tm
-getTestTmArg = toTestTm <$> argument auto (metavar "EXAMPLE_ID" <> value 0 <> help ("Use the example corresponding to the given number. The number should be " <> helpMessageFor options <> ".") <> completeWith options)
+getTestProgramArg :: Parser Program
+getTestProgramArg = toTestProgram <$> argument auto (metavar "EXAMPLE_ID" <> value 0 <> help ("Use the example corresponding to the given number. The number should be " <> helpMessageFor options <> ".") <> completeWith options)
   where
     options = fmap show [0..length examples]
 
@@ -74,11 +74,11 @@ getTestTmArg = toTestTm <$> argument auto (metavar "EXAMPLE_ID" <> value 0 <> he
     helpMessageFor [x]    = "or " <> x
     helpMessageFor (x:xs) = x <> ", " <> helpMessageFor xs
 
-    toTestTm :: Int -> Tm
-    toTestTm n = fromMaybe (last examples) (examples !? n)
+    toTestProgram :: Int -> Program
+    toTestProgram n = fromMaybe (last examples) (examples !? n)
 
-getOptionsForDirectCBackend :: Parser (Tm -> Options)
-getOptionsForDirectCBackend = (\backend phase fp tm -> Options tm backend phase fp)
+getOptionsForDirectCBackend :: Parser (Program -> Options)
+getOptionsForDirectCBackend = (\backend phase fp program -> Options program backend phase fp)
   <$> getDirectCBackend
   <*> getDirectCPhase
   <*> optional getFilePath
@@ -100,8 +100,8 @@ getDirectCPhase =
                       <> help "Stop after generating an executable using C, which is written to the given output path. Currently available only for the direct-c backend. This is the default for the Direct-C backend.")
   <|> pure UntilExe
 
-getOptionsForAMBackend :: Parser (Tm -> Options)
-getOptionsForAMBackend = (\backend phase tm -> Options tm backend phase ())
+getOptionsForAMBackend :: Parser (Program -> Options)
+getOptionsForAMBackend = (\backend phase program -> Options program backend phase ())
   <$> getAMBackend
   <*> getAMPhase
 

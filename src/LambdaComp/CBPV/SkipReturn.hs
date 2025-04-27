@@ -1,12 +1,12 @@
 {-# LANGUAGE GADTs #-}
 module LambdaComp.CBPV.SkipReturn
-  ( topSkipReturn
+  ( runSkipReturn
   ) where
 
 import LambdaComp.CBPV.Syntax
 
-topSkipReturn :: Tm Com -> Tm Com
-topSkipReturn = skipReturn
+runSkipReturn :: Tm Val -> Tm Val
+runSkipReturn = skipReturn
 
 skipReturn :: Tm c -> Tm c
 skipReturn tm@(TmVar _)             = tm

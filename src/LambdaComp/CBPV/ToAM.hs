@@ -16,8 +16,8 @@ import LambdaComp.AM.Syntax
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName   (FreshNameT, freshNameOf, runFreshNameT)
 
-runToAM :: Tm Com -> [CodeSection]
-runToAM tm = uncurry (:) . (`runReader` []) . runFreshNameT . runWriterT $ toAM (TopTmDef "u_main" TpInt (TmThunk tm))
+runToAM :: Program -> [CodeSection]
+runToAM = uncurry (<>) . (`runReader` []) . runFreshNameT . runWriterT . toAM
 
 type WithAMInfo = WriterT [CodeSection] (FreshNameT (Reader [Ident]))
 
