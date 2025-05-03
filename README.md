@@ -1,6 +1,6 @@
 # $\lambda$-Compiler
 
-A Primitive Compiler from $\lambda$-calculus + $\alpha$ (e.g. primitive operations, recursion, and effects) based on Call-By-Push-Value (CBPV)
+A Primitive Compiler from $\lambda$-calculus + $\alpha$ (e.g. primitive operations, recursion, and effects) to C, based on Call-By-Push-Value (CBPV)
 
 ## Usage
 
