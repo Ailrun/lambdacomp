@@ -16,28 +16,32 @@ runToCBPV = (`evalState` 0) . toCBPV
 
 class ToCBPV a where
   type CBPVData a
-  toCBPV :: a -> FreshName (CBPVData a)
+  toCBPV :: a -> CBPVData a
 
 instance ToCBPV Program where
-  type CBPVData Program = CBPV.Program
+  type CBPVData Program = FreshName CBPV.Program
 
-  toCBPV :: Program -> FreshName (CBPVData Program)
+  toCBPV :: Program -> CBPVData Program
   toCBPV = traverse toCBPV
 
 instance ToCBPV Top where
-  type CBPVData Top = CBPV.Top
+  type CBPVData Top = FreshName CBPV.Top
 
-  toCBPV :: Top -> FreshName (CBPVData Top)
+  toCBPV :: Top -> CBPVData Top
   toCBPV TopTmDef {..} = do
-    tmDefType' <- CBPV.TpUp <$> toCBPV tmDefType
-    tmDefBody' <- CBPV.TmThunk <$> toCBPV tmDefBody
-    pure $ CBPV.TopTmDef { tmDefName = "u_" <> tmDefName, tmDefType = tmDefType', tmDefBody = tmDefBody' }
+    let tmDefType' = toCBPV tmDefType
+    tmDefBody' <- toCBPV tmDefBody
+    let (tmDefType'', tmDefBody'') =
+          case (tmDefType', tmDefBody') of
+            (CBPV.TpDown tp, CBPV.TmReturn tm) -> (tp, tm)
+            _ -> (CBPV.TpUp tmDefType', CBPV.TmThunk tmDefBody')
+    pure $ CBPV.TopTmDef { tmDefName = "u_" <> tmDefName, tmDefType = tmDefType'', tmDefBody = tmDefBody'' }
 
 instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Com
 
-  toCBPV :: Tp -> FreshName (CBPVData Tp)
-  toCBPV = pure . CBPV.TpDown . helper
+  toCBPV :: Tp -> CBPVData Tp
+  toCBPV = CBPV.TpDown . helper
     where
       helper :: Tp -> CBPV.Tp CBPV.Val
       helper TpUnit            = CBPV.TpUnit
@@ -47,9 +51,9 @@ instance ToCBPV Tp where
       helper (ty0 `TpFun` ty1) = CBPV.TpUp $ helper ty0 `CBPV.TpFun` CBPV.TpDown (helper ty1)
 
 instance ToCBPV Tm where
-  type CBPVData Tm = CBPV.Tm CBPV.Com
+  type CBPVData Tm = FreshName (CBPV.Tm CBPV.Com)
 
-  toCBPV :: Tm -> FreshName (CBPVData Tm)
+  toCBPV :: Tm -> CBPVData Tm
   toCBPV (tm `TmAnn` _)           = toCBPV tm
   toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar $ "u_" <> x
   toCBPV TmUnit                   = pure $ CBPV.TmReturn CBPV.TmUnit
