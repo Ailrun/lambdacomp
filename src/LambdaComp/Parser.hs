@@ -7,7 +7,7 @@ module LambdaComp.Parser
 import Control.Monad                  (void)
 import Control.Monad.Combinators.Expr qualified as Expr
 import Data.Bifunctor                 (Bifunctor (first))
-import Data.Char                      (isAlpha, isAlphaNum)
+import Data.Char                      (isAlphaNum, isLower)
 import Data.List.NonEmpty             (NonEmpty (..))
 import Data.Semigroup                 (Any (..))
 import Data.Set                       qualified as Set
@@ -16,9 +16,10 @@ import Data.Text                      qualified as Text
 import Data.Void                      (Void)
 import Text.Megaparsec
 import Text.Megaparsec.Char           qualified as MC
+import Text.Megaparsec.Char.Lexer     qualified as MCL
 
 import LambdaComp.Syntax
-import qualified Text.Megaparsec.Char.Lexer as MCL
+import Text.Megaparsec.Debug (MonadParsecDbg(dbg))
 
 type Parser = Parsec Void Text
 
@@ -132,7 +133,8 @@ tmTable =
 atomicTm :: Parser Tm
 atomicTm =
   choice
-  [ TmTrue <$ keyword "True"
+  [ TmVar <$> ident
+  , TmTrue <$ keyword "True"
   , TmFalse <$ keyword "False"
   , TmInt <$> int
   , TmDouble <$> double
@@ -142,10 +144,10 @@ atomicTm =
   ]
 
 int :: Parser Int
-int = label "integer" . lexeme $ MCL.signed (pure ()) MCL.decimal
+int = label "integer" . lexeme . try $ MCL.signed (pure ()) MCL.decimal
 
 double :: Parser Double
-double = label "double precision floating number" . lexeme $ MCL.signed (pure ()) MCL.float
+double = label "double precision floating number" . lexeme . try $ MCL.signed (pure ()) MCL.float
 
 ident :: Parser Ident
 ident = Ident <$> identifier
@@ -163,13 +165,13 @@ keyword :: Text -> Parser ()
 keyword k =
   label ("keyword '" <> Text.unpack k <> "'")
   $ lexeme
-  $ MC.string k >> notFollowedBy (satisfy isIdentChar1)
+  $ try (MC.string k >> notFollowedBy (satisfy isIdentChar1))
 
 symbol :: Text -> Parser ()
 symbol = void . MCL.symbol space
 
 symbolNoSpace :: Text -> Parser ()
-symbolNoSpace = void . MCL.symbol (pure ())
+symbolNoSpace = void . try . (>> notFollowedBy space) . MCL.symbol (pure ())
 
 lexeme :: Parser a -> Parser a
 lexeme = MCL.lexeme space
@@ -179,11 +181,21 @@ space = hidden MC.space
 
 keywords :: [Text]
 keywords =
-  [ "fun"
+  [ "Bool"
+  , "Int"
+  , "Double"
+  , "if"
+  , "then"
+  , "else"
+  , "printInt"
+  , "before"
+  , "rec"
+  , "True"
+  , "False"
   ]
 
 isIdentChar0 :: Char -> Bool
-isIdentChar0 = getAny . ((Any . isAlpha) <> (Any . ('_' ==)))
+isIdentChar0 = getAny . ((Any . isLower) <> (Any . ('_' ==)))
 
 isIdentChar1 :: Char -> Bool
 isIdentChar1 = getAny . ((Any . isAlphaNum) <> (Any . ('_' ==)))
