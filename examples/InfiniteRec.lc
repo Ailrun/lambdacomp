@@ -1,0 +1,7 @@
+recF : Int -> Int = rec recF -> \x ->
+  printInt x before
+  printInt 2 before
+  recF x
+;;
+
+main : Int = recF 3

@@ -5,6 +5,7 @@ module LambdaComp.Driver where
 import Paths_lambdacomp (getDataDir)
 
 import Control.Monad      (void)
+import Data.Text.IO       qualified as T
 import System.Directory   (makeAbsolute)
 import System.Exit        (exitWith)
 import System.FilePath    (takeBaseName, (<.>), (</>))
@@ -19,27 +20,33 @@ import LambdaComp.CBPV.ToAM              (runToAM)
 import LambdaComp.CBPV.ToC               (runToC)
 import LambdaComp.CBV.ToCBPV             (runToCBPV)
 import LambdaComp.Driver.Argument
+import LambdaComp.Parser                 (runProgramParser)
 
 mainFunc :: IO ()
 mainFunc = do
-  Options tm backend phase mayFp <- parseOptions
-  let cbpvTm    = runToCBPV tm
-      cbpvOptTm = runLocalOptDefault cbpvTm
-      cCode     = runToC cbpvOptTm
-      amTm      = runToAM cbpvOptTm
-  case phase of
-    UntilCBPV    -> pPrintNoColor cbpvTm
-    UntilCBPVOpt -> pPrintNoColor cbpvOptTm
-    UntilC       -> requireFp phase mayFp >>= makeAbsolute >>= (`writeFile` cCode)
-    UntilExe     -> requireFp phase mayFp >>= makeAbsolute >>= genCExe cCode
-    UntilAM      -> pPrintNoColor amTm
-    Run          ->
-      case backend of
-        DirectCBackend -> do
-          case mayFp of
-            Just fp -> makeAbsolute fp >>= genAndExeCExe cCode
-            Nothing -> withLambdaCompTempFile $ genAndExeCExe cCode
-        AMBackend      -> topEval amTm >>= pPrintNoColor
+  Options inputFp backend phase mayFp <- parseOptions
+  input <- T.readFile inputFp
+  case runProgramParser inputFp input of
+    Left err -> putStrLn err
+    Right tm -> do
+      let cbpvTm    = runToCBPV tm
+          cbpvOptTm = runLocalOptDefault cbpvTm
+          cCode     = runToC cbpvOptTm
+          amTm      = runToAM cbpvOptTm
+      case phase of
+        UntilAST     -> pPrintNoColor tm
+        UntilCBPV    -> pPrintNoColor cbpvTm
+        UntilCBPVOpt -> pPrintNoColor cbpvOptTm
+        UntilC       -> requireFp phase mayFp >>= makeAbsolute >>= (`writeFile` cCode)
+        UntilExe     -> requireFp phase mayFp >>= makeAbsolute >>= genCExe cCode
+        UntilAM      -> pPrintNoColor amTm
+        Run          ->
+          case backend of
+            DirectCBackend -> do
+              case mayFp of
+                Just fp -> makeAbsolute fp >>= genAndExeCExe cCode
+                Nothing -> withLambdaCompTempFile $ genAndExeCExe cCode
+            AMBackend      -> topEval amTm >>= pPrintNoColor
 
 withLambdaCompTempFile :: (FilePath -> IO a) -> IO a
 withLambdaCompTempFile f =

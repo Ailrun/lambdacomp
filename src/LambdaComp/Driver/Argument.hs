@@ -14,12 +14,7 @@ module LambdaComp.Driver.Argument
   , showPhaseOption
   ) where
 
-import Data.List           ((!?))
-import Data.Maybe          (fromMaybe)
 import Options.Applicative
-
-import LambdaComp.Driver.Example (examples)
-import LambdaComp.Syntax
 
 type data BackendType where
   DirectCBackendType, AMBackendType :: BackendType
@@ -29,6 +24,7 @@ data Backend (c :: BackendType) where
   AMBackend :: Backend AMBackendType
 
 data Phase (c :: BackendType) where
+  UntilAST     :: Phase c
   UntilCBPV    :: Phase c
   UntilCBPVOpt :: Phase c
   UntilC       :: Phase DirectCBackendType
@@ -41,7 +37,7 @@ type family FilePathFor (c :: BackendType) = r | r -> c where
   FilePathFor AMBackendType      = ()
 
 data Options where
-  Options :: { testProgram :: Program, pass :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
+  Options :: { input :: FilePath, pass :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
 
 parseOptions :: IO Options
 parseOptions = execParser progInfo
@@ -50,6 +46,7 @@ printHelpForError :: String -> IO a
 printHelpForError h = handleParseResult . Failure $ parserFailure (prefs showHelpOnError) progInfo (ErrorMsg h) mempty
 
 showPhaseOption :: Phase c -> String
+showPhaseOption UntilAST     = "--until-ast option"
 showPhaseOption UntilCBPV    = "--until-cbpv option"
 showPhaseOption UntilCBPVOpt = "--until-cbpv-opt option"
 showPhaseOption UntilC       = "--until-c option"
@@ -63,25 +60,16 @@ progInfo = info (getOptions <**> helper)
   <> failureCode 1
 
 getOptions :: Parser Options
-getOptions = getTestProgramArg <**> (getOptionsForDirectCBackend <|> getOptionsForAMBackend)
+getOptions = getInputFilePath <**> (getOptionsForDirectCBackend <|> getOptionsForAMBackend)
 
-getTestProgramArg :: Parser Program
-getTestProgramArg = toTestProgram <$> argument auto (metavar "EXAMPLE_ID" <> value 0 <> help ("Use the example corresponding to the given number. The number should be " <> helpMessageFor options <> ".") <> completeWith options)
-  where
-    options = fmap show [0..length examples]
+getInputFilePath :: Parser FilePath
+getInputFilePath = strArgument (metavar "INPUT_FILE" <> help "The path of an input file." <> action "file")
 
-    helpMessageFor []     = error "A compiler bug"
-    helpMessageFor [x]    = "or " <> x
-    helpMessageFor (x:xs) = x <> ", " <> helpMessageFor xs
-
-    toTestProgram :: Int -> Program
-    toTestProgram n = fromMaybe (last examples) (examples !? n)
-
-getOptionsForDirectCBackend :: Parser (Program -> Options)
-getOptionsForDirectCBackend = (\backend phase fp program -> Options program backend phase fp)
+getOptionsForDirectCBackend :: Parser (FilePath -> Options)
+getOptionsForDirectCBackend = (\backend phase fp input -> Options input backend phase fp)
   <$> getDirectCBackend
   <*> getDirectCPhase
-  <*> optional getFilePath
+  <*> optional getOutputFilePath
 
 getDirectCBackend :: Parser (Backend DirectCBackendType)
 getDirectCBackend =
@@ -100,8 +88,8 @@ getDirectCPhase =
                       <> help "Stop after generating an executable using C, which is written to the given output path. Currently available only for the direct-c backend. This is the default for the Direct-C backend.")
   <|> pure UntilExe
 
-getOptionsForAMBackend :: Parser (Program -> Options)
-getOptionsForAMBackend = (\backend phase program -> Options program backend phase ())
+getOptionsForAMBackend :: Parser (FilePath -> Options)
+getOptionsForAMBackend = (\backend phase input -> Options input backend phase ())
   <$> getAMBackend
   <*> getAMPhase
 
@@ -121,7 +109,10 @@ getAMPhase =
 
 getCommonPhase :: Parser (Phase c)
 getCommonPhase =
-  flag' UntilCBPV (long "until-cbpv"
+  flag' UntilAST (long "until-ast"
+                   <> hidden
+                   <> help "Stop after parsing an AST and print it.")
+  <|> flag' UntilCBPV (long "until-cbpv"
                    <> hidden
                    <> help "Stop after generating a CBPV term and print it.")
   <|> flag' UntilCBPVOpt (long "until-cbpv-opt"
@@ -131,8 +122,8 @@ getCommonPhase =
                  <> short 'r'
                  <> help "Run the example term using the given backend. For the Direct-C backend, this generates and executes an executable using C, which is written to the given output path. For the AM backend, this interprets an abstract machine (AM) term and prints the result value.")
 
-getFilePath :: Parser FilePath
-getFilePath =
+getOutputFilePath :: Parser FilePath
+getOutputFilePath =
   strOption
   $ long "output"
   <> short 'o'

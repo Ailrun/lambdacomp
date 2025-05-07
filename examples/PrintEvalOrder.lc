@@ -1,0 +1,7 @@
+main : Int =
+  printInt
+    (\x ->
+      (\y -> printInt y before x)
+      2)
+    (printInt 7 before 3) before
+  0
