@@ -1,6 +1,10 @@
 module Main where
 
-import LambdaComp.Driver (mainFunc)
+import System.Exit (exitWith)
+import System.IO   (stdout)
+
+import LambdaComp.Driver          (mainFuncWithOptions)
+import LambdaComp.Driver.Argument (parseOptions)
 
 main :: IO ()
-main = mainFunc
+main = parseOptions >>= mainFuncWithOptions stdout >>= exitWith

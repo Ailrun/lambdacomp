@@ -74,7 +74,7 @@ jobs:
         run: cabal build all
 
       - name: Run tests
-        run: cabal test all
+        run: cabal test all --test-options="-t 5s --no-create"
 
       - name: Check cabal file
         run: cabal check

@@ -38,7 +38,7 @@ type family FilePathFor (c :: BackendType) = r | r -> c where
   FilePathFor AMBackendType      = ()
 
 data Options where
-  Options :: { input :: FilePath, pass :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
+  Options :: { input :: FilePath, backend :: Backend c, phase :: Phase c, output :: FilePathFor c } -> Options
 
 parseOptions :: IO Options
 parseOptions = execParser progInfo

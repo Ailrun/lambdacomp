@@ -1,8 +1,0 @@
-recF : Int -> Int;;
-recF = \x ->
-  printInt x before
-  printInt 2 before
-  recF x
-;;
-
-main = recF 3

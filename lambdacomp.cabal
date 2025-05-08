@@ -136,11 +136,17 @@ test-suite lambdacomp-test
 
   -- Test dependencies.
   build-depends:
-    , base        ^>=4.19.2.0
+    , base          ^>=4.19.2.0
+    , bytestring
+    , directory
+    , filepath
     , lambdacomp
+    , tasty
+    , temporary
+    , tasty-golden
 
   -- Modules included in this executable, other than Main.
-  -- other-modules:
+  -- other-modules:    Paths_lambdacomp
 
   -- Directories containing source files.
   hs-source-dirs:   test

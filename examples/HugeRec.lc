@@ -1,0 +1,12 @@
+recF : Int -> Int -> Int;;
+recF = \n x ->
+  printInt x before
+  printInt 2 before
+  if n > 0
+  then
+    recF (n - 1) x
+  else
+    0
+;;
+
+main = recF 1000000 3
