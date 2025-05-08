@@ -7,7 +7,7 @@ import Paths_lambdacomp (getDataDir)
 import Control.Monad      (void)
 import Data.Text.IO       qualified as T
 import System.Directory   (makeAbsolute)
-import System.Exit        (exitWith)
+import System.Exit        (ExitCode (ExitFailure), exitWith)
 import System.FilePath    (takeBaseName, (<.>), (</>))
 import System.IO          (hFlush, hPutStr)
 import System.IO.Temp     (withSystemTempDirectory, withSystemTempFile)
@@ -18,8 +18,10 @@ import LambdaComp.AM.Eval                (topEval)
 import LambdaComp.CBPV.LocalOptimization (runLocalOptDefault)
 import LambdaComp.CBPV.ToAM              (runToAM)
 import LambdaComp.CBPV.ToC               (runToC)
-import LambdaComp.CBV.ToCBPV             (runToCBPV)
 import LambdaComp.Driver.Argument
+import LambdaComp.Elaborated.CBV.ToCBPV  (runToCBPV)
+import LambdaComp.Elaborated.Syntax      qualified as E
+import LambdaComp.External.ToElaborated  (ElaborationError, runToElaborated)
 import LambdaComp.Parser                 (runProgramParser)
 
 mainFunc :: IO ()
@@ -29,24 +31,30 @@ mainFunc = do
   case runProgramParser inputFp input of
     Left err -> putStrLn err
     Right tm -> do
-      let cbpvTm    = runToCBPV tm
-          cbpvOptTm = runLocalOptDefault cbpvTm
-          cCode     = runToC cbpvOptTm
-          amTm      = runToAM cbpvOptTm
+      let getElTm      = handleElabError $ runToElaborated tm
+          getCBPVTm    = runToCBPV <$> getElTm
+          getCBPVOptTm = runLocalOptDefault <$> getCBPVTm
+          getCCode     = runToC <$> getCBPVOptTm
+          getAMTm      = runToAM <$> getCBPVOptTm
       case phase of
-        UntilAST     -> pPrintNoColor tm
-        UntilCBPV    -> pPrintNoColor cbpvTm
-        UntilCBPVOpt -> pPrintNoColor cbpvOptTm
-        UntilC       -> requireFp phase mayFp >>= makeAbsolute >>= (`writeFile` cCode)
-        UntilExe     -> requireFp phase mayFp >>= makeAbsolute >>= genCExe cCode
-        UntilAM      -> pPrintNoColor amTm
-        Run          ->
+        UntilAST         -> pPrintNoColor tm
+        UntilElaboration -> getElTm >>= pPrintNoColor
+        UntilCBPV        -> getCBPVTm >>= pPrintNoColor
+        UntilCBPVOpt     -> getCBPVOptTm >>= pPrintNoColor
+        UntilC           -> getCCode >>= (\cCode -> requireFp phase mayFp >>= makeAbsolute >>= (`writeFile` cCode))
+        UntilExe         -> getCCode >>= (\cCode -> requireFp phase mayFp >>= makeAbsolute >>= genCExe cCode)
+        UntilAM          -> getAMTm >>= pPrintNoColor
+        Run              ->
           case backend of
             DirectCBackend -> do
               case mayFp of
-                Just fp -> makeAbsolute fp >>= genAndExeCExe cCode
-                Nothing -> withLambdaCompTempFile $ genAndExeCExe cCode
-            AMBackend      -> topEval amTm >>= pPrintNoColor
+                Just fp -> getCCode >>= (\cCode -> makeAbsolute fp >>= genAndExeCExe cCode)
+                Nothing -> getCCode >>= withLambdaCompTempFile . genAndExeCExe
+            AMBackend      -> getAMTm >>= topEval >>= pPrintNoColor
+
+handleElabError :: Either ElaborationError E.Program -> IO E.Program
+handleElabError (Left elabErr) = pPrintNoColor elabErr >> exitWith (ExitFailure 1)
+handleElabError (Right prog)   = pure prog
 
 withLambdaCompTempFile :: (FilePath -> IO a) -> IO a
 withLambdaCompTempFile f =

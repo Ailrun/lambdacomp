@@ -39,7 +39,7 @@ commutingThen tm@(TmInt _)             = tm
 commutingThen tm@(TmDouble _)          = tm
 commutingThen (TmThunk tm)             = TmThunk $ closedCommutingThen tm
 commutingThen (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ commutingThen tm0) (commutingThen tm1) (commutingThen tm2)
-commutingThen (TmLam x tm)             = TmLam x <$> commutingThenUnder x tm
+commutingThen (TmLam x tm)             = TmLam x <$> commutingThenUnder (paramName x) tm
 commutingThen (tmf `TmApp` tma)        = (`TmApp` commutingThen tma) <$> commutingThen tmf
 commutingThen (TmForce tm)             = pure . TmForce $ commutingThen tm
 commutingThen (TmReturn tm)            = pure . TmReturn $ commutingThen tm
@@ -51,7 +51,7 @@ commutingThen (TmLet x tm0 tm1)        = TmLet x (commutingThen tm0) <$> commuti
 commutingThen (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingThen tm0) (commutingThen tm1)
 commutingThen (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (commutingThen tm)
 commutingThen (TmPrintInt tm0 tm1)     = TmPrintInt (commutingThen tm0) <$> commutingThen tm1
-commutingThen (TmRec f tm)             = TmRec f <$> commutingThenUnder f tm
+commutingThen (TmRec f tp tm)          = TmRec f tp <$> commutingThenUnder f tm
 
 commitThenUnder :: Ident -> Tm Com -> [TmToPrefix] -> CommutingThen Com (Tm Com)
 commitThenUnder x tm1 prefixes = do
@@ -84,7 +84,7 @@ liftingLet tm@(TmInt _)             = tm
 liftingLet tm@(TmDouble _)          = tm
 liftingLet (TmThunk tm)             = TmThunk $ closedLiftingLet tm
 liftingLet (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ liftingLet tm0) (liftingLet tm1) (liftingLet tm2)
-liftingLet (TmLam x tm)             = TmLam x <$> liftingLetUnder x tm
+liftingLet (TmLam x tm)             = TmLam x <$> liftingLetUnder (paramName x) tm
 liftingLet (tmf `TmApp` tma)        = (`TmApp` liftingLet tma) <$> liftingLet tmf
 liftingLet (TmForce tm)             = pure . TmForce $ liftingLet tm
 liftingLet (TmReturn tm)            = pure . TmReturn $ liftingLet tm
@@ -97,7 +97,7 @@ liftingLet (TmLet x tm0 tm1)        = do
 liftingLet (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (liftingLet tm0) (liftingLet tm1)
 liftingLet (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (liftingLet tm)
 liftingLet (TmPrintInt tm0 tm1)     = TmPrintInt (liftingLet tm0) <$> liftingLet tm1
-liftingLet (TmRec f tm)             = TmRec f <$> liftingLetUnder f tm
+liftingLet (TmRec f tp tm)          = TmRec f tp <$> liftingLetUnder f tm
 
 commitLetUnder :: Ident -> Tm Com -> [TmLetPrefix] -> LiftingLet Com (Tm Com)
 commitLetUnder x tm1 prefixes = do

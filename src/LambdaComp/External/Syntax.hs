@@ -1,30 +1,31 @@
-module LambdaComp.Syntax
-  ( module LambdaComp.Syntax
+module LambdaComp.External.Syntax
+  ( module LambdaComp.External.Syntax
+  , module LambdaComp.Elaborated.Syntax
   , module LambdaComp.Ident
   , module LambdaComp.PrimOp
   ) where
 
 import Data.String (IsString (..))
 
+import LambdaComp.Elaborated.Syntax (Tp (..))
 import LambdaComp.Ident
-import LambdaComp.PrimOp (PrimOp(..), PrimOpArity (..))
+import LambdaComp.PrimOp            (PrimOp (..), PrimOpArity (..))
 
 type Program = [Top]
 
 data Top
-  = TopTmDef
+  = TopTmDecl
     { tmDefName :: Ident
     , tmDefType :: Tp
+    }
+  | TopTmDef
+    { tmDefName :: Ident
     , tmDefBody :: Tm
     }
   deriving stock (Show)
 
-data Tp where
-  TpUnit   :: Tp
-  TpBool   :: Tp
-  TpInt    :: Tp
-  TpDouble :: Tp
-  TpFun    :: Tp -> Tp -> Tp
+data Param where
+  Param :: { paramName :: !Ident, paramType :: !(Maybe Tp) } -> Param
   deriving stock (Eq, Ord, Show)
 
 data Tm where
@@ -36,16 +37,12 @@ data Tm where
   TmInt         :: !Int -> Tm
   TmDouble      :: !Double -> Tm
   TmIf          :: Tm -> Tm -> Tm -> Tm
-  TmLam         :: !Ident -> Tm -> Tm
-  TmApp         :: Tm -> Tm -> Tm
+  TmLam         :: ![Param] -> Tm -> Tm
+  TmApp         :: Tm -> ![Tm] -> Tm
   TmPrimBinOp   :: !(PrimOp Binary) -> Tm -> Tm -> Tm
   TmPrimUnOp    :: !(PrimOp Unary) -> Tm -> Tm
   TmPrintInt    :: Tm -> Tm -> Tm
-  TmRec         :: !Ident -> Tm -> Tm
-
-deriving stock instance Eq Tm
-deriving stock instance Ord Tm
-deriving stock instance Show Tm
+  deriving stock (Eq, Ord, Show)
 
 instance IsString Tm where
   fromString = TmVar . fromString

@@ -34,9 +34,9 @@ instance ToAM Program where
     then traverse toAM tops
     else error "No main function is given!"
     where
-      withMain []                        = False
-      withMain (TopTmDef "u_main" _ _:_) = True
-      withMain (_:ts)                    = withMain ts
+      withMain []                      = False
+      withMain (TopTmDef "u_main" _:_) = True
+      withMain (_:ts)                  = withMain ts
 
 instance ToAM Top where
   type AMData Top = CodeSection
@@ -73,7 +73,7 @@ instance ToAM (Tm Com) where
     code1 <- toAM tm1
     code2 <- toAM tm2
     pure $ Vector.cons (ICondJump val0 (1 + length code1)) code1 <> Vector.cons (IJump (length code2)) code2
-  toAM (TmLam x tm) = Vector.cons (IPop (toVarAddr x)) <$> toAM tm
+  toAM (TmLam p tm) = Vector.cons (IPop (toVarAddr (paramName p))) <$> toAM tm
   toAM (tmf `TmApp` tma) = liftA2 Vector.cons (IPush <$> toAM tma) (toAM tmf)
   toAM (TmForce tm) = pure . ICall <$> toAM tm
   toAM (TmReturn tm) = pure . ISetReturn <$> toAM tm
@@ -90,7 +90,7 @@ instance ToAM (Tm Com) where
     val <- toAM tm
     pure [IPush val, IPrimUnOp op]
   toAM (TmPrintInt tm0 tm1) = liftA2 Vector.cons (IPrintInt <$> toAM tm0) (toAM tm1)
-  toAM (TmRec x tm) = do
+  toAM (TmRec x _ tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
     thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"
     tell [ThunkCodeSection {..}]

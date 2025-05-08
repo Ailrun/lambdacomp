@@ -52,9 +52,9 @@ instance ToC Program where
       $ traverse (WriterT . toC) tops
     else error "No main function is given!"
     where
-      withMain []                        = False
-      withMain (TopTmDef "u_main" _ _:_) = True
-      withMain (_:ts)                    = withMain ts
+      withMain []                      = False
+      withMain (TopTmDef "u_main" _:_) = True
+      withMain (_:ts)                  = withMain ts
 
 instance ToC Top where
   type CData Top = ([String], Dual [TopDef])
@@ -128,7 +128,7 @@ instance ToC (Tm Com) where
     tm2Code <- WriterT $ toC tm2
     c <- lift $ freshNameOf "sys_c"
     pure (tm0Code True c <> [ifStmt (intItem c) tm1Code tm2Code])
-  toC (TmLam x tm) = first (underScope . (globalStackPopStmt (toVar x) :)) <$> toC tm
+  toC (TmLam p tm) = first (underScope . (globalStackPopStmt (toVar (paramName p)) :)) <$> toC tm
   toC (tmf `TmApp` tma) = runWriterT $ liftA2 (<>) (globalStackPushStmt <$> WriterT (toC tma)) (WriterT $ toC tmf)
   toC (TmForce tm) = runWriterT $ do
     tmCode <- WriterT $ toC tm
@@ -161,7 +161,7 @@ instance ToC (Tm Com) where
     tm1Code <- WriterT $ toC tm1
     msg <- lift $ freshNameOf "sys_msg"
     pure (tm0Code True msg <> (printlnAsIntStmt msg : tm1Code))
-  toC (TmRec x tm) = runWriterT $ do
+  toC (TmRec x _ tm) = runWriterT $ do
     tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
     (thunkInit, inits) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
     pure (thunkInit True xVar <> inits xVar <> [forceThunkStmt xVar])

@@ -7,7 +7,7 @@ module LambdaComp.CBPV.TypeCheck
   , TypeError
   ) where
 
-import Control.Monad        (unless, when)
+import Control.Monad        (when)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (MonadReader (local), ReaderT (runReaderT), asks)
 import Data.Map             (Map)
@@ -47,14 +47,6 @@ check (TmDouble _)             = \case
 check (TmThunk tm)             = \case
   TpUp tp -> check tm tp
   tp      -> throwError $ NonUpType tp
-check (TmIf tm0 tm1 tm2)       = \tp -> do
-  tpc <- infer tm0
-  case tpc of
-    TpBool -> check tm1 tp >> check tm2 tp
-    _      -> throwError $ TypeMismatch TpBool tpc
-check (TmLam x tm)             = \case
-  tp0 `TpFun` tp1 -> local (Map.insert x tp0) $ check tm tp1
-  tp              -> throwError $ NonFunType tp
 check (TmReturn tm)            = \case
   TpDown tp -> check tm tp
   tp        -> throwError $ NonDownType tp
@@ -66,25 +58,6 @@ check (TmTo tm0 x tm1)         = \tp -> do
 check (TmLet x tm0 tm1)        = \tp -> do
   tp0 <- infer tm0
   local (Map.insert x tp0) $ check tm1 tp
-check (TmPrimBinOp op tm0 tm1) = \tp -> do
-  unless (tp == TpDown retTp) $
-    throwError $ TypeMismatch (TpDown retTp) tp
-  check tm0 arg0Tp
-  check tm1 arg1Tp
-  where
-    ((arg0Tp, arg1Tp), retTp) = getPrimOpType op primOpTypeBase
-check (TmPrimUnOp op tm)       = \tp -> do
-  unless (tp == TpDown retTp) $
-    throwError $ TypeMismatch (TpDown retTp) tp
-  check tm argTp
-  where
-    (argTp, retTp) = getPrimOpType op primOpTypeBase
-check (TmPrintInt tm0 tm1)     = \tp -> do
-  tp0 <- infer tm0
-  case tp0 of
-    TpInt -> check tm1 tp
-    _     -> throwError $ TypeMismatch TpInt tp0
-check (TmRec f tm)             = \tp -> local (Map.insert f (TpUp tp)) $ check tm tp
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
@@ -108,6 +81,7 @@ infer (TmIf tm0 tm1 tm2)       = do
         then pure tp1
         else throwError $ BranchTypeMismatch tp1 tp2
     _      -> throwError $ TypeMismatch TpBool tpc
+infer (TmLam p tm)             = TpFun (paramType p) <$> local (Map.insert (paramName p) (paramType p)) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
   case tpf of
@@ -143,7 +117,7 @@ infer (TmPrintInt tm0 tm1)     = do
   case tp0 of
     TpInt -> infer tm1
     _     -> throwError $ TypeMismatch TpInt tp0
-infer tm                       = throwError $ NeedTypeAnn tm
+infer (TmRec x tp tm)          = TpDown tp <$ local (Map.insert x tp) (check tm (TpDown tp))
 
 primOpTypeBase :: PrimOpTypeBase (Tp Val)
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
@@ -156,6 +130,5 @@ data TypeError where
   NonFunType         :: Tp Com -> TypeError
   NonUpType          :: Tp Val -> TypeError
   NonDownType        :: Tp Com -> TypeError
-  NeedTypeAnn        :: Tm c -> TypeError
 
 deriving stock instance Show TypeError

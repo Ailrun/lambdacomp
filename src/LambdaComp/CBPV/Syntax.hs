@@ -10,7 +10,7 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 
 import LambdaComp.Ident
-import LambdaComp.PrimOp (PrimOp(..), PrimOpArity (..))
+import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 
 type data Class where
   Val, Com :: Class
@@ -20,7 +20,6 @@ type Program = [Top]
 data Top
   = TopTmDef
     { tmDefName :: Ident
-    , tmDefType :: Tp Val
     , tmDefBody :: Tm Val
     }
   deriving stock (Show)
@@ -38,8 +37,9 @@ deriving stock instance Eq (Tp c)
 deriving stock instance Ord (Tp c)
 deriving stock instance Show (Tp c)
 
-instance Read (Tp c) where
-  readsPrec = undefined
+data Param where
+  Param :: { paramName :: !Ident, paramType :: !(Tp Val) } -> Param
+  deriving stock (Eq, Ord, Show)
 
 data Tm (c :: Class) where
   TmVar    :: !Ident -> Tm Val
@@ -53,7 +53,7 @@ data Tm (c :: Class) where
 
   TmIf        :: Tm Val -> Tm Com -> Tm Com -> Tm Com
 
-  TmLam       :: !Ident -> Tm Com -> Tm Com
+  TmLam       :: !Param -> Tm Com -> Tm Com
   TmApp       :: Tm Com -> Tm Val -> Tm Com
 
   TmForce     :: Tm Val -> Tm Com
@@ -68,20 +68,17 @@ data Tm (c :: Class) where
 
   TmPrintInt  :: Tm Val -> Tm Com -> Tm Com
 
-  TmRec       :: !Ident -> Tm Com -> Tm Com
+  TmRec       :: !Ident -> Tp Val -> Tm Com -> Tm Com
 
 deriving stock instance Eq (Tm c)
 deriving stock instance Ord (Tm c)
 deriving stock instance Show (Tm c)
 
-instance Read (Tm c) where
-  readsPrec = undefined
-
 freeVarOfTm :: Tm c -> Set Ident
 freeVarOfTm (TmVar x)               = Set.singleton x
 freeVarOfTm (TmThunk tm)            = freeVarOfTm tm
 freeVarOfTm (TmIf tm0 tm1 tm2)      = Set.unions [freeVarOfTm tm0, freeVarOfTm tm1, freeVarOfTm tm2]
-freeVarOfTm (TmLam x tm)            = x `Set.delete` freeVarOfTm tm
+freeVarOfTm (TmLam x tm)            = paramName x `Set.delete` freeVarOfTm tm
 freeVarOfTm (tmf `TmApp` tma)       = freeVarOfTm tmf `Set.union` freeVarOfTm tma
 freeVarOfTm (TmForce tm)            = freeVarOfTm tm
 freeVarOfTm (TmReturn tm)           = freeVarOfTm tm
@@ -90,5 +87,5 @@ freeVarOfTm (TmLet x tm0 tm1)       = freeVarOfTm tm0 `Set.union` (x `Set.delete
 freeVarOfTm (TmPrimBinOp _ tm0 tm1) = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
 freeVarOfTm (TmPrimUnOp _ tm)       = freeVarOfTm tm
 freeVarOfTm (TmPrintInt tm0 tm1)    = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
-freeVarOfTm (TmRec x tm)            = x `Set.delete` freeVarOfTm tm
+freeVarOfTm (TmRec x _ tm)          = x `Set.delete` freeVarOfTm tm
 freeVarOfTm _                       = Set.empty -- ground values

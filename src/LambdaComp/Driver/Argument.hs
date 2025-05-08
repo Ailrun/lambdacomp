@@ -24,13 +24,14 @@ data Backend (c :: BackendType) where
   AMBackend :: Backend AMBackendType
 
 data Phase (c :: BackendType) where
-  UntilAST     :: Phase c
-  UntilCBPV    :: Phase c
-  UntilCBPVOpt :: Phase c
-  UntilC       :: Phase DirectCBackendType
-  UntilExe     :: Phase DirectCBackendType
-  UntilAM      :: Phase AMBackendType
-  Run          :: Phase c
+  UntilAST         :: Phase c
+  UntilElaboration :: Phase c
+  UntilCBPV        :: Phase c
+  UntilCBPVOpt     :: Phase c
+  UntilC           :: Phase DirectCBackendType
+  UntilExe         :: Phase DirectCBackendType
+  UntilAM          :: Phase AMBackendType
+  Run              :: Phase c
 
 type family FilePathFor (c :: BackendType) = r | r -> c where
   FilePathFor DirectCBackendType = Maybe FilePath
@@ -46,13 +47,14 @@ printHelpForError :: String -> IO a
 printHelpForError h = handleParseResult . Failure $ parserFailure (prefs showHelpOnError) progInfo (ErrorMsg h) mempty
 
 showPhaseOption :: Phase c -> String
-showPhaseOption UntilAST     = "--until-ast option"
-showPhaseOption UntilCBPV    = "--until-cbpv option"
-showPhaseOption UntilCBPVOpt = "--until-cbpv-opt option"
-showPhaseOption UntilC       = "--until-c option"
-showPhaseOption UntilExe     = "--until-exe option"
-showPhaseOption UntilAM      = "--until-am option"
-showPhaseOption Run          = "--run option"
+showPhaseOption UntilAST         = "--until-ast option"
+showPhaseOption UntilElaboration = "--until-elaboration option"
+showPhaseOption UntilCBPV        = "--until-cbpv option"
+showPhaseOption UntilCBPVOpt     = "--until-cbpv-opt option"
+showPhaseOption UntilC           = "--until-c option"
+showPhaseOption UntilExe         = "--until-exe option"
+showPhaseOption UntilAM          = "--until-am option"
+showPhaseOption Run              = "--run option"
 
 progInfo :: ParserInfo Options
 progInfo = info (getOptions <**> helper)
@@ -112,6 +114,9 @@ getCommonPhase =
   flag' UntilAST (long "until-ast"
                    <> hidden
                    <> help "Stop after parsing an AST and print it.")
+  <|> flag' UntilElaboration (long "until-elaboration"
+                              <> hidden
+                              <> help "Stop after generating an elaborated AST and print it.")
   <|> flag' UntilCBPV (long "until-cbpv"
                    <> hidden
                    <> help "Stop after generating a CBPV term and print it.")

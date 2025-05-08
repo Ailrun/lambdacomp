@@ -1,4 +1,4 @@
-main : Int =
+main =
   printInt
     (\x ->
       (\y -> printInt y before x)

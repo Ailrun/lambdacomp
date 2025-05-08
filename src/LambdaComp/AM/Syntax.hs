@@ -4,11 +4,11 @@ module LambdaComp.AM.Syntax
   , module LambdaComp.PrimOp
   ) where
 
+import Data.String (IsString (..))
 import Data.Vector (Vector)
 
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
-import Data.String (IsString (..))
 
 data Addr where
   AIdent    :: !Ident -> Addr

@@ -4,7 +4,7 @@ module LambdaComp.Parser
   ( runProgramParser
   ) where
 
-import Control.Monad                  (void)
+import Control.Monad                  (void, join)
 import Control.Monad.Combinators.Expr qualified as Expr
 import Data.Bifunctor                 (Bifunctor (first))
 import Data.Char                      (isAlphaNum, isLower)
@@ -18,8 +18,7 @@ import Text.Megaparsec
 import Text.Megaparsec.Char           qualified as MC
 import Text.Megaparsec.Char.Lexer     qualified as MCL
 
-import LambdaComp.Syntax
-import Text.Megaparsec.Debug (MonadParsecDbg(dbg))
+import LambdaComp.External.Syntax
 
 type Parser = Parsec Void Text
 
@@ -30,16 +29,19 @@ program :: Parser Program
 program = sepEndBy top (symbol ";;")
 
 top :: Parser Top
-top = topTmDef
+top = topTmDef <|> topTmDecl
 
 topTmDef :: Parser Top
 topTmDef = do
-  tmDefName <- ident
-  symbol ":"
-  tmDefType <- tp
-  symbol "="
+  tmDefName <- try $ ident <* symbol "="
   tmDefBody <- tm
   pure $ TopTmDef {..}
+
+topTmDecl :: Parser Top
+topTmDecl = do
+  tmDefName <- try $ ident <* symbol ":"
+  tmDefType <- tp
+  pure $ TopTmDecl {..}
 
 tp :: Parser Tp
 tp = Expr.makeExprParser atomicTp tpTable
@@ -57,17 +59,21 @@ atomicTp =
 
 tpTable :: [[Expr.Operator Parser Tp]]
 tpTable =
-  [ [ Expr.InfixR $ TpFun <$ symbol "->"
+  [ [ Expr.InfixR $ addFunParamTp <$ symbol "->"
     ]
   ]
 
+addFunParamTp :: Tp -> Tp -> Tp
+addFunParamTp tpP (TpFun tpPs tpR) = TpFun (tpP:tpPs) tpR
+addFunParamTp tpP tpR              = TpFun [tpP] tpR
+
 tm :: Parser Tm
-tm = tmLam <|> tmIf <|> tmPrintInt <|> tmRec <|> Expr.makeExprParser atomicTm tmTable
+tm = tmLam <|> tmIf <|> tmPrintInt <|> Expr.makeExprParser atomicTm tmTable
 
 tmLam :: Parser Tm
 tmLam =
-  TmLam <$ symbol "\\"
-  <*> ident <* symbol "->"
+  TmLam . join
+  <$> some (between (symbol "\\") (symbol "->") (some param))
   <*> tm
 
 tmIf :: Parser Tm
@@ -83,18 +89,12 @@ tmPrintInt =
   <*> tm <* keyword "before"
   <*> tm
 
-tmRec :: Parser Tm
-tmRec =
-  TmRec <$ keyword "rec"
-  <*> ident <* symbol "->"
-  <*> tm
-
 tmTable :: [[Expr.Operator Parser Tm]]
 tmTable =
   [ [ Expr.Prefix $ TmPrimUnOp PrimINeg <$ symbolNoSpace "-"
     , Expr.Prefix $ TmPrimUnOp PrimDNeg <$ symbolNoSpace "-."
     ]
-  , [ Expr.InfixL $ TmApp <$ space
+  , [ Expr.InfixL $ addAppArgTm <$ space
     ]
   , [ Expr.Prefix $ TmPrimUnOp PrimBNot <$ symbol "~"
     ]
@@ -130,6 +130,10 @@ tmTable =
     ]
   ]
 
+addAppArgTm :: Tm -> Tm -> Tm
+addAppArgTm (TmApp tmF tmAs) tmA = TmApp tmF (tmAs <> [tmA])
+addAppArgTm tmF              tmA = TmApp tmF [tmA]
+
 atomicTm :: Parser Tm
 atomicTm =
   choice
@@ -142,6 +146,15 @@ atomicTm =
     (TmUnit <$ symbol ")"
      <|> tm <* symbol ")")
   ]
+
+param :: Parser Param
+param =
+  label "parameter"
+  $ (`Param` Nothing) <$> ident
+  <|> parened (Param <$> ident <* symbol ":" <*> optional tp)
+
+parened :: Parser a -> Parser a
+parened = between (symbol "(") (symbol ")")
 
 int :: Parser Int
 int = label "integer" . lexeme . try $ MCL.signed (pure ()) MCL.decimal

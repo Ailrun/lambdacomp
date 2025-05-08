@@ -20,7 +20,7 @@ To use that, users can check [their documentation about autocompletion](https://
 Currently, this repository implements a primitive compiler from Call-By-Value $\lambda$-calculus to C based on Call-By-Push-Value (CBPV) and
 a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CBPV. This repository also comes with an interpreter for AM.
 
-- [ ] Frontend Parser for $\lambda$-calculus
+- [x] Frontend Parser for $\lambda$-calculus
 - [x] Simple bidirectional type-checker for $\lambda$-calculus
 - [ ] Constraint-based bidirectional type checker for $\lambda$-calculus
 - [x] Call-By-Value $\lambda$-calculus-To-CBPV pass

@@ -1,31 +1,29 @@
 {-# LANGUAGE LambdaCase #-}
-module LambdaComp.TypeCheck
-  ( topCheck
-  , topInfer
+module LambdaComp.Elaborated.TypeCheck
+  ( runProgramInfer
 
   , TypeError
   ) where
 
-import Control.Monad        (unless, when)
+import Control.Monad        (foldM, unless, when, zipWithM_)
 import Control.Monad.Except (MonadError (throwError))
-import Control.Monad.Reader (MonadReader (local), ReaderT (runReaderT), asks)
+import Control.Monad.Reader (ReaderT (runReaderT), asks, local)
 import Data.Map             (Map)
 import Data.Map             qualified as Map
 
-import LambdaComp.PrimOp (PrimOpTypeBase (..), getPrimOpType)
-import LambdaComp.Syntax
+import LambdaComp.Elaborated.Syntax
+import LambdaComp.PrimOp            (PrimOpTypeBase (..), getPrimOpType)
 
-type TypeCheck = ReaderT (Map Ident Tp) (Either TypeError)
+type Context = Map Ident Tp
+type TypeCheck = ReaderT Context (Either TypeError)
 
-topCheck :: Tm -> Tp -> Either TypeError ()
-topCheck tm = (`runReaderT` initialContext) . check tm
+runProgramInfer :: Program -> Either TypeError Context
+runProgramInfer = foldM go Map.empty
   where
-    initialContext = Map.empty
+    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` ctx
 
-topInfer :: Tm -> Either TypeError Tp
-topInfer = (`runReaderT` initialContext) . infer
-  where
-    initialContext = Map.empty
+topInfer :: Top -> TypeCheck Tp
+topInfer = infer . tmDefBody
 
 check :: Tm -> Tp -> TypeCheck ()
 check TmUnit                   = \case
@@ -43,40 +41,12 @@ check (TmInt _)                = \case
 check (TmDouble _)             = \case
   TpDouble -> pure ()
   tp       -> throwError $ InvalidConsType tp [TpDouble]
-check (TmIf tm0 tm1 tm2)       = \tp -> do
-  tp0 <- infer tm0
-  case tp0 of
-    TpBool -> check tm1 tp >> check tm2 tp
-    _      -> throwError $ TypeMismatch TpBool tp0
-check (TmLam x tm)             = \case
-  tp0 `TpFun` tp1 -> local (Map.insert x tp0) $ check tm tp1
-  tp              -> throwError $ NonFunType tp
-check (TmPrimBinOp op tm0 tm1) = \tp -> do
-  unless (tp == retTp) $
-    throwError $ TypeMismatch retTp tp
-  check tm0 arg0Tp
-  check tm1 arg1Tp
-  where
-    ((arg0Tp, arg1Tp), retTp) = getPrimOpType op primOpTypeBase
-check (TmPrimUnOp op tm)       = \tp -> do
-  unless (tp == retTp) $
-    throwError $ TypeMismatch retTp tp
-  check tm argTp
-  where
-    (argTp, retTp) = getPrimOpType op primOpTypeBase
-check (TmPrintInt tm0 tm1)     = \tp -> do
-  tp0 <- infer tm0
-  case tp0 of
-    TpInt -> check tm1 tp
-    _     -> throwError $ TypeMismatch TpInt tp0
-check (TmRec f tm)             = \tp -> local (Map.insert f tp) $ check tm tp
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
     throwError $ TypeMismatch tp tp'
 
 infer :: Tm -> TypeCheck Tp
-infer (tm `TmAnn` tp)          = tp <$ check tm tp
 infer (TmVar x)                = asks (Map.lookup x) >>= maybe (throwError $ NotInScope x) pure
 infer TmUnit                   = pure TpUnit
 infer TmTrue                   = pure TpBool
@@ -89,15 +59,16 @@ infer (TmIf tm0 tm1 tm2)       = do
     TpBool -> do
       tp1 <- infer tm1
       tp2 <- infer tm2
-      if tp1 == tp2
-        then pure tp1
-        else throwError $ BranchTypeMismatch tp1 tp2
+      unless (tp1 == tp2) $
+        throwError $ BranchTypeMismatch tp1 tp2
+      pure tp1
     _      -> throwError $ TypeMismatch TpBool tp0
-infer (tmf `TmApp` tma)        = do
+infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> infer tm
+infer (tmf `TmApp` tmas)       = do
   tpf <- infer tmf
   case tpf of
-    tp0 `TpFun` tp1 -> tp1 <$ check tma tp0
-    _               -> throwError $ NonFunType tpf
+    tpPs `TpFun` tpR -> tpR <$ zipWithM_ check tmas tpPs
+    _                -> throwError $ NonFunType tpf
 infer (TmPrimBinOp op tm0 tm1) = do
   check tm0 arg0Tp
   check tm1 arg1Tp
@@ -114,7 +85,7 @@ infer (TmPrintInt tm0 tm1)     = do
   case tp0 of
     TpInt -> infer tm1
     _     -> throwError $ TypeMismatch TpInt tp0
-infer tm                       = throwError $ NeedTypeAnn tm
+infer (TmRec x tp tm)          = tp <$ local (Map.insert x tp) (check tm tp)
 
 primOpTypeBase :: PrimOpTypeBase Tp
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
