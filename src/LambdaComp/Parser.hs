@@ -26,7 +26,7 @@ runProgramParser :: String -> Text -> Either String Program
 runProgramParser filename = first errorBundlePretty . runParser program filename
 
 program :: Parser Program
-program = sepEndBy top (symbol ";;")
+program = sepEndBy (withSourceSpan top) (symbol ";;")
 
 top :: Parser Top
 top = topTmDef <|> topTmDecl
@@ -34,13 +34,13 @@ top = topTmDef <|> topTmDecl
 topTmDef :: Parser Top
 topTmDef = do
   tmDefName <- try $ ident <* symbol "="
-  tmDefBody <- tm
+  tmDefBody <- xtm
   pure $ TopTmDef {..}
 
 topTmDecl :: Parser Top
 topTmDecl = do
   tmDefName <- try $ ident <* symbol ":"
-  tmDefType <- tp
+  tmDefType <- withSourceSpan tp
   pure $ TopTmDecl {..}
 
 tp :: Parser Tp
@@ -67,84 +67,86 @@ addFunParamTp :: Tp -> Tp -> Tp
 addFunParamTp tpP (TpFun tpPs tpR) = TpFun (tpP:tpPs) tpR
 addFunParamTp tpP tpR              = TpFun [tpP] tpR
 
-tm :: Parser Tm
-tm = tmLam <|> tmIf <|> tmPrintInt <|> Expr.makeExprParser atomicTm tmTable
+xtm :: Parser XTm
+xtm = withSourceSpan (tmLam <|> tmIf <|> tmPrintInt) <|> Expr.makeExprParser atomicXTm tmTable
 
 tmLam :: Parser Tm
 tmLam =
   TmLam . join
-  <$> some (between (symbol "\\") (symbol "->") (some param))
-  <*> tm
+  <$> some (between (symbol "\\") (symbol "->") . some $ withSourceSpan param)
+  <*> xtm
 
 tmIf :: Parser Tm
 tmIf =
   TmIf <$ keyword "if"
-  <*> tm <* keyword "then"
-  <*> tm <* keyword "else"
-  <*> tm
+  <*> xtm <* keyword "then"
+  <*> xtm <* keyword "else"
+  <*> xtm
 
 tmPrintInt :: Parser Tm
 tmPrintInt =
   TmPrintInt <$ keyword "printInt"
-  <*> tm <* keyword "before"
-  <*> tm
+  <*> xtm <* keyword "before"
+  <*> xtm
 
-tmTable :: [[Expr.Operator Parser Tm]]
+tmTable :: [[Expr.Operator Parser XTm]]
 tmTable =
-  [ [ Expr.Prefix $ TmPrimUnOp PrimINeg <$ symbolNoSpace "-"
-    , Expr.Prefix $ TmPrimUnOp PrimDNeg <$ symbolNoSpace "-."
+  [ [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimINeg) <$> ofSourceSpan (symbolNoSpace "-")
+    , Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimDNeg) <$> ofSourceSpan (symbolNoSpace "-.")
     ]
-  , [ Expr.InfixL $ addAppArgTm <$ space
+  , [ Expr.InfixL $ addAppArgXTm <$ space
     ]
-  , [ Expr.Prefix $ TmPrimUnOp PrimBNot <$ symbol "~"
+  , [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimBNot) <$> ofSourceSpan (symbol "~")
     ]
-  , [ Expr.InfixL $ TmPrimBinOp PrimIMul <$ symbol "*"
-    , Expr.InfixL $ TmPrimBinOp PrimIDiv <$ symbol "/"
-    , Expr.InfixL $ TmPrimBinOp PrimIMod <$ symbol "%"
-    , Expr.InfixL $ TmPrimBinOp PrimDMul <$ symbol "*."
-    , Expr.InfixL $ TmPrimBinOp PrimDDiv <$ symbol "/."
+  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimIMul) <$ symbol "*"
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimIDiv) <$ symbol "/"
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimIMod) <$ symbol "%"
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDMul) <$ symbol "*."
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDDiv) <$ symbol "/."
     ]
-  , [ Expr.InfixL $ TmPrimBinOp PrimIAdd <$ symbol "+"
-    , Expr.InfixL $ TmPrimBinOp PrimISub <$ symbol "-"
-    , Expr.InfixL $ TmPrimBinOp PrimDAdd <$ symbol "+."
-    , Expr.InfixL $ TmPrimBinOp PrimDSub <$ symbol "-."
+  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimIAdd) <$ symbol "+"
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimISub) <$ symbol "-"
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDAdd) <$ symbol "+."
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDSub) <$ symbol "-."
     ]
-  , [ Expr.InfixN $ TmPrimBinOp PrimIEq <$ symbol "="
-    , Expr.InfixN $ TmPrimBinOp PrimINEq <$ symbol "<>"
-    , Expr.InfixN $ TmPrimBinOp PrimILt <$ symbol "<"
-    , Expr.InfixN $ TmPrimBinOp PrimILe <$ symbol "<="
-    , Expr.InfixN $ TmPrimBinOp PrimIGt <$ symbol ">"
-    , Expr.InfixN $ TmPrimBinOp PrimIGe <$ symbol ">="
-    , Expr.InfixN $ TmPrimBinOp PrimDEq <$ symbol "=."
-    , Expr.InfixN $ TmPrimBinOp PrimDNEq <$ symbol "<>."
-    , Expr.InfixN $ TmPrimBinOp PrimDLt <$ symbol "<."
-    , Expr.InfixN $ TmPrimBinOp PrimDLe <$ symbol "<=."
-    , Expr.InfixN $ TmPrimBinOp PrimDGt <$ symbol ">."
-    , Expr.InfixN $ TmPrimBinOp PrimDGe <$ symbol ">=."
+  , [ Expr.InfixN $ liftX2 (TmPrimBinOp PrimIEq) <$ symbol "="
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimINEq) <$ symbol "<>"
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimILt) <$ symbol "<"
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimILe) <$ symbol "<="
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIGt) <$ symbol ">"
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIGe) <$ symbol ">="
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDEq) <$ symbol "=."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDNEq) <$ symbol "<>."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDLt) <$ symbol "<."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDLe) <$ symbol "<=."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDGt) <$ symbol ">."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDGe) <$ symbol ">=."
     ]
-  , [ Expr.InfixL $ TmPrimBinOp PrimBAnd <$ symbol "&&"
+  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimBAnd) <$ symbol "&&"
     ]
-  , [ Expr.InfixL $ TmPrimBinOp PrimBOr <$ symbol "||"
+  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimBOr) <$ symbol "||"
     ]
-  , [ Expr.Postfix $ flip TmAnn <$ symbol ":" <*> tp
+  , [ Expr.Postfix $ liftX2 (flip TmAnn) <$ symbol ":" <*> withSourceSpan tp
     ]
   ]
 
-addAppArgTm :: Tm -> Tm -> Tm
-addAppArgTm (TmApp tmF tmAs) tmA = TmApp tmF (tmAs <> [tmA])
-addAppArgTm tmF              tmA = TmApp tmF [tmA]
+addAppArgXTm :: XTm -> XTm -> XTm
+addAppArgXTm (TmApp xtmF xtmAs, span0) xtmA@(_, span1) = (TmApp xtmF (xtmAs <> [xtmA]), mergeSourceSpan span0 span1)
+addAppArgXTm xtmF                      xtmA            = (TmApp xtmF [xtmA], mergeSourceSpan (snd xtmF) (snd xtmA))
 
-atomicTm :: Parser Tm
-atomicTm =
+useUnaryXTm :: (XTm -> Tm) -> SourceSpan -> XTm -> XTm
+useUnaryXTm f span0 xtmOp@(_, span1) = (f xtmOp, mergeSourceSpan span0 span1)
+
+atomicXTm :: Parser XTm
+atomicXTm =
   choice
-  [ TmVar <$> ident
-  , TmTrue <$ keyword "True"
-  , TmFalse <$ keyword "False"
-  , TmInt <$> int
-  , TmDouble <$> double
-  , symbol "(" *>
-    (TmUnit <$ symbol ")"
-     <|> tm <* symbol ")")
+  [ withSourceSpan $ TmVar <$> ident
+  , withSourceSpan $ TmTrue <$ keyword "True"
+  , withSourceSpan $ TmFalse <$ keyword "False"
+  , withSourceSpan $ TmInt <$> int
+  , withSourceSpan $ TmDouble <$> double
+  , withSourceSpan $ try $ parened $ pure TmUnit
+  , parened xtm
   ]
 
 param :: Parser Param
@@ -153,8 +155,11 @@ param =
   $ (`Param` Nothing) <$> ident
   <|> parened (Param <$> ident <* symbol ":" <*> optional tp)
 
-parened :: Parser a -> Parser a
-parened = between (symbol "(") (symbol ")")
+ofSourceSpan :: Parser () -> Parser SourceSpan
+ofSourceSpan = fmap snd . withSourceSpan
+
+withSourceSpan :: Parser a -> Parser (a, SourceSpan)
+withSourceSpan p = (\startPos a endPos -> (a, SourceSpan {..})) <$> getSourcePos <*> p <*> getSourcePos
 
 int :: Parser Int
 int = label "integer" . lexeme . try $ MCL.signed (pure ()) MCL.decimal
@@ -164,6 +169,9 @@ double = label "double precision floating number" . lexeme . try $ MCL.signed (p
 
 ident :: Parser Ident
 ident = Ident <$> identifier
+
+parened :: Parser a -> Parser a
+parened = between (symbol "(") (symbol ")")
 
 identifier :: Parser Text
 identifier = label "identifier" $ lexeme $ do

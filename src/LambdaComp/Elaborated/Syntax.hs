@@ -16,7 +16,7 @@ data Top
     { tmDefName :: Ident
     , tmDefBody :: Tm
     }
-  deriving stock (Show)
+  deriving stock (Eq, Ord, Show)
 
 data Tp where
   TpUnit   :: Tp
