@@ -43,6 +43,7 @@ data Tm where
   TmPrimBinOp   :: !(PrimOp Binary) -> Tm -> Tm -> Tm
   TmPrimUnOp    :: !(PrimOp Unary) -> Tm -> Tm
   TmPrintInt    :: Tm -> Tm -> Tm
+  TmPrintDouble :: Tm -> Tm -> Tm
   TmRec         :: !Ident -> !Tp -> Tm -> Tm
   deriving stock (Eq, Ord, Show)
 

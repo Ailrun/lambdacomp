@@ -51,24 +51,25 @@ data Tm (c :: Class) where
 
   TmThunk  :: Tm Com -> Tm Val
 
-  TmIf        :: Tm Val -> Tm Com -> Tm Com -> Tm Com
+  TmIf          :: Tm Val -> Tm Com -> Tm Com -> Tm Com
 
-  TmLam       :: !Param -> Tm Com -> Tm Com
-  TmApp       :: Tm Com -> Tm Val -> Tm Com
+  TmLam         :: !Param -> Tm Com -> Tm Com
+  TmApp         :: Tm Com -> Tm Val -> Tm Com
 
-  TmForce     :: Tm Val -> Tm Com
+  TmForce       :: Tm Val -> Tm Com
 
-  TmReturn    :: Tm Val -> Tm Com
-  TmTo        :: Tm Com -> Ident -> Tm Com -> Tm Com
+  TmReturn      :: Tm Val -> Tm Com
+  TmTo          :: Tm Com -> Ident -> Tm Com -> Tm Com
 
-  TmLet       :: !Ident -> Tm Val -> Tm Com -> Tm Com
+  TmLet         :: !Ident -> Tm Val -> Tm Com -> Tm Com
 
-  TmPrimBinOp :: !(PrimOp Binary) -> Tm Val -> Tm Val -> Tm Com
-  TmPrimUnOp  :: !(PrimOp Unary) -> Tm Val -> Tm Com
+  TmPrimBinOp   :: !(PrimOp Binary) -> Tm Val -> Tm Val -> Tm Com
+  TmPrimUnOp    :: !(PrimOp Unary) -> Tm Val -> Tm Com
 
-  TmPrintInt  :: Tm Val -> Tm Com -> Tm Com
+  TmPrintInt    :: Tm Val -> Tm Com -> Tm Com
+  TmPrintDouble :: Tm Val -> Tm Com -> Tm Com
 
-  TmRec       :: !Ident -> Tp Val -> Tm Com -> Tm Com
+  TmRec         :: !Ident -> Tp Val -> Tm Com -> Tm Com
 
 deriving stock instance Eq (Tm c)
 deriving stock instance Ord (Tm c)

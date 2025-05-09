@@ -56,6 +56,7 @@ data Tm where
   TmPrimBinOp   :: !(PrimOp Binary) -> XTm -> XTm -> Tm
   TmPrimUnOp    :: !(PrimOp Unary) -> XTm -> Tm
   TmPrintInt    :: XTm -> XTm -> Tm
+  TmPrintDouble :: XTm -> XTm -> Tm
   deriving stock (Eq, Ord, Show)
 
 instance IsString Tm where

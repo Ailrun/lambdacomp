@@ -40,6 +40,7 @@ a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CB
 - [ ] GC for CBPV-to-AM
 - [ ] GC for AM-to-C
 - [x] PrintInt effect
+- [x] PrintDouble effect
 - [ ] PrintString effect
 - [ ] Read effect
 - [ ] Exception-handling effects

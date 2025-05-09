@@ -84,7 +84,11 @@ instance ToCBPV Tm where
     tm0' <- toCBPV tm0
     v <- freshNameOf "c_v"
     CBPV.TmTo tm0' v . CBPV.TmPrintInt (CBPV.TmVar v) <$> toCBPV tm1
-  toCBPV (TmRec x tp tm)           = do
+  toCBPV (TmPrintDouble tm0 tm1)  = do
+    tm0' <- toCBPV tm0
+    v <- freshNameOf "c_v"
+    CBPV.TmTo tm0' v . CBPV.TmPrintDouble (CBPV.TmVar v) <$> toCBPV tm1
+  toCBPV (TmRec x tp tm)          = do
     tm' <- toCBPV tm
     v <- freshNameOf "c_r"
     pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec ("u_" <> x) (toCBPV tp) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)

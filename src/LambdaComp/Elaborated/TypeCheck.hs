@@ -85,6 +85,11 @@ infer (TmPrintInt tm0 tm1)     = do
   case tp0 of
     TpInt -> infer tm1
     _     -> throwError $ TypeMismatch TpInt tp0
+infer (TmPrintDouble tm0 tm1)  = do
+  tp0 <- infer tm0
+  case tp0 of
+    TpDouble -> infer tm1
+    _        -> throwError $ TypeMismatch TpDouble tp0
 infer (TmRec x tp tm)          = tp <$ local (Map.insert x tp) (check tm tp)
 
 primOpTypeBase :: PrimOpTypeBase Tp

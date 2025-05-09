@@ -112,6 +112,7 @@ evalInst (IRecAssign addr x env) = iRecAssign addr x env
 evalInst (IPrimBinOp op)         = iPrimBinOp op
 evalInst (IPrimUnOp op)          = iPrimUnOp op
 evalInst (IPrintInt v)           = embodyValue v >>= iPrintInt
+evalInst (IPrintDouble v)        = embodyValue v >>= iPrintDouble
 evalInst IExit                   = iExit
 evalInst IEndScope               = iEndScope
 
@@ -218,8 +219,12 @@ iPrimUnOp PrimDNeg = stackDoublePop >>= iSetReturn . ItDouble . negate
 iPrimUnOp PrimBNot = stackBoolPop >>= iSetReturn . ItBool . not
 
 iPrintInt :: Item -> Eval ()
-iPrintInt (ItInt n) = asks snd >>= liftIO . flip hPrint n
+iPrintInt (ItInt i) = asks snd >>= liftIO . flip hPrint i
 iPrintInt _         = fail "Invalid PrintInt argument"
+
+iPrintDouble :: Item -> Eval ()
+iPrintDouble (ItDouble d) = asks snd >>= liftIO . flip hPrint d
+iPrintDouble _            = fail "Invalid PrintDouble argument"
 
 iExit :: Eval ()
 iExit = do
@@ -235,7 +240,7 @@ stackIntPop :: Eval Int
 stackIntPop = do
   it <- stackPop
   case it of
-    ItInt n -> pure n
+    ItInt i -> pure i
     _       -> fail "Stack pop gives a non-int item"
 
 stackDoublePop2 :: Eval (Double, Double)

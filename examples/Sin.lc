@@ -1,0 +1,19 @@
+pow : Double -> Int -> Double;;
+pow = \x n ->
+  if n <= 0
+  then 1.0
+  else x *. pow x (n - 1)
+;;
+
+fact : Double -> Double;;
+fact = \x ->
+  if x <=. 0.0
+  then 1.0
+  else x *. fact (x -. 1.0)
+;;
+
+sin : Double -> Double;;
+sin = \x -> x -. pow x 3 /. fact 3.0 +. pow x 5 /. fact 5.0 -. pow x 7 /. fact 7.0 +. pow x 9 /. fact 9.0 -. pow x 11 /. fact 11.0 +. pow x 13 /. fact 13.0
+;;
+
+main = printDouble sin 0.5 before 0

@@ -161,6 +161,11 @@ instance ToC (Tm Com) where
     tm1Code <- WriterT $ toC tm1
     msg <- lift $ freshNameOf "sys_msg"
     pure (tm0Code True msg <> (printlnAsIntStmt msg : tm1Code))
+  toC (TmPrintDouble tm0 tm1) = runWriterT $ do
+    tm0Code <- WriterT $ toC tm0
+    tm1Code <- WriterT $ toC tm1
+    msg <- lift $ freshNameOf "sys_msg"
+    pure (tm0Code True msg <> (printlnAsDoubleStmt msg : tm1Code))
   toC (TmRec x _ tm) = runWriterT $ do
     tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
     (thunkInit, inits) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
@@ -276,6 +281,9 @@ ifStmt c b1 b2 =
 
 printlnAsIntStmt :: String -> String
 printlnAsIntStmt s = "printf(\"%d\\n\", " <> intItem s <> ");"
+
+printlnAsDoubleStmt :: String -> String
+printlnAsDoubleStmt s = "printf(\"%lf\\n\", " <> doubleItem s <> ");"
 
 nthGlobalStackItem :: String -> String
 nthGlobalStackItem idx = "(" <> globalStack <> ".items[" <> idx <> "])"

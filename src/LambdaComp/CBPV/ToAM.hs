@@ -90,6 +90,7 @@ instance ToAM (Tm Com) where
     val <- toAM tm
     pure [IPush val, IPrimUnOp op]
   toAM (TmPrintInt tm0 tm1) = liftA2 Vector.cons (IPrintInt <$> toAM tm0) (toAM tm1)
+  toAM (TmPrintDouble tm0 tm1) = liftA2 Vector.cons (IPrintDouble <$> toAM tm0) (toAM tm1)
   toAM (TmRec x _ tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
     thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"

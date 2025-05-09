@@ -31,21 +31,22 @@ instance IsString Value where
   fromString = VaAddr . fromString
 
 data Inst where
-  IScope     :: Inst
-  IPush      :: !Value -> Inst
-  IPop       :: !Addr -> Inst
-  IAssign    :: !Addr -> !Value -> Inst
-  IJump      :: !Int -> Inst
-  ICondJump  :: !Value -> !Int -> Inst
-  ICall      :: !Value -> Inst
-  ISetReturn :: !Value -> Inst
-  IReceive   :: !Addr -> Inst
-  IRecAssign :: !Addr -> !Ident -> !(Vector Addr) -> Inst
-  IPrimBinOp :: !(PrimOp Binary) -> Inst
-  IPrimUnOp  :: !(PrimOp Unary) -> Inst
-  IPrintInt  :: !Value -> Inst
-  IExit      :: Inst
-  IEndScope  :: Inst
+  IScope       :: Inst
+  IPush        :: !Value -> Inst
+  IPop         :: !Addr -> Inst
+  IAssign      :: !Addr -> !Value -> Inst
+  IJump        :: !Int -> Inst
+  ICondJump    :: !Value -> !Int -> Inst
+  ICall        :: !Value -> Inst
+  ISetReturn   :: !Value -> Inst
+  IReceive     :: !Addr -> Inst
+  IRecAssign   :: !Addr -> !Ident -> !(Vector Addr) -> Inst
+  IPrimBinOp   :: !(PrimOp Binary) -> Inst
+  IPrimUnOp    :: !(PrimOp Unary) -> Inst
+  IPrintInt    :: !Value -> Inst
+  IPrintDouble :: !Value -> Inst
+  IExit        :: Inst
+  IEndScope    :: Inst
   deriving Show
 
 type Code = Vector Inst

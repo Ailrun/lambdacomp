@@ -51,6 +51,7 @@ commutingThen (TmLet x tm0 tm1)        = TmLet x (commutingThen tm0) <$> commuti
 commutingThen (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingThen tm0) (commutingThen tm1)
 commutingThen (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (commutingThen tm)
 commutingThen (TmPrintInt tm0 tm1)     = TmPrintInt (commutingThen tm0) <$> commutingThen tm1
+commutingThen (TmPrintDouble tm0 tm1)  = TmPrintDouble (commutingThen tm0) <$> commutingThen tm1
 commutingThen (TmRec f tp tm)          = TmRec f tp <$> commutingThenUnder f tm
 
 commitThenUnder :: Ident -> Tm Com -> [TmToPrefix] -> CommutingThen Com (Tm Com)
@@ -97,6 +98,7 @@ liftingLet (TmLet x tm0 tm1)        = do
 liftingLet (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (liftingLet tm0) (liftingLet tm1)
 liftingLet (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (liftingLet tm)
 liftingLet (TmPrintInt tm0 tm1)     = TmPrintInt (liftingLet tm0) <$> liftingLet tm1
+liftingLet (TmPrintDouble tm0 tm1)  = TmPrintDouble (liftingLet tm0) <$> liftingLet tm1
 liftingLet (TmRec f tp tm)          = TmRec f tp <$> liftingLetUnder f tm
 
 commitLetUnder :: Ident -> Tm Com -> [TmLetPrefix] -> LiftingLet Com (Tm Com)

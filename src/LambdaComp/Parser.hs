@@ -68,7 +68,7 @@ addFunParamTp tpP (TpFun tpPs tpR) = TpFun (tpP:tpPs) tpR
 addFunParamTp tpP tpR              = TpFun [tpP] tpR
 
 xtm :: Parser XTm
-xtm = withSourceSpan (tmLam <|> tmIf <|> tmPrintInt) <|> Expr.makeExprParser atomicXTm tmTable
+xtm = withSourceSpan (tmLam <|> tmIf <|> tmPrintInt <|> tmPrintDouble) <|> Expr.makeExprParser atomicXTm tmTable
 
 tmLam :: Parser Tm
 tmLam =
@@ -89,38 +89,44 @@ tmPrintInt =
   <*> xtm <* keyword "before"
   <*> xtm
 
+tmPrintDouble :: Parser Tm
+tmPrintDouble =
+  TmPrintDouble <$ keyword "printDouble"
+  <*> xtm <* keyword "before"
+  <*> xtm
+
 tmTable :: [[Expr.Operator Parser XTm]]
 tmTable =
-  [ [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimINeg) <$> ofSourceSpan (symbolNoSpace "-")
-    , Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimDNeg) <$> ofSourceSpan (symbolNoSpace "-.")
+  [ [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimDNeg) <$> ofSourceSpan (symbolNoSpace "-.")
+    , Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimINeg) <$> ofSourceSpan (symbolNoSpace "-")
     ]
   , [ Expr.InfixL $ addAppArgXTm <$ space
     ]
   , [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimBNot) <$> ofSourceSpan (symbol "~")
     ]
-  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimIMul) <$ symbol "*"
+  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimDMul) <$ symbol "*."
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDDiv) <$ symbol "/."
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimIMul) <$ symbol "*"
     , Expr.InfixL $ liftX2 (TmPrimBinOp PrimIDiv) <$ symbol "/"
     , Expr.InfixL $ liftX2 (TmPrimBinOp PrimIMod) <$ symbol "%"
-    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDMul) <$ symbol "*."
-    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDDiv) <$ symbol "/."
     ]
-  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimIAdd) <$ symbol "+"
-    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimISub) <$ symbol "-"
-    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDAdd) <$ symbol "+."
+  , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimDAdd) <$ symbol "+."
     , Expr.InfixL $ liftX2 (TmPrimBinOp PrimDSub) <$ symbol "-."
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimIAdd) <$ symbol "+"
+    , Expr.InfixL $ liftX2 (TmPrimBinOp PrimISub) <$ symbol "-"
     ]
-  , [ Expr.InfixN $ liftX2 (TmPrimBinOp PrimIEq) <$ symbol "="
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimINEq) <$ symbol "<>"
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimILt) <$ symbol "<"
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimILe) <$ symbol "<="
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIGt) <$ symbol ">"
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIGe) <$ symbol ">="
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDEq) <$ symbol "=."
+  , [ Expr.InfixN $ liftX2 (TmPrimBinOp PrimDEq) <$ symbol "=."
     , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDNEq) <$ symbol "<>."
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDLt) <$ symbol "<."
     , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDLe) <$ symbol "<=."
-    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDGt) <$ symbol ">."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDLt) <$ symbol "<."
     , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDGe) <$ symbol ">=."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimDGt) <$ symbol ">."
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIEq) <$ symbol "="
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimINEq) <$ symbol "<>"
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimILe) <$ symbol "<="
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimILt) <$ symbol "<"
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIGe) <$ symbol ">="
+    , Expr.InfixN $ liftX2 (TmPrimBinOp PrimIGt) <$ symbol ">"
     ]
   , [ Expr.InfixL $ liftX2 (TmPrimBinOp PrimBAnd) <$ symbol "&&"
     ]
@@ -143,8 +149,8 @@ atomicXTm =
   [ withSourceSpan $ TmVar <$> ident
   , withSourceSpan $ TmTrue <$ keyword "True"
   , withSourceSpan $ TmFalse <$ keyword "False"
-  , withSourceSpan $ TmInt <$> int
   , withSourceSpan $ TmDouble <$> double
+  , withSourceSpan $ TmInt <$> int
   , withSourceSpan $ try $ parened $ pure TmUnit
   , parened xtm
   ]

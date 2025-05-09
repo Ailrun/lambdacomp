@@ -162,6 +162,11 @@ infer (TmPrintInt xtm0 xtm1)     = do
   case tp0 of
     TpInt -> second (E.TmPrintInt tm0') <$> xinfer xtm1
     _     -> throwError $ TypeMismatch TpInt tp0
+infer (TmPrintDouble xtm0 xtm1)  = do
+  (tp0, tm0') <- xinfer xtm0
+  case tp0 of
+    TpDouble -> second (E.TmPrintDouble tm0') <$> xinfer xtm1
+    _        -> throwError $ TypeMismatch TpDouble tp0
 
 xcheckParam :: XParam -> Tp -> ToElaborated (Ident, XTp)
 xcheckParam (param, paramSpan) tp = wrapErrorWithSpan paramSpan $ second (, paramSpan) <$> checkParam param tp
