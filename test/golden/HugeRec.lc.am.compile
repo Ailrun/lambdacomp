@@ -59,6 +59,18 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_c_3" )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_0" )
+            )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_1" )
+            )
+        , ICondJump
+            ( VaAddr
+                ( AIdent "var_c_c_3" )
+            ) 14
         , IScope
         , IPush
             ( VaAddr
@@ -84,18 +96,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_f1_5" )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_0" )
-            )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_1" )
-            )
-        , ICondJump
-            ( VaAddr
-                ( AIdent "var_c_c_3" )
-            ) 3
         , IPush
             ( VaAddr
                 ( AIdent "var_c_a1_5" )

@@ -61,19 +61,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_c_1" )
-        , IScope
-        , IPush
-            ( VaAddr
-                ( AIdent "var_c_inp0_4" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_c_inp1_4" )
-            )
-        , IPrimBinOp PrimIAdd
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_a1_6" )
         , IPop
             ( AIdent "var_u_y" )
         , IAssign
@@ -96,6 +83,26 @@
             ( VaAddr
                 ( ALocalEnv 2 )
             )
+        , ICondJump
+            ( VaAddr
+                ( AIdent "var_c_c_1" )
+            ) 2
+        , ISetReturn
+            ( VaInt 0 )
+        , IJump 31
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_4" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_4" )
+            )
+        , IPrimBinOp PrimIAdd
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_a1_6" )
         , IScope
         , IPush
             ( VaAddr
@@ -145,13 +152,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_f3_6" )
-        , ICondJump
-            ( VaAddr
-                ( AIdent "var_c_c_1" )
-            ) 2
-        , ISetReturn
-            ( VaInt 0 )
-        , IJump 4
         , IPrintInt
             ( VaAddr
                 ( AIdent "var_c_v_2" )
