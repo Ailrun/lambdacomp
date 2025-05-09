@@ -215,7 +215,9 @@ iPrimBinOp PrimBOr  = stackBoolPop2 >>= iSetReturn . ItBool . uncurry (||) . swa
 
 iPrimUnOp :: PrimOp Unary -> Eval ()
 iPrimUnOp PrimINeg = stackIntPop >>= iSetReturn . ItInt . negate
+iPrimUnOp PrimIToD = stackIntPop >>= iSetReturn . ItDouble . fromIntegral
 iPrimUnOp PrimDNeg = stackDoublePop >>= iSetReturn . ItDouble . negate
+iPrimUnOp PrimDToI = stackDoublePop >>= iSetReturn . ItInt . truncate
 iPrimUnOp PrimBNot = stackBoolPop >>= iSetReturn . ItBool . not
 
 iPrintInt :: Item -> Eval ()

@@ -20,6 +20,7 @@ data PrimOp (a :: PrimOpArity) where
   PrimILe  :: PrimOp Binary
   PrimIGt  :: PrimOp Binary
   PrimIGe  :: PrimOp Binary
+  PrimIToD :: PrimOp Unary
   PrimDAdd :: PrimOp Binary
   PrimDSub :: PrimOp Binary
   PrimDMul :: PrimOp Binary
@@ -31,6 +32,7 @@ data PrimOp (a :: PrimOpArity) where
   PrimDLe  :: PrimOp Binary
   PrimDGt  :: PrimOp Binary
   PrimDGe  :: PrimOp Binary
+  PrimDToI :: PrimOp Unary
   PrimBNot :: PrimOp Unary
   PrimBAnd :: PrimOp Binary
   PrimBOr  :: PrimOp Binary
@@ -59,6 +61,7 @@ getPrimOpType PrimILt  PrimOpTypeBase {..} = ((intTp, intTp), boolTp)
 getPrimOpType PrimILe  PrimOpTypeBase {..} = ((intTp, intTp), boolTp)
 getPrimOpType PrimIGt  PrimOpTypeBase {..} = ((intTp, intTp), boolTp)
 getPrimOpType PrimIGe  PrimOpTypeBase {..} = ((intTp, intTp), boolTp)
+getPrimOpType PrimIToD PrimOpTypeBase {..} = (intTp, doubleTp)
 getPrimOpType PrimDAdd PrimOpTypeBase {..} = ((doubleTp, doubleTp), doubleTp)
 getPrimOpType PrimDSub PrimOpTypeBase {..} = ((doubleTp, doubleTp), doubleTp)
 getPrimOpType PrimDMul PrimOpTypeBase {..} = ((doubleTp, doubleTp), doubleTp)
@@ -70,6 +73,7 @@ getPrimOpType PrimDLt  PrimOpTypeBase {..} = ((doubleTp, doubleTp), boolTp)
 getPrimOpType PrimDLe  PrimOpTypeBase {..} = ((doubleTp, doubleTp), boolTp)
 getPrimOpType PrimDGt  PrimOpTypeBase {..} = ((doubleTp, doubleTp), boolTp)
 getPrimOpType PrimDGe  PrimOpTypeBase {..} = ((doubleTp, doubleTp), boolTp)
+getPrimOpType PrimDToI PrimOpTypeBase {..} = (doubleTp, intTp)
 getPrimOpType PrimBNot PrimOpTypeBase {..} = (boolTp, boolTp)
 getPrimOpType PrimBAnd PrimOpTypeBase {..} = ((boolTp, boolTp), boolTp)
 getPrimOpType PrimBOr  PrimOpTypeBase {..} = ((boolTp, boolTp), boolTp)

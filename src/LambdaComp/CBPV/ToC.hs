@@ -155,7 +155,7 @@ instance ToC (Tm Com) where
     tmCode <- WriterT $ toC tm
     arg <- lift $ freshNameOf "sys_arg"
     opCode <- WriterT $ toC op
-    pure (underScope (tmCode True arg <> [opCode arg retPointer]))
+    pure (underScope (tmCode True arg <> [opCode arg retValue]))
   toC (TmPrintInt tm0 tm1) = runWriterT $ do
     tm0Code <- WriterT $ toC tm0
     tm1Code <- WriterT $ toC tm1
@@ -209,7 +209,9 @@ instance ToC (PrimOp Unary) where
 
   toC :: PrimOp Unary -> WithClosure (CData (PrimOp Unary))
   toC PrimINeg = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("- " <> intItem arg)
+  toC PrimIToD = runWriterT . pure $ \arg ret -> assignStmt (doubleItem ret) ("(double)" <> intItem arg)
   toC PrimDNeg = runWriterT . pure $ \arg ret -> assignStmt (doubleItem ret) ("- " <> doubleItem arg)
+  toC PrimDToI = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("(int)" <> doubleItem arg)
   toC PrimBNot = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("! " <> intItem arg)
 
 showC :: ([String], Dual [TopDef]) -> String
@@ -283,7 +285,7 @@ printlnAsIntStmt :: String -> String
 printlnAsIntStmt s = "printf(\"%d\\n\", " <> intItem s <> ");"
 
 printlnAsDoubleStmt :: String -> String
-printlnAsDoubleStmt s = "printf(\"%lf\\n\", " <> doubleItem s <> ");"
+printlnAsDoubleStmt s = "printf(\"%.15g\\n\", " <> doubleItem s <> ");"
 
 nthGlobalStackItem :: String -> String
 nthGlobalStackItem idx = "(" <> globalStack <> ".items[" <> idx <> "])"

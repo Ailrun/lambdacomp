@@ -100,7 +100,9 @@ tmTable =
   [ [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimDNeg) <$> ofSourceSpan (symbolNoSpace "-.")
     , Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimINeg) <$> ofSourceSpan (symbolNoSpace "-")
     ]
-  , [ Expr.InfixL $ addAppArgXTm <$ space
+  , [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimIToD) <$> ofSourceSpan (keyword "intToDouble")
+    , Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimDToI) <$> ofSourceSpan (keyword "doubleToInt")
+    , Expr.InfixL $ addAppArgXTm <$ space
     ]
   , [ Expr.Prefix $ useUnaryXTm (TmPrimUnOp PrimBNot) <$> ofSourceSpan (symbol "~")
     ]
@@ -217,6 +219,8 @@ keywords =
   , "printInt"
   , "before"
   , "rec"
+  , "intToDouble"
+  , "doubleToInt"
   , "True"
   , "False"
   ]

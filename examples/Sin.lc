@@ -5,15 +5,19 @@ pow = \x n ->
   else x *. pow x (n - 1)
 ;;
 
-fact : Double -> Double;;
+fact : Int -> Int;;
 fact = \x ->
-  if x <=. 0.0
-  then 1.0
-  else x *. fact (x -. 1.0)
+  if x <= 0
+  then 1
+  else x * fact (x - 1)
+;;
+
+sinEntry : Double -> Int -> Double;;
+sinEntry = \x n -> pow x n /. intToDouble (fact n)
 ;;
 
 sin : Double -> Double;;
-sin = \x -> x -. pow x 3 /. fact 3.0 +. pow x 5 /. fact 5.0 -. pow x 7 /. fact 7.0 +. pow x 9 /. fact 9.0 -. pow x 11 /. fact 11.0 +. pow x 13 /. fact 13.0
+sin = \x -> sinEntry x 1 -. sinEntry x 3 +. sinEntry x 5 -. sinEntry x 7 +. sinEntry x 9 -. sinEntry x 11 +. sinEntry x 13 -. sinEntry x 15
 ;;
 
 main = printDouble sin 0.5 before 0
