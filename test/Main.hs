@@ -4,7 +4,7 @@ import Control.Monad        (void)
 import Data.ByteString.Lazy qualified as LBS
 import System.Directory     (makeAbsolute)
 import System.FilePath      (takeFileName, (<.>), (</>))
-import System.IO            (hClose)
+import System.IO            (hClose, Handle)
 import System.IO.Temp       (withSystemTempFile)
 import System.Timeout       (timeout)
 import Test.Tasty
@@ -21,7 +21,15 @@ tests allExamples =
   testGroup "λ-compiler tests"
   [ testGroup "examples"
 
-    [ testGroup "compile"
+    [ testGroup "cbpv"
+      [ anyCBPVTests allExamples
+      ]
+
+    , testGroup "cbpv-opt"
+      [ anyCBPVOptTests allExamples
+      ]
+
+    , testGroup "compile"
       [ cCompileTests allExamples
       , amCompileTests allExamples
       ]
@@ -32,6 +40,22 @@ tests allExamples =
       ]
     ]
   ]
+
+anyCBPVTests :: [FilePath] -> TestTree
+anyCBPVTests allExamples =
+  testGroup "Any backend"
+  $ getCBPVOfExample (makeAMOptions UntilCBPV) <$> allExamples
+
+getCBPVOfExample :: (FilePath -> Options) -> String -> TestTree
+getCBPVOfExample = goldenOf "cbpv" mainFuncWithOptions
+
+anyCBPVOptTests :: [FilePath] -> TestTree
+anyCBPVOptTests allExamples =
+  testGroup "Any backend"
+  $ getCBPVOptOfExample (makeAMOptions UntilCBPVOpt) <$> allExamples
+
+getCBPVOptOfExample :: (FilePath -> Options) -> String -> TestTree
+getCBPVOptOfExample = goldenOf ("cbpv" <.> "opt") mainFuncWithOptions
 
 cCompileTests :: [FilePath] -> TestTree
 cCompileTests allExamples =
@@ -44,16 +68,7 @@ amCompileTests allExamples =
   $ compileOfExample "am" (makeAMOptions UntilAM) <$> allExamples
 
 compileOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-compileOfExample tag optionBuilder s =
-  goldenVsStringDiff s gitDiff ("." </> "test" </> "golden" </> s <.> tag <.> "compile")
-  $ withSystemTempFile s
-  $ \fp handle -> do
-    getExamplePath s
-      >>= void
-      . mainFuncWithOptions handle
-      . optionBuilder
-    hClose handle
-    LBS.take 10000 <$> LBS.readFile fp
+compileOfExample tag = goldenOf (tag <.> "compile") mainFuncWithOptions
 
 cExecutionTests :: [FilePath] -> TestTree
 cExecutionTests allExamples =
@@ -66,15 +81,15 @@ amExecutionTests allExamples =
   $ executionOfExample "am" (makeAMOptions Run) <$> allExamples
 
 executionOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-executionOfExample tag optionBuilder s =
-  goldenVsStringDiff s gitDiff ("." </> "test" </> "golden" </> s <.> tag <.> "execution")
+executionOfExample tag = goldenOf (tag <.> "execution") $ \handle ->
+  timeout 300000 . mainFuncWithOptions handle
+
+goldenOf :: String -> (Handle -> Options -> IO a) -> (FilePath -> Options) -> String -> TestTree
+goldenOf tag f optionBuilder s =
+  goldenVsStringDiff s gitDiff ("." </> "test" </> "golden" </> s <.> tag)
   $ withSystemTempFile s
   $ \fp handle -> do
-    getExamplePath s
-      >>= void
-      . timeout 300000
-      . mainFuncWithOptions handle
-      . optionBuilder
+    getExamplePath s >>= void . f handle . optionBuilder
     hClose handle
     LBS.take 10000 <$> LBS.readFile fp
 
