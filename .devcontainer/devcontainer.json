@@ -1,0 +1,12 @@
+{
+  "name": "lambdacomp-devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/haskell:2": {
+      "ghcVersion": "9.8.4",
+      "cabalVersion": "3.14.2.0",
+      "installStack": false,
+      "installStackGHCupHook": false
+    }
+  }
+}
