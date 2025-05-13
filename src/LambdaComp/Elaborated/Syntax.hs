@@ -44,7 +44,7 @@ data Tm where
   TmPrimUnOp    :: !(PrimOp Unary) -> Tm -> Tm
   TmPrintInt    :: Tm -> Tm -> Tm
   TmPrintDouble :: Tm -> Tm -> Tm
-  TmRec         :: !Ident -> !Tp -> Tm -> Tm
+  TmRec         :: !Param -> Tm -> Tm
   deriving stock (Eq, Ord, Show)
 
 instance IsString Tm where

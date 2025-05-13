@@ -44,8 +44,9 @@ topCheck :: Ident -> XTm -> XTp -> ToElaborated E.Top
 topCheck tmDefName xtm (tmDefType, _) = do
   (tm', Any referSelf) <- listen $ xcheck xtm tmDefType
   let
+    p = E.Param tmDefName tmDefType
     tmDefBody
-      | referSelf = E.TmRec tmDefName tmDefType tm'
+      | referSelf = E.TmRec p tm'
       | otherwise = tm'
   pure E.TopTmDef {..}
 
@@ -53,8 +54,9 @@ topInfer :: Ident -> XTm -> SourceSpan -> ToElaborated (E.Top, XTp)
 topInfer tmDefName xtm topSpan = do
   ((tp, tm'), Any referSelf) <- listen $ xinfer xtm
   let
+    p = E.Param tmDefName tp
     tmDefBody
-      | referSelf = E.TmRec tmDefName tp tm'
+      | referSelf = E.TmRec p tm'
       | otherwise = tm'
   pure (E.TopTmDef {..}, (tp, topSpan))
 

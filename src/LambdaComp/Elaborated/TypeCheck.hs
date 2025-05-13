@@ -1,4 +1,5 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE RecordWildCards #-}
 module LambdaComp.Elaborated.TypeCheck
   ( runProgramInfer
 
@@ -8,6 +9,7 @@ module LambdaComp.Elaborated.TypeCheck
 import Control.Monad        (foldM, unless, when, zipWithM_)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (ReaderT (runReaderT), asks, local)
+import Data.Foldable        (foldr')
 import Data.Map             (Map)
 import Data.Map             qualified as Map
 
@@ -63,7 +65,7 @@ infer (TmIf tm0 tm1 tm2)       = do
         throwError $ BranchTypeMismatch tp1 tp2
       pure tp1
     _      -> throwError $ TypeMismatch TpBool tp0
-infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> infer tm
+infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> local (flip (foldr' insertParam) ps) (infer tm)
 infer (tmf `TmApp` tmas)       = do
   tpf <- infer tmf
   case tpf of
@@ -90,7 +92,10 @@ infer (TmPrintDouble tm0 tm1)  = do
   case tp0 of
     TpDouble -> infer tm1
     _        -> throwError $ TypeMismatch TpDouble tp0
-infer (TmRec x tp tm)          = tp <$ local (Map.insert x tp) (check tm tp)
+infer (TmRec p tm)             = paramType p <$ local (insertParam p) (check tm $ paramType p)
+
+insertParam :: Param -> Context -> Context
+insertParam Param {..} = Map.insert paramName paramType
 
 primOpTypeBase :: PrimOpTypeBase Tp
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
