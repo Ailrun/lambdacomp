@@ -26,42 +26,42 @@ import LambdaComp.External.ToElaborated         (ElaborationError, runToElaborat
 import LambdaComp.Parser                        (runProgramParser)
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
-mainFuncWithOptions out (Options inputFp backend phase mayFp) = do
+mainFuncWithOptions outH (Options inputFp backend phase mayFp) = do
   input <- T.readFile inputFp
   e <- case runProgramParser inputFp input of
     Left err -> hPutStrLn stderr err >> pure (ExitFailure 1)
     Right tm -> do
-      let getElTm      = handleElabError out $ runToElaborated tm
+      let getElTm      = handleElabError outH $ runToElaborated tm
           getElOptTm   = Elaborated.runLocalOptDefault <$> getElTm
           getCBPVTm    = runToCBPV <$> getElOptTm
           getCBPVOptTm = CBPV.runLocalOptDefault <$> getCBPVTm
           getCCode     = runToC <$> getCBPVOptTm
           getAMTm      = runToAM <$> getCBPVOptTm
       case phase of
-        UntilAST            -> pHPrintNoColor out tm >> pure ExitSuccess
-        UntilElaboration    -> getElTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilElaborationOpt -> getElOptTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilCBPV           -> getCBPVTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilCBPVOpt        -> getCBPVOptTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilC              -> getCCode >>= (\cCode -> runWithFp (`writeFile` cCode) mayFp >> pure ExitSuccess)
-        UntilExe            -> getCCode >>= (\cCode -> runWithFp (genCExe out cCode) mayFp)
-        UntilAM             -> getAMTm >>= pHPrintNoColor out >> pure ExitSuccess
+        UntilAST            -> pHPrintNoColor outH tm >> pure ExitSuccess
+        UntilElaboration    -> getElTm >>= pHPrintNoColor outH >> pure ExitSuccess
+        UntilElaborationOpt -> getElOptTm >>= pHPrintNoColor outH >> pure ExitSuccess
+        UntilCBPV           -> getCBPVTm >>= pHPrintNoColor outH >> pure ExitSuccess
+        UntilCBPVOpt        -> getCBPVOptTm >>= pHPrintNoColor outH >> pure ExitSuccess
+        UntilC              -> getCCode >>= (\cCode -> runWithFp (\real -> if real then (`writeFile` cCode) else \_ -> hPutStr outH cCode) mayFp >> pure ExitSuccess)
+        UntilExe            -> getCCode >>= (\cCode -> runWithFp (const $ genCExe outH cCode) mayFp)
+        UntilAM             -> getAMTm >>= pHPrintNoColor outH >> pure ExitSuccess
         Run                 ->
           case backend of
             DirectCBackend -> do
               cCode <- getCCode
-              runWithFp (genAndExeCExe out cCode) mayFp
-            AMBackend      -> getAMTm >>= topEval out >>= pHPrintNoColor out >> pure ExitSuccess
-  hFlush out
+              runWithFp (const $ genAndExeCExe outH cCode) mayFp
+            AMBackend      -> getAMTm >>= topEval outH >>= pHPrintNoColor outH >> pure ExitSuccess
+  hFlush outH
   pure e
 
 handleElabError :: Handle -> Either ElaborationError E.Program -> IO E.Program
-handleElabError out (Left elabErr) = pHPrintNoColor out elabErr >> exitWith (ExitFailure 1)
-handleElabError _   (Right prog)   = pure prog
+handleElabError outH (Left elabErr) = pHPrintNoColor outH elabErr >> exitWith (ExitFailure 1)
+handleElabError _    (Right prog)   = pure prog
 
-runWithFp :: (FilePath -> IO a) -> Maybe FilePath -> IO a
-runWithFp f (Just fp) = makeAbsolute fp >>= f
-runWithFp f Nothing   = withLambdaCompTempFile f
+runWithFp :: (Bool -> FilePath -> IO a) -> Maybe FilePath -> IO a
+runWithFp f (Just fp) = makeAbsolute fp >>= f True
+runWithFp f Nothing   = withLambdaCompTempFile $ f False
 
 withLambdaCompTempFile :: (FilePath -> IO a) -> IO a
 withLambdaCompTempFile f =
@@ -72,24 +72,24 @@ withLambdaCompTempFile f =
 -- requireFp phase  Nothing   = printHelpForError $ showPhaseOption phase <> " requires output file path."
 
 genAndExeCExe :: Handle -> String -> FilePath -> IO ExitCode
-genAndExeCExe out cCode fp = do
-  e <- genCExe out cCode fp
+genAndExeCExe outH cCode fp = do
+  e <- genCExe outH cCode fp
   case e of
     ExitFailure _ -> pure e
     ExitSuccess -> do
       bracketOnError
-        (createProcess_ "genAndExeCExe" (proc fp []) { std_out = UseHandle out })
+        (createProcess_ "genAndExeCExe" (proc fp []) { std_out = UseHandle outH })
         cleanupProcess
         (\(_, _, _, p) -> waitForProcess p)
 
 genCExe :: Handle -> String -> FilePath -> IO ExitCode
-genCExe out cCode fp = do
+genCExe outH cCode fp = do
   dataDir <- getDataDir
   let tempCFileName = takeBaseName fp <.> "c"
   withSystemTempFile tempCFileName $ \tempCfp handle -> do
     hPutStr handle cCode
     hFlush handle
     bracketOnError
-      (createProcess_ "genCExe" (proc "gcc" ["-O2", "-I", dataDir, "-o", fp, tempCfp]) { std_out = UseHandle out })
+      (createProcess_ "genCExe" (proc "gcc" ["-O2", "-I", dataDir, "-o", fp, tempCfp]) { std_out = UseHandle outH })
       cleanupProcess
       (\(_, _, _, p) -> waitForProcess p)

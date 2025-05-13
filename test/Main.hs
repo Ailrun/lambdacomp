@@ -29,9 +29,13 @@ tests allExamples =
       [ anyCBPVOptTests allExamples
       ]
 
+    , testGroup "code-gen"
+      [ cGenTests allExamples
+      , amGenTests allExamples
+      ]
+
     , testGroup "compile"
       [ cCompileTests allExamples
-      , amCompileTests allExamples
       ]
 
     , testGroup "execution"
@@ -57,15 +61,23 @@ anyCBPVOptTests allExamples =
 getCBPVOptOfExample :: (FilePath -> Options) -> String -> TestTree
 getCBPVOptOfExample = goldenOf ("cbpv" <.> "opt") mainFuncWithOptions
 
+cGenTests :: [FilePath] -> TestTree
+cGenTests allExamples =
+  testGroup "C backend"
+  $ codeGenOfExample "c" (makeCOptions UntilC) <$> allExamples
+
+amGenTests :: [FilePath] -> TestTree
+amGenTests allExamples =
+  testGroup "AM backend"
+  $ codeGenOfExample "am" (makeAMOptions UntilAM) <$> allExamples
+
+codeGenOfExample :: String -> (FilePath -> Options) -> String -> TestTree
+codeGenOfExample tag = goldenOf (tag <.> "code" <.> "gen") mainFuncWithOptions
+
 cCompileTests :: [FilePath] -> TestTree
 cCompileTests allExamples =
   testGroup "C backend"
   $ compileOfExample "c" (makeCOptions UntilExe) <$> allExamples
-
-amCompileTests :: [FilePath] -> TestTree
-amCompileTests allExamples =
-  testGroup "AM backend (interpreter)"
-  $ compileOfExample "am" (makeAMOptions UntilAM) <$> allExamples
 
 compileOfExample :: String -> (FilePath -> Options) -> String -> TestTree
 compileOfExample tag = goldenOf (tag <.> "compile") mainFuncWithOptions
