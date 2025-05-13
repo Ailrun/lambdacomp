@@ -127,4 +127,152 @@
                                                                                                             )
                                                                                                         ) "c_a3_6"
                                                                                                         ( TmTo
-                    
+                                                                                                            ( TmTo
+                                                                                                                ( TmTo
+                                                                                                                    ( TmTo
+                                                                                                                        ( TmReturn
+                                                                                                                            ( TmVar "u_recFib" )
+                                                                                                                        ) "c_f0_6"
+                                                                                                                        ( TmApp
+                                                                                                                            ( TmForce
+                                                                                                                                ( TmVar "c_f0_6" )
+                                                                                                                            )
+                                                                                                                            ( TmVar "c_a0_6" )
+                                                                                                                        )
+                                                                                                                    ) "c_f1_6"
+                                                                                                                    ( TmApp
+                                                                                                                        ( TmForce
+                                                                                                                            ( TmVar "c_f1_6" )
+                                                                                                                        )
+                                                                                                                        ( TmVar "c_a1_6" )
+                                                                                                                    )
+                                                                                                                ) "c_f2_6"
+                                                                                                                ( TmApp
+                                                                                                                    ( TmForce
+                                                                                                                        ( TmVar "c_f2_6" )
+                                                                                                                    )
+                                                                                                                    ( TmVar "c_a2_6" )
+                                                                                                                )
+                                                                                                            ) "c_f3_6"
+                                                                                                            ( TmApp
+                                                                                                                ( TmForce
+                                                                                                                    ( TmVar "c_f3_6" )
+                                                                                                                )
+                                                                                                                ( TmVar "c_a3_6" )
+                                                                                                            )
+                                                                                                        )
+                                                                                                    )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ) "c_r_7"
+                ( TmForce
+                    ( TmVar "c_r_7" )
+                )
+            )
+        )
+    }
+, TopTmDef
+    { tmDefName = "u_fib"
+    , tmDefBody = TmThunk
+        ( TmLam
+            ( Param
+                { paramName = "u_n"
+                , paramType = TpInt
+                }
+            )
+            ( TmTo
+                ( TmReturn
+                    ( TmVar "u_n" )
+                ) "c_a0_8"
+                ( TmTo
+                    ( TmReturn
+                        ( TmInt 0 )
+                    ) "c_a1_8"
+                    ( TmTo
+                        ( TmReturn
+                            ( TmInt 0 )
+                        ) "c_a2_8"
+                        ( TmTo
+                            ( TmReturn
+                                ( TmInt 1 )
+                            ) "c_a3_8"
+                            ( TmTo
+                                ( TmTo
+                                    ( TmTo
+                                        ( TmTo
+                                            ( TmReturn
+                                                ( TmVar "u_recFib" )
+                                            ) "c_f0_8"
+                                            ( TmApp
+                                                ( TmForce
+                                                    ( TmVar "c_f0_8" )
+                                                )
+                                                ( TmVar "c_a0_8" )
+                                            )
+                                        ) "c_f1_8"
+                                        ( TmApp
+                                            ( TmForce
+                                                ( TmVar "c_f1_8" )
+                                            )
+                                            ( TmVar "c_a1_8" )
+                                        )
+                                    ) "c_f2_8"
+                                    ( TmApp
+                                        ( TmForce
+                                            ( TmVar "c_f2_8" )
+                                        )
+                                        ( TmVar "c_a2_8" )
+                                    )
+                                ) "c_f3_8"
+                                ( TmApp
+                                    ( TmForce
+                                        ( TmVar "c_f3_8" )
+                                    )
+                                    ( TmVar "c_a3_8" )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+, TopTmDef
+    { tmDefName = "u_main"
+    , tmDefBody = TmThunk
+        ( TmTo
+            ( TmReturn
+                ( TmInt 10 )
+            ) "c_a0_9"
+            ( TmTo
+                ( TmReturn
+                    ( TmVar "u_fib" )
+                ) "c_f0_9"
+                ( TmApp
+                    ( TmForce
+                        ( TmVar "c_f0_9" )
+                    )
+                    ( TmVar "c_a0_9" )
+                )
+            )
+        )
+    }
+]

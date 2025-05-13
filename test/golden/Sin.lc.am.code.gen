@@ -417,4 +417,409 @@
             )
         , IAssign
             ( AIdent "var_c_a0_17" )
-            ( Va
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_17" )
+            ( VaInt 3 )
+        , IAssign
+            ( AIdent "var_c_f0_17" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IAssign
+            ( AIdent "var_c_a0_19" )
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_19" )
+            ( VaInt 5 )
+        , IAssign
+            ( AIdent "var_c_f0_19" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IAssign
+            ( AIdent "var_c_a0_21" )
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_21" )
+            ( VaInt 7 )
+        , IAssign
+            ( AIdent "var_c_f0_21" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IAssign
+            ( AIdent "var_c_a0_23" )
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_23" )
+            ( VaInt 9 )
+        , IAssign
+            ( AIdent "var_c_f0_23" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IAssign
+            ( AIdent "var_c_a0_25" )
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_25" )
+            ( VaInt 11 )
+        , IAssign
+            ( AIdent "var_c_f0_25" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IAssign
+            ( AIdent "var_c_a0_27" )
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_27" )
+            ( VaInt 13 )
+        , IAssign
+            ( AIdent "var_c_f0_27" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IAssign
+            ( AIdent "var_c_a0_29" )
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
+        , IAssign
+            ( AIdent "var_c_a1_29" )
+            ( VaInt 15 )
+        , IAssign
+            ( AIdent "var_c_f0_29" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_16" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_16" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_16" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_16" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_16" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_18" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_17" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_17" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_17" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_17" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_17" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_18" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_18" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_18" )
+            )
+        , IPrimBinOp PrimDSub
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_20" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_19" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_19" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_19" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_19" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_19" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_20" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_20" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_20" )
+            )
+        , IPrimBinOp PrimDAdd
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_22" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_21" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_21" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_21" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_21" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_21" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_22" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_22" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_22" )
+            )
+        , IPrimBinOp PrimDSub
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_24" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_23" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_23" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_23" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_23" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_23" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_24" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_24" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_24" )
+            )
+        , IPrimBinOp PrimDAdd
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_26" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_25" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_25" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_25" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_25" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_25" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_26" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_26" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_26" )
+            )
+        , IPrimBinOp PrimDSub
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_28" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_27" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_27" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_27" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_27" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_27" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_28" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_28" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_28" )
+            )
+        , IPrimBinOp PrimDAdd
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_30" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_29" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_29" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_29" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a1_29" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_29" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp1_30" )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_30" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp1_30" )
+            )
+        , IPrimBinOp PrimDSub
+        , IExit
+        ]
+    , thunkEnvSize = 1
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_10"
+    , thunkCode =
+        [ IAssign
+            ( AIdent "var_c_a0_31" )
+            ( VaDouble 0.5 )
+        , IAssign
+            ( AIdent "var_c_f0_31" )
+            ( VaAddr
+                ( ALocalEnv 0 )
+            )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_a0_31" )
+            )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_31" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_v_32" )
+        , IPrintDouble
+            ( VaAddr
+                ( AIdent "var_c_v_32" )
+            )
+        , ISetReturn
+            ( VaInt 0 )
+        , IExit
+        ]
+    , thunkEnvSize = 1
+    }
+]

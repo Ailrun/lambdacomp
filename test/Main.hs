@@ -2,9 +2,10 @@ module Main (main) where
 
 import Control.Monad        (void)
 import Data.ByteString.Lazy qualified as LBS
+import Data.Int             (Int64)
 import System.Directory     (makeAbsolute)
 import System.FilePath      (takeFileName, (<.>), (</>))
-import System.IO            (hClose, Handle)
+import System.IO            (Handle, hClose)
 import System.IO.Temp       (withSystemTempFile)
 import System.Timeout       (timeout)
 import Test.Tasty
@@ -51,7 +52,7 @@ anyCBPVTests allExamples =
   $ getCBPVOfExample (makeAMOptions UntilCBPV) <$> allExamples
 
 getCBPVOfExample :: (FilePath -> Options) -> String -> TestTree
-getCBPVOfExample = goldenOf "cbpv" mainFuncWithOptions
+getCBPVOfExample = goldenOf Nothing "cbpv" mainFuncWithOptions
 
 anyCBPVOptTests :: [FilePath] -> TestTree
 anyCBPVOptTests allExamples =
@@ -59,7 +60,7 @@ anyCBPVOptTests allExamples =
   $ getCBPVOptOfExample (makeAMOptions UntilCBPVOpt) <$> allExamples
 
 getCBPVOptOfExample :: (FilePath -> Options) -> String -> TestTree
-getCBPVOptOfExample = goldenOf ("cbpv" <.> "opt") mainFuncWithOptions
+getCBPVOptOfExample = goldenOf Nothing ("cbpv" <.> "opt") mainFuncWithOptions
 
 cGenTests :: [FilePath] -> TestTree
 cGenTests allExamples =
@@ -72,7 +73,7 @@ amGenTests allExamples =
   $ codeGenOfExample "am" (makeAMOptions UntilAM) <$> allExamples
 
 codeGenOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-codeGenOfExample tag = goldenOf (tag <.> "code" <.> "gen") mainFuncWithOptions
+codeGenOfExample tag = goldenOf Nothing (tag <.> "code" <.> "gen") mainFuncWithOptions
 
 cCompileTests :: [FilePath] -> TestTree
 cCompileTests allExamples =
@@ -80,7 +81,7 @@ cCompileTests allExamples =
   $ compileOfExample "c" (makeCOptions UntilExe) <$> allExamples
 
 compileOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-compileOfExample tag = goldenOf (tag <.> "compile") mainFuncWithOptions
+compileOfExample tag = goldenOf Nothing (tag <.> "compile") mainFuncWithOptions
 
 cExecutionTests :: [FilePath] -> TestTree
 cExecutionTests allExamples =
@@ -93,17 +94,19 @@ amExecutionTests allExamples =
   $ executionOfExample "am" (makeAMOptions Run) <$> allExamples
 
 executionOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-executionOfExample tag = goldenOf (tag <.> "execution") $ \handle ->
+executionOfExample tag = goldenOf (Just 10000) (tag <.> "execution") $ \handle ->
   timeout 300000 . mainFuncWithOptions handle
 
-goldenOf :: String -> (Handle -> Options -> IO a) -> (FilePath -> Options) -> String -> TestTree
-goldenOf tag f optionBuilder s =
+goldenOf :: Maybe Int64 -> String -> (Handle -> Options -> IO a) -> (FilePath -> Options) -> String -> TestTree
+goldenOf maySize tag f optionBuilder s =
   goldenVsStringDiff s gitDiff ("." </> "test" </> "golden" </> s <.> tag)
   $ withSystemTempFile s
   $ \fp handle -> do
     getExamplePath s >>= void . f handle . optionBuilder
     hClose handle
-    LBS.take 10000 <$> LBS.readFile fp
+    case maySize of
+      Just size -> LBS.take size <$> LBS.readFile fp
+      Nothing   -> LBS.readFile fp
 
 makeCOptions :: Phase DirectCBackendType -> FilePath -> Options
 makeCOptions phase input = Options { input, backend = DirectCBackend, phase, output = Nothing }
