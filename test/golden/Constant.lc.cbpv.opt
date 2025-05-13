@@ -1,0 +1,14 @@
+[ TopTmDef
+    { tmDefName = "u_main"
+    , tmDefBody = TmThunk
+        ( TmLet "c_v_0"
+            ( TmInt 5 )
+            ( TmPrintInt
+                ( TmVar "c_v_0" )
+                ( TmReturn
+                    ( TmInt 0 )
+                )
+            )
+        )
+    }
+]

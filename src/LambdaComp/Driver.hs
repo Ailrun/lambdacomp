@@ -14,15 +14,16 @@ import System.IO.Temp     (withSystemTempDirectory, withSystemTempFile)
 import System.Process     (CreateProcess (..), StdStream (..), cleanupProcess, createProcess_, proc, waitForProcess)
 import Text.Pretty.Simple (pHPrintNoColor)
 
-import LambdaComp.AM.Eval                 (topEval)
-import LambdaComp.CBPV.Optimization.Local (runLocalOptDefault)
-import LambdaComp.CBPV.ToAM               (runToAM)
-import LambdaComp.CBPV.ToC                (runToC)
+import LambdaComp.AM.Eval                       (topEval)
+import LambdaComp.CBPV.Optimization.Local       qualified as CBPV
+import LambdaComp.CBPV.ToAM                     (runToAM)
+import LambdaComp.CBPV.ToC                      (runToC)
 import LambdaComp.Driver.Argument
-import LambdaComp.Elaborated.CBV.ToCBPV   (runToCBPV)
-import LambdaComp.Elaborated.Syntax       qualified as E
-import LambdaComp.External.ToElaborated   (ElaborationError, runToElaborated)
-import LambdaComp.Parser                  (runProgramParser)
+import LambdaComp.Elaborated.CBV.ToCBPV         (runToCBPV)
+import LambdaComp.Elaborated.Optimization.Local qualified as Elaborated
+import LambdaComp.Elaborated.Syntax             qualified as E
+import LambdaComp.External.ToElaborated         (ElaborationError, runToElaborated)
+import LambdaComp.Parser                        (runProgramParser)
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
 mainFuncWithOptions out (Options inputFp backend phase mayFp) = do
@@ -31,19 +32,21 @@ mainFuncWithOptions out (Options inputFp backend phase mayFp) = do
     Left err -> hPutStrLn stderr err >> pure (ExitFailure 1)
     Right tm -> do
       let getElTm      = handleElabError out $ runToElaborated tm
-          getCBPVTm    = runToCBPV <$> getElTm
-          getCBPVOptTm = runLocalOptDefault <$> getCBPVTm
+          getElOptTm   = Elaborated.runLocalOptDefault <$> getElTm
+          getCBPVTm    = runToCBPV <$> getElOptTm
+          getCBPVOptTm = CBPV.runLocalOptDefault <$> getCBPVTm
           getCCode     = runToC <$> getCBPVOptTm
           getAMTm      = runToAM <$> getCBPVOptTm
       case phase of
-        UntilAST         -> pHPrintNoColor out tm >> pure ExitSuccess
-        UntilElaboration -> getElTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilCBPV        -> getCBPVTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilCBPVOpt     -> getCBPVOptTm >>= pHPrintNoColor out >> pure ExitSuccess
-        UntilC           -> getCCode >>= (\cCode -> runWithFp (`writeFile` cCode) mayFp >> pure ExitSuccess)
-        UntilExe         -> getCCode >>= (\cCode -> runWithFp (genCExe out cCode) mayFp)
-        UntilAM          -> getAMTm >>= pHPrintNoColor out >> pure ExitSuccess
-        Run              ->
+        UntilAST            -> pHPrintNoColor out tm >> pure ExitSuccess
+        UntilElaboration    -> getElTm >>= pHPrintNoColor out >> pure ExitSuccess
+        UntilElaborationOpt -> getElOptTm >>= pHPrintNoColor out >> pure ExitSuccess
+        UntilCBPV           -> getCBPVTm >>= pHPrintNoColor out >> pure ExitSuccess
+        UntilCBPVOpt        -> getCBPVOptTm >>= pHPrintNoColor out >> pure ExitSuccess
+        UntilC              -> getCCode >>= (\cCode -> runWithFp (`writeFile` cCode) mayFp >> pure ExitSuccess)
+        UntilExe            -> getCCode >>= (\cCode -> runWithFp (genCExe out cCode) mayFp)
+        UntilAM             -> getAMTm >>= pHPrintNoColor out >> pure ExitSuccess
+        Run                 ->
           case backend of
             DirectCBackend -> do
               cCode <- getCCode

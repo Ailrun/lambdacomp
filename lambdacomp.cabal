@@ -65,6 +65,8 @@ library
     LambdaComp.Driver
     LambdaComp.Driver.Argument
     LambdaComp.Elaborated.CBV.ToCBPV
+    LambdaComp.Elaborated.Optimization.ConstantPropagation
+    LambdaComp.Elaborated.Optimization.Local
     LambdaComp.Elaborated.Syntax
     LambdaComp.Elaborated.TypeCheck
     LambdaComp.External.Syntax
