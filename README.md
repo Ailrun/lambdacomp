@@ -5,10 +5,10 @@ A Primitive Compiler from $\lambda$-calculus + $\alpha$ (e.g. primitive operatio
 ## Usage
 
 ```
-$ lambdacomp [EXAMPLE_ID] [(-c|--direct-c) (-o|--output OUTPUT_FILE) | [--am]]
+$ lamc [EXAMPLE_ID] [(-c|--direct-c) (-o|--output OUTPUT_FILE) | [--am]]
 ```
 
-For details of each option, please check `lambdacomp --help`.
+For details of each option, please check `lamc --help`.
 
 ### Autocompletion
 

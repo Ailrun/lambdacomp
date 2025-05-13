@@ -101,7 +101,7 @@ library
   default-language: GHC2021
   autogen-modules:  Paths_lambdacomp
 
-executable lambdacomp
+executable lamc
   import:
     , extensions
     , warnings
