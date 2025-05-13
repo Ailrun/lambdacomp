@@ -1,12 +1,11 @@
 {-# LANGUAGE GADTs        #-}
 {-# LANGUAGE TypeFamilies #-}
-module LambdaComp.CBPV.BindingConversion
+module LambdaComp.CBPV.Optimization.BindingConversion
   ( runCommutingThen
   , runLiftingLet
   ) where
 
 import Control.Monad.Writer.Strict (MonadWriter (tell), Writer, runWriter)
-import Data.Kind                   (Type)
 import Data.Set                    (Set)
 import Data.Set                    qualified as Set
 
@@ -20,7 +19,7 @@ runLiftingLet = liftingLet
 
 data TmToPrefix = TmToPrefix (Set Ident) (Tm Com) Ident
 
-type family CommutingThen (c :: Class) (a :: Type) where
+type family CommutingThen (c :: Class) a where
   CommutingThen Com a = Writer [TmToPrefix] a
   CommutingThen Val a = a
 
@@ -66,7 +65,7 @@ commitThen = foldr (\(TmToPrefix _ tm0 x) -> TmTo tm0 x)
 
 data TmLetPrefix = TmLetPrefix (Set Ident) Ident (Tm Val)
 
-type family LiftingLet (c :: Class) (a :: Type) where
+type family LiftingLet (c :: Class) a where
   LiftingLet Com a = Writer [TmLetPrefix] a
   LiftingLet Val a = a
 

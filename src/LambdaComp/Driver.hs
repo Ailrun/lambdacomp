@@ -14,15 +14,15 @@ import System.IO.Temp     (withSystemTempDirectory, withSystemTempFile)
 import System.Process     (CreateProcess (..), StdStream (..), cleanupProcess, createProcess_, proc, waitForProcess)
 import Text.Pretty.Simple (pHPrintNoColor)
 
-import LambdaComp.AM.Eval                (topEval)
-import LambdaComp.CBPV.LocalOptimization (runLocalOptDefault)
-import LambdaComp.CBPV.ToAM              (runToAM)
-import LambdaComp.CBPV.ToC               (runToC)
+import LambdaComp.AM.Eval                 (topEval)
+import LambdaComp.CBPV.Optimization.Local (runLocalOptDefault)
+import LambdaComp.CBPV.ToAM               (runToAM)
+import LambdaComp.CBPV.ToC                (runToC)
 import LambdaComp.Driver.Argument
-import LambdaComp.Elaborated.CBV.ToCBPV  (runToCBPV)
-import LambdaComp.Elaborated.Syntax      qualified as E
-import LambdaComp.External.ToElaborated  (ElaborationError, runToElaborated)
-import LambdaComp.Parser                 (runProgramParser)
+import LambdaComp.Elaborated.CBV.ToCBPV   (runToCBPV)
+import LambdaComp.Elaborated.Syntax       qualified as E
+import LambdaComp.External.ToElaborated   (ElaborationError, runToElaborated)
+import LambdaComp.Parser                  (runProgramParser)
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
 mainFuncWithOptions out (Options inputFp backend phase mayFp) = do

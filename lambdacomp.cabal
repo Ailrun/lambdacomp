@@ -55,9 +55,9 @@ library
   exposed-modules:
     LambdaComp.AM.Eval
     LambdaComp.AM.Syntax
-    LambdaComp.CBPV.BindingConversion
-    LambdaComp.CBPV.LocalOptimization
-    LambdaComp.CBPV.SkipReturn
+    LambdaComp.CBPV.Optimization.BindingConversion
+    LambdaComp.CBPV.Optimization.Local
+    LambdaComp.CBPV.Optimization.SkipReturn
     LambdaComp.CBPV.Syntax
     LambdaComp.CBPV.ToAM
     LambdaComp.CBPV.ToC

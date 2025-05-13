@@ -1,9 +1,9 @@
-module LambdaComp.CBPV.LocalOptimization
+module LambdaComp.CBPV.Optimization.Local
   ( runLocalOptDefault
   ) where
 
-import LambdaComp.CBPV.BindingConversion
-import LambdaComp.CBPV.SkipReturn
+import LambdaComp.CBPV.Optimization.BindingConversion
+import LambdaComp.CBPV.Optimization.SkipReturn
 import LambdaComp.CBPV.Syntax
 
 runLocalOptDefault :: Program -> Program
