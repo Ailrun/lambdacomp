@@ -5,14 +5,15 @@ module LambdaComp.CBPV.ToC
   ( runToC
   ) where
 
-import Control.Monad               (zipWithM, join)
+import Control.Monad               (join, zipWithM)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.State.Strict  (evalStateT)
-import Control.Monad.Writer.Strict (WriterT (..), lift, MonadWriter (tell))
+import Control.Monad.Writer.Strict (MonadWriter (tell), WriterT (..), lift)
 import Data.Bifunctor              (Bifunctor (..))
 import Data.Functor.Identity       (Identity (..))
 import Data.Functor.Product        (Product (Pair))
 import Data.List                   (elemIndex)
+import Data.Map.Strict             qualified as Map
 import Data.Maybe                  (fromMaybe)
 import Data.Semigroup              (Dual (..))
 import Data.Set                    qualified as Set
@@ -44,23 +45,20 @@ instance ToC Program where
   type CData Program = String
 
   toC :: Program -> WithClosure (CData Program)
-  toC tops = if withMain tops
+  toC prog = if "u_main" `Map.member` prog
     then
       fmap showC
       . runWriterT
       . fmap ((<> [forceThunkStmt (toVar "u_main")]) . join)
-      $ traverse (WriterT . toC) tops
+      . traverse (WriterT . toC)
+      $ Map.toList prog
     else error "No main function is given!"
-    where
-      withMain []                      = False
-      withMain (TopTmDef "u_main" _:_) = True
-      withMain (_:ts)                  = withMain ts
 
-instance ToC Top where
-  type CData Top = ([String], Dual [TopDef])
+instance ToC (Ident, Tm Val) where
+  type CData (Ident, Tm Val) = ([String], Dual [TopDef])
 
-  toC :: Top -> WithClosure (CData Top)
-  toC TopTmDef {..} = runWriterT $ do
+  toC :: (Ident, Tm Val) -> WithClosure (CData (Ident, Tm Val))
+  toC (tmDefName, tmDefBody) = runWriterT $ do
     tmDefBody' <- WriterT $ toC tmDefBody
     tell $ Dual [TmDef $ toVar tmDefName]
     pure $ comment (show tmDefBody) : tmDefBody' False (toVar tmDefName)

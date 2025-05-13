@@ -9,6 +9,7 @@ module LambdaComp.CBPV.ToAM
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.Writer.Strict (MonadWriter (tell), WriterT (runWriterT), lift)
 import Data.List                   (elemIndex)
+import Data.Map.Strict             qualified as Map
 import Data.Set                    qualified as Set
 import Data.Vector                 qualified as Vector
 
@@ -29,20 +30,16 @@ instance ToAM Program where
   type AMData Program = [CodeSection]
 
   toAM :: Program -> WithAMInfo (AMData Program)
-  toAM tops =
-    if withMain tops
-    then traverse toAM tops
+  toAM prog =
+    if "u_main" `Map.member` prog
+    then traverse toAM $ Map.toList prog
     else error "No main function is given!"
-    where
-      withMain []                      = False
-      withMain (TopTmDef "u_main" _:_) = True
-      withMain (_:ts)                  = withMain ts
 
-instance ToAM Top where
-  type AMData Top = CodeSection
+instance ToAM (Ident, Tm Val) where
+  type AMData (Ident, Tm Val) = CodeSection
 
-  toAM :: Top -> WithAMInfo (AMData Top)
-  toAM TopTmDef {..} = TmDefCodeSection (toVarIdent tmDefName) <$> toAM tmDefBody
+  toAM :: (Ident, Tm Val) -> WithAMInfo (AMData (Ident, Tm Val))
+  toAM (tmDefName, tmDefBody) = TmDefCodeSection (toVarIdent tmDefName) <$> toAM tmDefBody
 
 instance ToAM (Tm Val) where
   type AMData (Tm Val) = Value

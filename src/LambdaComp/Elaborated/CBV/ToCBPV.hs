@@ -12,6 +12,7 @@ import Data.String                (IsString (fromString))
 import LambdaComp.CBPV.Syntax       qualified as CBPV
 import LambdaComp.Elaborated.Syntax
 import LambdaComp.FreshName
+import qualified Data.Map.Strict as Map
 
 runToCBPV :: Program -> CBPV.Program
 runToCBPV = (`evalState` 0) . toCBPV
@@ -24,10 +25,10 @@ instance ToCBPV Program where
   type CBPVData Program = FreshName CBPV.Program
 
   toCBPV :: Program -> CBPVData Program
-  toCBPV = traverse toCBPV
+  toCBPV = fmap Map.fromList . traverse toCBPV
 
 instance ToCBPV Top where
-  type CBPVData Top = FreshName CBPV.Top
+  type CBPVData Top = FreshName (Ident, CBPV.Tm CBPV.Val)
 
   toCBPV :: Top -> CBPVData Top
   toCBPV TopTmDef {..} = do
@@ -36,7 +37,7 @@ instance ToCBPV Top where
           case tmDefBody' of
             CBPV.TmReturn tm -> tm
             _                -> CBPV.TmThunk tmDefBody'
-    pure $ CBPV.TopTmDef { tmDefName = "u_" <> tmDefName, tmDefBody = tmDefBody'' }
+    pure ("u_" <> tmDefName, tmDefBody'')
 
 instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Val

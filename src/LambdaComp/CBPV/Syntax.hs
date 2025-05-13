@@ -11,18 +11,12 @@ import Data.Set qualified as Set
 
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
+import Data.Map.Strict (Map)
 
 type data Class where
   Val, Com :: Class
 
-type Program = [Top]
-
-data Top
-  = TopTmDef
-    { tmDefName :: Ident
-    , tmDefBody :: Tm Val
-    }
-  deriving stock (Show)
+type Program = Map Ident (Tm Val)
 
 data Tp (c :: Class) where
   TpUnit   :: Tp Val
