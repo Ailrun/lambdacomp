@@ -1,5 +1,6 @@
-{-# LANGUAGE GADTs      #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs           #-}
+{-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE RecordWildCards #-}
 module LambdaComp.CBPV.TypeCheck
   ( topCheck
   , topInfer
@@ -16,7 +17,8 @@ import Data.Map             qualified as Map
 import LambdaComp.CBPV.Syntax
 import LambdaComp.PrimOp      (PrimOpTypeBase (..), getPrimOpType)
 
-type TypeCheck = ReaderT (Map Ident (Tp Val)) (Either TypeError)
+type Context = Map Ident (Tp Val)
+type TypeCheck = ReaderT Context (Either TypeError)
 
 topCheck :: Tm c -> Tp c -> Either TypeError ()
 topCheck tm = (`runReaderT` initialContext) . check tm
@@ -81,7 +83,7 @@ infer (TmIf tm0 tm1 tm2)       = do
         then pure tp1
         else throwError $ BranchTypeMismatch tp1 tp2
     _      -> throwError $ TypeMismatch TpBool tpc
-infer (TmLam p tm)             = TpFun (paramType p) <$> local (Map.insert (paramName p) (paramType p)) (infer tm)
+infer (TmLam p tm)             = TpFun (paramType p) <$> local (insertParam p) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
   case tpf of
@@ -122,7 +124,12 @@ infer (TmPrintDouble tm0 tm1)  = do
   case tp0 of
     TpDouble -> infer tm1
     _        -> throwError $ TypeMismatch TpDouble tp0
-infer (TmRec x tp tm)          = TpDown tp <$ local (Map.insert x tp) (check tm (TpDown tp))
+infer (TmRec p tm)             = tp <$ local (insertParam p) (check tm tp)
+  where
+    tp = TpDown (paramType p)
+
+insertParam :: Param -> Context -> Context
+insertParam Param {..} = Map.insert paramName paramType
 
 primOpTypeBase :: PrimOpTypeBase (Tp Val)
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }

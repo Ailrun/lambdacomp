@@ -30,4 +30,4 @@ skipReturn (TmPrimBinOp op tm0 tm1) = TmPrimBinOp op (skipReturn tm0) (skipRetur
 skipReturn (TmPrimUnOp op tm)       = TmPrimUnOp op $ skipReturn tm
 skipReturn (TmPrintInt tm0 tm1)     = TmPrintInt (skipReturn tm0) (skipReturn tm1)
 skipReturn (TmPrintDouble tm0 tm1)  = TmPrintDouble (skipReturn tm0) (skipReturn tm1)
-skipReturn (TmRec f tp tm)          = TmRec f tp (skipReturn tm)
+skipReturn (TmRec p tm)             = TmRec p (skipReturn tm)

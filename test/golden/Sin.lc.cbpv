@@ -2,9 +2,12 @@ fromList
     [
         ( "u_fact"
         , TmThunk
-            ( TmRec "u_fact"
-                ( TpUp
-                    ( TpFun TpInt ( TpDown TpInt ) )
+            ( TmRec
+                ( Param
+                    { paramName = "u_fact"
+                    , paramType = TpUp
+                        ( TpFun TpInt ( TpDown TpInt ) )
+                    }
                 )
                 ( TmTo
                     ( TmReturn
@@ -115,15 +118,18 @@ fromList
     ,
         ( "u_pow"
         , TmThunk
-            ( TmRec "u_pow"
-                ( TpUp
-                    ( TpFun TpDouble
-                        ( TpDown
-                            ( TpUp
-                                ( TpFun TpInt ( TpDown TpDouble ) )
+            ( TmRec
+                ( Param
+                    { paramName = "u_pow"
+                    , paramType = TpUp
+                        ( TpFun TpDouble
+                            ( TpDown
+                                ( TpUp
+                                    ( TpFun TpInt ( TpDown TpDouble ) )
+                                )
                             )
                         )
-                    )
+                    }
                 )
                 ( TmTo
                     ( TmReturn

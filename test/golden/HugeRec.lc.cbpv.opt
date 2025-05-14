@@ -29,15 +29,18 @@ fromList
     ,
         ( "u_recF"
         , TmThunk
-            ( TmRec "u_recF"
-                ( TpUp
-                    ( TpFun TpInt
-                        ( TpDown
-                            ( TpUp
-                                ( TpFun TpInt ( TpDown TpInt ) )
+            ( TmRec
+                ( Param
+                    { paramName = "u_recF"
+                    , paramType = TpUp
+                        ( TpFun TpInt
+                            ( TpDown
+                                ( TpUp
+                                    ( TpFun TpInt ( TpDown TpInt ) )
+                                )
                             )
                         )
-                    )
+                    }
                 )
                 ( TmLet "c_r_6"
                     ( TmThunk

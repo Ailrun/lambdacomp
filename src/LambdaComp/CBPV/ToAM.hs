@@ -88,14 +88,14 @@ instance ToAM (Tm Com) where
     pure [IPush val, IPrimUnOp op]
   toAM (TmPrintInt tm0 tm1) = liftA2 Vector.cons (IPrintInt <$> toAM tm0) (toAM tm1)
   toAM (TmPrintDouble tm0 tm1) = liftA2 Vector.cons (IPrintDouble <$> toAM tm0) (toAM tm1)
-  toAM (TmRec x _ tm) = do
+  toAM (TmRec p tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
     thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"
     tell [ThunkCodeSection {..}]
     initCode <- IRecAssign xVar thunkCodeSectionName . Vector.fromList <$> traverse getVar thunkEnvVars
     pure [initCode, ICall (VaAddr xVar)]
     where
-      xVar = toVarAddr x
+      xVar = toVarAddr (paramName p)
       thunkEnvVars = Set.toList thunkEnv
       thunkEnvSize = Set.size thunkEnv
       thunkEnv = freeVarOfTm tm

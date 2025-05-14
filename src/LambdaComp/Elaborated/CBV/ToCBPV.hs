@@ -92,7 +92,7 @@ instance ToCBPV Tm where
   toCBPV (TmRec (Param {..}) tm)  = do
     tm' <- toCBPV tm
     v <- freshNameOf "c_r"
-    pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec ("u_" <> paramName) (toCBPV paramType) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
+    pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec (CBPV.Param ("u_" <> paramName) (toCBPV paramType)) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
 
 instance ToCBPV Param where
   type CBPVData Param = CBPV.Param

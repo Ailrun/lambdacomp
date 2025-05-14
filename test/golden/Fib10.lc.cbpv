@@ -88,18 +88,21 @@ fromList
     ,
         ( "u_recFib"
         , TmThunk
-            ( TmRec "u_recFib"
-                ( TpUp
-                    ( TpFun TpInt
-                        ( TpDown
-                            ( TpUp
-                                ( TpFun TpInt
-                                    ( TpDown
-                                        ( TpUp
-                                            ( TpFun TpInt
-                                                ( TpDown
-                                                    ( TpUp
-                                                        ( TpFun TpInt ( TpDown TpInt ) )
+            ( TmRec
+                ( Param
+                    { paramName = "u_recFib"
+                    , paramType = TpUp
+                        ( TpFun TpInt
+                            ( TpDown
+                                ( TpUp
+                                    ( TpFun TpInt
+                                        ( TpDown
+                                            ( TpUp
+                                                ( TpFun TpInt
+                                                    ( TpDown
+                                                        ( TpUp
+                                                            ( TpFun TpInt ( TpDown TpInt ) )
+                                                        )
                                                     )
                                                 )
                                             )
@@ -108,7 +111,7 @@ fromList
                                 )
                             )
                         )
-                    )
+                    }
                 )
                 ( TmTo
                     ( TmReturn

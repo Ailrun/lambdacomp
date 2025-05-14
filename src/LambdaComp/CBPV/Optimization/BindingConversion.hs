@@ -1,7 +1,7 @@
 {-# LANGUAGE GADTs        #-}
 {-# LANGUAGE TypeFamilies #-}
 module LambdaComp.CBPV.Optimization.BindingConversion
-  ( runCommutingThen
+  ( runCommutingTo
   , runLiftingLet
   ) where
 
@@ -11,57 +11,57 @@ import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
 
-runCommutingThen :: Tm Val -> Tm Val
-runCommutingThen = commutingThen
+runCommutingTo :: Tm Val -> Tm Val
+runCommutingTo = commutingTo
 
 runLiftingLet :: Tm Val -> Tm Val
 runLiftingLet = liftingLet
 
 data TmToPrefix = TmToPrefix (Set Ident) (Tm Com) Ident
 
-type family CommutingThen (c :: Class) a where
-  CommutingThen Com a = Writer [TmToPrefix] a
-  CommutingThen Val a = a
+type family CommutingTo (c :: Class) a where
+  CommutingTo Com a = Writer [TmToPrefix] a
+  CommutingTo Val a = a
 
-closedCommutingThen :: Tm Com -> Tm Com
-closedCommutingThen = uncurry commitThen . runWriter . commutingThen
+closedCommutingTo :: Tm Com -> Tm Com
+closedCommutingTo = uncurry commitTo . runWriter . commutingTo
 
-commutingThenUnder :: Ident -> Tm Com -> CommutingThen Com (Tm Com)
-commutingThenUnder x = uncurry (commitThenUnder x) . runWriter . commutingThen
+commutingToUnder :: Ident -> Tm Com -> CommutingTo Com (Tm Com)
+commutingToUnder x = uncurry (commitToUnder x) . runWriter . commutingTo
 
-commutingThen :: Tm c -> CommutingThen c (Tm c)
-commutingThen tm@(TmVar _)             = tm
-commutingThen tm@TmUnit                = tm
-commutingThen tm@TmTrue                = tm
-commutingThen tm@TmFalse               = tm
-commutingThen tm@(TmInt _)             = tm
-commutingThen tm@(TmDouble _)          = tm
-commutingThen (TmThunk tm)             = TmThunk $ closedCommutingThen tm
-commutingThen (TmIf tm0 tm1 tm2)       = pure $ TmIf (commutingThen tm0) (closedCommutingThen tm1) (closedCommutingThen tm2)
-commutingThen (TmLam x tm)             = TmLam x <$> commutingThenUnder (paramName x) tm
-commutingThen (tmf `TmApp` tma)        = (`TmApp` commutingThen tma) <$> commutingThen tmf
-commutingThen (TmForce tm)             = pure . TmForce $ commutingThen tm
-commutingThen (TmReturn tm)            = pure . TmReturn $ commutingThen tm
-commutingThen (TmTo tm0 x tm1)         = do
-  tm0' <- commutingThen tm0
+commutingTo :: Tm c -> CommutingTo c (Tm c)
+commutingTo tm@(TmVar _)             = tm
+commutingTo tm@TmUnit                = tm
+commutingTo tm@TmTrue                = tm
+commutingTo tm@TmFalse               = tm
+commutingTo tm@(TmInt _)             = tm
+commutingTo tm@(TmDouble _)          = tm
+commutingTo (TmThunk tm)             = TmThunk $ closedCommutingTo tm
+commutingTo (TmIf tm0 tm1 tm2)       = pure $ TmIf (commutingTo tm0) (closedCommutingTo tm1) (closedCommutingTo tm2)
+commutingTo (TmLam x tm)             = TmLam x <$> commutingToUnder (paramName x) tm
+commutingTo (tmf `TmApp` tma)        = (`TmApp` commutingTo tma) <$> commutingTo tmf
+commutingTo (TmForce tm)             = pure . TmForce $ commutingTo tm
+commutingTo (TmReturn tm)            = pure . TmReturn $ commutingTo tm
+commutingTo (TmTo tm0 x tm1)         = do
+  tm0' <- commutingTo tm0
   tell [TmToPrefix (freeVarOfTm tm0') tm0' x]
-  commutingThen tm1
-commutingThen (TmLet x tm0 tm1)        = TmLet x (commutingThen tm0) <$> commutingThenUnder x tm1
-commutingThen (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingThen tm0) (commutingThen tm1)
-commutingThen (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (commutingThen tm)
-commutingThen (TmPrintInt tm0 tm1)     = TmPrintInt (commutingThen tm0) <$> commutingThen tm1
-commutingThen (TmPrintDouble tm0 tm1)  = TmPrintDouble (commutingThen tm0) <$> commutingThen tm1
-commutingThen (TmRec f tp tm)          = TmRec f tp <$> commutingThenUnder f tm
+  commutingTo tm1
+commutingTo (TmLet x tm0 tm1)        = TmLet x (commutingTo tm0) <$> commutingToUnder x tm1
+commutingTo (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingTo tm0) (commutingTo tm1)
+commutingTo (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (commutingTo tm)
+commutingTo (TmPrintInt tm0 tm1)     = TmPrintInt (commutingTo tm0) <$> commutingTo tm1
+commutingTo (TmPrintDouble tm0 tm1)  = TmPrintDouble (commutingTo tm0) <$> commutingTo tm1
+commutingTo (TmRec p tm)             = TmRec p <$> commutingToUnder (paramName p) tm
 
-commitThenUnder :: Ident -> Tm Com -> [TmToPrefix] -> CommutingThen Com (Tm Com)
-commitThenUnder x tm1 prefixes = do
+commitToUnder :: Ident -> Tm Com -> [TmToPrefix] -> CommutingTo Com (Tm Com)
+commitToUnder x tm1 prefixes = do
   tell prefixes0
   pure $ foldr (\(TmToPrefix _ tm0 y) -> TmTo tm0 y) tm1 prefixes1
   where
     (prefixes0, prefixes1) = break (\(TmToPrefix fv _ y) -> x `Set.member` fv || y == x) prefixes
 
-commitThen :: Tm Com -> [TmToPrefix] -> Tm Com
-commitThen = foldr (\(TmToPrefix _ tm0 x) -> TmTo tm0 x)
+commitTo :: Tm Com -> [TmToPrefix] -> Tm Com
+commitTo = foldr (\(TmToPrefix _ tm0 x) -> TmTo tm0 x)
 
 data TmLetPrefix = TmLetPrefix (Set Ident) Ident (Tm Val)
 
@@ -98,7 +98,7 @@ liftingLet (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (liftingLet tm0) (li
 liftingLet (TmPrimUnOp op tm)       = pure $ TmPrimUnOp op (liftingLet tm)
 liftingLet (TmPrintInt tm0 tm1)     = TmPrintInt (liftingLet tm0) <$> liftingLet tm1
 liftingLet (TmPrintDouble tm0 tm1)  = TmPrintDouble (liftingLet tm0) <$> liftingLet tm1
-liftingLet (TmRec f tp tm)          = TmRec f tp <$> liftingLetUnder f tm
+liftingLet (TmRec p tm)             = TmRec p <$> liftingLetUnder (paramName p) tm
 
 commitLetUnder :: Ident -> Tm Com -> [TmLetPrefix] -> LiftingLet Com (Tm Com)
 commitLetUnder x tm1 prefixes = do

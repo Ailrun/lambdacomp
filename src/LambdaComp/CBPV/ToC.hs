@@ -164,12 +164,12 @@ instance ToC (Tm Com) where
     tm1Code <- WriterT $ toC tm1
     msg <- lift $ freshNameOf "sys_msg"
     pure (tm0Code True msg <> (printlnAsDoubleStmt msg : tm1Code))
-  toC (TmRec x _ tm) = runWriterT $ do
+  toC (TmRec p tm) = runWriterT $ do
     tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
     (thunkInit, inits) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
     pure (thunkInit True xVar <> inits xVar <> [forceThunkStmt xVar])
     where
-      xVar = toVar x
+      xVar = toVar (paramName p)
       thunkEnv = freeVarOfTm tm
       thunkEnvSize = Set.size thunkEnv
       thunkEnvVars = Set.toList thunkEnv
