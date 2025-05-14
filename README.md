@@ -30,15 +30,13 @@ a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CB
 - [ ] Constraint-based bidirectional type checker for CBPV
 - [x] Simple CBPV optimization pass
 - [ ] Tail call optimization pass (or lowering pass)
-- [ ] CBPV interpreter
 - [x] CBPV-to-C pass without GC
 - [x] CBPV-to-AM pass without GC
 - [x] AM interpreter
 - [ ] AM-to-C pass without GC
-- [ ] GC instruction for AM
-- [ ] GC for CBPV-to-C
-- [ ] GC for CBPV-to-AM
-- [ ] GC for AM-to-C
+- [ ] GC runtime function
+- [ ] GC instruction in CBPV-to-C
+- [ ] GC instruction in CBPV-to-AM
 - [x] PrintInt effect
 - [x] PrintDouble effect
 - [ ] PrintString effect
