@@ -13,25 +13,22 @@ const item var_u_x = (global_stack.items[--global_stack.top]);
 
 void sys_thunk_5(item *const _, item *const ret)
 {
-/* TmLet "c_a0_0" TmTrue (TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmLet "c_v_2" (TmInt 1) (TmLet "c_v_3" (TmInt 0) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) (TmVar "c_a0_0")) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 1))) (TmPrintInt (TmVar "c_v_3") (TmReturn (TmInt 0)))))))) */
-const item var_c_a0_0 = {.int_item = 1};
+/* TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0))))) */
 const item var_c_f0_0 = {.thunk_item = {.code = sys_thunk_0, .env = NULL}};
-const item var_c_v_2 = {.int_item = 1};
-const item var_c_v_3 = {.int_item = 0};
-(global_stack.items[global_stack.top++]) = var_c_a0_0;
+(global_stack.items[global_stack.top++]).int_item = 1;
 const item sys_t_1 = var_c_f0_0;
 sys_t_1.thunk_item.code(sys_t_1.thunk_item.env, ret);
 const item var_c_c_1 = (*ret);
 const item sys_c_4 = var_c_c_1;
 if (sys_c_4.int_item)
 {
-const item sys_msg_2 = var_c_v_2;
+const item sys_msg_2 = {.int_item = 1};
 printf("%d\n", sys_msg_2.int_item);
 (*ret).int_item = 1;
 }
 else
 {
-const item sys_msg_3 = var_c_v_3;
+const item sys_msg_3 = {.int_item = 0};
 printf("%d\n", sys_msg_3.int_item);
 (*ret).int_item = 0;
 }
@@ -44,7 +41,7 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmThunk (TmLet "c_a0_0" TmTrue (TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmLet "c_v_2" (TmInt 1) (TmLet "c_v_3" (TmInt 0) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) (TmVar "c_a0_0")) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 1))) (TmPrintInt (TmVar "c_v_3") (TmReturn (TmInt 0))))))))) */
+/* TmThunk (TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0)))))) */
 var_u_main.thunk_item.code = sys_thunk_5;
 var_u_main.thunk_item.env = NULL;
 var_u_main.thunk_item.code(var_u_main.thunk_item.env, ret);

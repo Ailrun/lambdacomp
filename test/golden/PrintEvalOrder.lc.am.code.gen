@@ -7,14 +7,9 @@
     , thunkCode =
         [ IPop
             ( AIdent "var_u_y" )
-        , IAssign
-            ( AIdent "var_c_v_1" )
-            ( VaAddr
-                ( AIdent "var_u_y" )
-            )
         , IPrintInt
             ( VaAddr
-                ( AIdent "var_c_v_1" )
+                ( AIdent "var_u_y" )
             )
         , ISetReturn
             ( VaAddr
@@ -27,10 +22,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_a0_2" )
-            ( VaInt 2 )
-        , IPop
+        [ IPop
             ( AIdent "var_u_x" )
         , IAssign
             ( AIdent "var_c_f0_2" )
@@ -38,9 +30,7 @@
                 [ AIdent "var_u_x" ]
             )
         , IPush
-            ( VaAddr
-                ( AIdent "var_c_a0_2" )
-            )
+            ( VaInt 2 )
         , ICall
             ( VaAddr
                 ( AIdent "var_c_f0_2" )
@@ -53,16 +43,11 @@
     { thunkCodeSectionName = "sys_thunk_2"
     , thunkCode =
         [ IAssign
-            ( AIdent "var_c_v_0" )
-            ( VaInt 7 )
-        , IAssign
             ( AIdent "var_c_f0_3" )
             ( VaThunk "sys_thunk_1" [] )
         , IScope
         , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_0" )
-            )
+            ( VaInt 7 )
         , ISetReturn
             ( VaInt 3 )
         , IEndScope

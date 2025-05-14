@@ -19,21 +19,10 @@
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
         [ IAssign
-            ( AIdent "var_c_a0_0" ) ( VaBool True )
-        , IAssign
             ( AIdent "var_c_f0_0" )
             ( VaThunk "sys_thunk_0" [] )
-        , IAssign
-            ( AIdent "var_c_v_2" )
-            ( VaInt 1 )
-        , IAssign
-            ( AIdent "var_c_v_3" )
-            ( VaInt 0 )
         , IScope
-        , IPush
-            ( VaAddr
-                ( AIdent "var_c_a0_0" )
-            )
+        , IPush ( VaBool True )
         , ICall
             ( VaAddr
                 ( AIdent "var_c_f0_0" )
@@ -46,16 +35,12 @@
                 ( AIdent "var_c_c_1" )
             ) 3
         , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_2" )
-            )
+            ( VaInt 1 )
         , ISetReturn
             ( VaInt 1 )
         , IJump 2
         , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_3" )
-            )
+            ( VaInt 0 )
         , ISetReturn
             ( VaInt 0 )
         , IExit

@@ -17,24 +17,18 @@ fromList
                 )
                 ( TmLet "c_f0_1"
                     ( TmThunk
-                        ( TmLet "c_a0_0"
-                            ( TmInt 5 )
-                            ( TmLam
-                                ( Param
-                                    { paramName = "u_x"
-                                    , paramType = TpUp
-                                        ( TpFun TpInt ( TpDown TpInt ) )
-                                    }
-                                )
-                                ( TmLet "c_f0_0"
+                        ( TmLam
+                            ( Param
+                                { paramName = "u_x"
+                                , paramType = TpUp
+                                    ( TpFun TpInt ( TpDown TpInt ) )
+                                }
+                            )
+                            ( TmApp
+                                ( TmForce
                                     ( TmVar "u_x" )
-                                    ( TmApp
-                                        ( TmForce
-                                            ( TmVar "c_f0_0" )
-                                        )
-                                        ( TmVar "c_a0_0" )
-                                    )
                                 )
+                                ( TmInt 5 )
                             )
                         )
                     )

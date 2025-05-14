@@ -2,12 +2,14 @@ module LambdaComp.CBPV.Optimization.Local
   ( runLocalOptDefault
   ) where
 
-import LambdaComp.CBPV.Optimization.BindingConversion
-import LambdaComp.CBPV.Optimization.SkipReturn
+import LambdaComp.CBPV.Optimization.BindingConversion      (runCommutingTo, runLiftingLet)
+import LambdaComp.CBPV.Optimization.DeadBindingElimination (runDeadLetElimination)
+import LambdaComp.CBPV.Optimization.InlineBinding          (runInlineSimpleLet)
+import LambdaComp.CBPV.Optimization.SkipReturn             (runSkipReturn)
 import LambdaComp.CBPV.Syntax
 
 runLocalOptDefault :: Program -> Program
 runLocalOptDefault = fmap runLocalOptDefaultTm
 
 runLocalOptDefaultTm :: Tm Val -> Tm Val
-runLocalOptDefaultTm = runLiftingLet . runSkipReturn . runCommutingThen
+runLocalOptDefaultTm = runDeadLetElimination . runInlineSimpleLet . runLiftingLet . runSkipReturn . runCommutingTo

@@ -18,23 +18,13 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_a0_0" )
-            ( VaInt 5 )
-        , IPop
+        [ IPop
             ( AIdent "var_u_x" )
-        , IAssign
-            ( AIdent "var_c_f0_0" )
-            ( VaAddr
-                ( AIdent "var_u_x" )
-            )
         , IPush
-            ( VaAddr
-                ( AIdent "var_c_a0_0" )
-            )
+            ( VaInt 5 )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f0_0" )
+                ( AIdent "var_u_x" )
             )
         , IExit
         ]

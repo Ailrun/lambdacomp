@@ -2,46 +2,37 @@ fromList
     [
         ( "u_main"
         , TmThunk
-            ( TmLet "c_a0_0" TmTrue
-                ( TmLet "c_f0_0"
-                    ( TmThunk
-                        ( TmLam
-                            ( Param
-                                { paramName = "u_x"
-                                , paramType = TpBool
-                                }
-                            )
-                            ( TmReturn
-                                ( TmVar "u_x" )
-                            )
+            ( TmLet "c_f0_0"
+                ( TmThunk
+                    ( TmLam
+                        ( Param
+                            { paramName = "u_x"
+                            , paramType = TpBool
+                            }
+                        )
+                        ( TmReturn
+                            ( TmVar "u_x" )
                         )
                     )
-                    ( TmLet "c_v_2"
-                        ( TmInt 1 )
-                        ( TmLet "c_v_3"
+                )
+                ( TmTo
+                    ( TmApp
+                        ( TmForce
+                            ( TmVar "c_f0_0" )
+                        ) TmTrue
+                    ) "c_c_1"
+                    ( TmIf
+                        ( TmVar "c_c_1" )
+                        ( TmPrintInt
+                            ( TmInt 1 )
+                            ( TmReturn
+                                ( TmInt 1 )
+                            )
+                        )
+                        ( TmPrintInt
                             ( TmInt 0 )
-                            ( TmTo
-                                ( TmApp
-                                    ( TmForce
-                                        ( TmVar "c_f0_0" )
-                                    )
-                                    ( TmVar "c_a0_0" )
-                                ) "c_c_1"
-                                ( TmIf
-                                    ( TmVar "c_c_1" )
-                                    ( TmPrintInt
-                                        ( TmVar "c_v_2" )
-                                        ( TmReturn
-                                            ( TmInt 1 )
-                                        )
-                                    )
-                                    ( TmPrintInt
-                                        ( TmVar "c_v_3" )
-                                        ( TmReturn
-                                            ( TmInt 0 )
-                                        )
-                                    )
-                                )
+                            ( TmReturn
+                                ( TmInt 0 )
                             )
                         )
                     )

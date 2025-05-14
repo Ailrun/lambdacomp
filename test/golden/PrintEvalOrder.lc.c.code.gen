@@ -7,32 +7,29 @@ item var_u_main;
 
 void sys_thunk_1(item *const env, item *const ret)
 {
-/* TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmLet "c_v_1" (TmVar "u_y") (TmPrintInt (TmVar "c_v_1") (TmReturn (TmVar "u_x")))) */
+/* TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))) */
 const item var_u_y = (global_stack.items[--global_stack.top]);
-const item var_c_v_1 = var_u_y;
-const item sys_msg_0 = var_c_v_1;
+const item sys_msg_0 = var_u_y;
 printf("%d\n", sys_msg_0.int_item);
 (*ret) = (env[0]);
 }
 
 void sys_thunk_3(item *const _, item *const ret)
 {
-/* TmLet "c_a0_2" (TmInt 2) (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmLet "c_v_1" (TmVar "u_y") (TmPrintInt (TmVar "c_v_1") (TmReturn (TmVar "u_x")))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmVar "c_a0_2")))) */
-const item var_c_a0_2 = {.int_item = 2};
+/* TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))) */
 const item var_u_x = (global_stack.items[--global_stack.top]);
 const item var_c_f0_2 = {.thunk_item = {.code = sys_thunk_1, .env = (item *) malloc(1 * sizeof(item))}};
 (var_c_f0_2.thunk_item.env[0]) = var_u_x;
-(global_stack.items[global_stack.top++]) = var_c_a0_2;
+(global_stack.items[global_stack.top++]).int_item = 2;
 const item sys_t_2 = var_c_f0_2;
 sys_t_2.thunk_item.code(sys_t_2.thunk_item.env, ret);
 }
 
 void sys_thunk_7(item *const _, item *const ret)
 {
-/* TmLet "c_v_0" (TmInt 7) (TmLet "c_f0_3" (TmThunk (TmLet "c_a0_2" (TmInt 2) (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmLet "c_v_1" (TmVar "u_y") (TmPrintInt (TmVar "c_v_1") (TmReturn (TmVar "u_x")))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmVar "c_a0_2")))))) (TmTo (TmPrintInt (TmVar "c_v_0") (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0)))))) */
-const item var_c_v_0 = {.int_item = 7};
+/* TmLet "c_f0_3" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))))) (TmTo (TmPrintInt (TmInt 7) (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0))))) */
 const item var_c_f0_3 = {.thunk_item = {.code = sys_thunk_3, .env = NULL}};
-const item sys_msg_4 = var_c_v_0;
+const item sys_msg_4 = {.int_item = 7};
 printf("%d\n", sys_msg_4.int_item);
 (*ret).int_item = 3;
 const item var_c_a0_3 = (*ret);
@@ -51,7 +48,7 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmThunk (TmLet "c_v_0" (TmInt 7) (TmLet "c_f0_3" (TmThunk (TmLet "c_a0_2" (TmInt 2) (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmLet "c_v_1" (TmVar "u_y") (TmPrintInt (TmVar "c_v_1") (TmReturn (TmVar "u_x")))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmVar "c_a0_2")))))) (TmTo (TmPrintInt (TmVar "c_v_0") (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0))))))) */
+/* TmThunk (TmLet "c_f0_3" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))))) (TmTo (TmPrintInt (TmInt 7) (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0)))))) */
 var_u_main.thunk_item.code = sys_thunk_7;
 var_u_main.thunk_item.env = NULL;
 var_u_main.thunk_item.code(var_u_main.thunk_item.env, ret);
