@@ -11,7 +11,7 @@ fromList
                 ( TmTo
                     ( TmApp
                         ( TmForce
-                            ( TmVar "u_recFib" )
+                            ( TmGlobal "u_recFib" )
                         )
                         ( TmVar "u_n" )
                     ) "c_f1_8"
@@ -45,7 +45,7 @@ fromList
         , TmThunk
             ( TmApp
                 ( TmForce
-                    ( TmVar "u_fib" )
+                    ( TmGlobal "u_fib" )
                 )
                 ( TmInt 10 )
             )

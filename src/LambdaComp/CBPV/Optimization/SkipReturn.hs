@@ -10,6 +10,7 @@ runSkipReturn = skipReturn
 
 skipReturn :: Tm c -> Tm c
 skipReturn tm@(TmVar _)             = tm
+skipReturn tm@(TmGlobal _)          = tm
 skipReturn tm@TmUnit                = tm
 skipReturn tm@TmTrue                = tm
 skipReturn tm@TmFalse               = tm

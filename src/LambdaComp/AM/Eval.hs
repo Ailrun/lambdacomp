@@ -38,7 +38,7 @@ data Item where
 topEval :: Handle -> [CodeSection] -> IO Item
 topEval out cs = returnReg <$> runMachine evalData evalState
   where
-    evalData = foldl' insertCodeSection (Map.singleton mainName $ Right [ICall "var_u_main"], out) cs
+    evalData = foldl' insertCodeSection (Map.singleton mainName $ Right [ICall mainTopValue], out) cs
     evalState =
       EvalState
       { codePointer = (mainName, 0)
@@ -276,3 +276,6 @@ stackPop = do
 
 mainName :: Ident
 mainName = "main"
+
+mainTopValue :: Value
+mainTopValue = "top_u_main"

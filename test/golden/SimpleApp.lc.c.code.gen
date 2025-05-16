@@ -3,7 +3,7 @@
 void sys_thunk_0(item *const env, item *const ret);
 void sys_thunk_2(item *const env, item *const ret);
 void sys_thunk_5(item *const env, item *const ret);
-item var_u_main;
+item top_u_main;
 
 void sys_thunk_0(item *const _, item *const ret)
 {
@@ -42,9 +42,9 @@ item retv;
 {
 item *const ret = &retv;
 /* TmThunk (TmLet "c_a0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmReturn (TmVar "u_x")))) (TmLet "c_f0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpUp (TpFun TpInt (TpDown TpInt))}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)))) (TmTo (TmApp (TmForce (TmVar "c_f0_1")) (TmVar "c_a0_1")) "c_v_2" (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 0)))))) */
-var_u_main.thunk_item.code = sys_thunk_5;
-var_u_main.thunk_item.env = NULL;
-var_u_main.thunk_item.code(var_u_main.thunk_item.env, ret);
+top_u_main.thunk_item.code = sys_thunk_5;
+top_u_main.thunk_item.env = NULL;
+top_u_main.thunk_item.code(top_u_main.thunk_item.env, ret);
 }
 return retv.int_item;
 }

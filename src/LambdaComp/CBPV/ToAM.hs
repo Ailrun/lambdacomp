@@ -39,13 +39,14 @@ instance ToAM (Ident, Tm Val) where
   type AMData (Ident, Tm Val) = CodeSection
 
   toAM :: (Ident, Tm Val) -> WithAMInfo (AMData (Ident, Tm Val))
-  toAM (tmDefName, tmDefBody) = TmDefCodeSection (toVarIdent tmDefName) <$> toAM tmDefBody
+  toAM (tmDefName, tmDefBody) = TmDefCodeSection (toGlobalIdent tmDefName) <$> toAM tmDefBody
 
 instance ToAM (Tm Val) where
   type AMData (Tm Val) = Value
 
   toAM :: Tm Val -> WithAMInfo (AMData (Tm Val))
   toAM (TmVar x)    = VaAddr <$> getVar x
+  toAM (TmGlobal x) = VaAddr <$> getGlobal x
   toAM TmUnit       = pure VaUnit
   toAM TmTrue       = pure $ VaBool True
   toAM TmFalse      = pure $ VaBool False
@@ -109,6 +110,15 @@ getVar x = do
 
 toVarAddr :: Ident -> Addr
 toVarAddr = AIdent . toVarIdent
+
+getGlobal :: Ident -> WithAMInfo Addr
+getGlobal x = pure $ toGlobalAddr x
+
+toGlobalAddr :: Ident -> Addr
+toGlobalAddr = AIdent . toGlobalIdent
+
+toGlobalIdent :: Ident -> Ident
+toGlobalIdent = ("top_" <>)
 
 toVarIdent :: Ident -> Ident
 toVarIdent = ("var_" <>)

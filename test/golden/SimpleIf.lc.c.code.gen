@@ -2,7 +2,7 @@
 
 void sys_thunk_0(item *const env, item *const ret);
 void sys_thunk_5(item *const env, item *const ret);
-item var_u_main;
+item top_u_main;
 
 void sys_thunk_0(item *const _, item *const ret)
 {
@@ -42,9 +42,9 @@ item retv;
 {
 item *const ret = &retv;
 /* TmThunk (TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0)))))) */
-var_u_main.thunk_item.code = sys_thunk_5;
-var_u_main.thunk_item.env = NULL;
-var_u_main.thunk_item.code(var_u_main.thunk_item.env, ret);
+top_u_main.thunk_item.code = sys_thunk_5;
+top_u_main.thunk_item.env = NULL;
+top_u_main.thunk_item.code(top_u_main.thunk_item.env, ret);
 }
 return retv.int_item;
 }

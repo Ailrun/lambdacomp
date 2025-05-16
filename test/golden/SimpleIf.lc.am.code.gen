@@ -1,5 +1,5 @@
 [ TmDefCodeSection
-    { tmDefCodeSectionName = "var_u_main"
+    { tmDefCodeSectionName = "top_u_main"
     , tmDefValue = VaThunk "sys_thunk_1" []
     }
 , ThunkCodeSection

@@ -11,6 +11,7 @@ runConstantsPropagation = propagateConstants
 
 propagateConstants :: Tm -> Tm
 propagateConstants tm@(TmVar _)             = tm
+propagateConstants tm@(TmGlobal _)          = tm
 propagateConstants tm@TmUnit                = tm
 propagateConstants tm@TmTrue                = tm
 propagateConstants tm@TmFalse               = tm

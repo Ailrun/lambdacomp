@@ -1,15 +1,13 @@
 [ TmDefCodeSection
-    { tmDefCodeSectionName = "var_u_fib"
-    , tmDefValue = VaThunk "sys_thunk_0"
-        [ AIdent "var_u_recFib" ]
+    { tmDefCodeSectionName = "top_u_fib"
+    , tmDefValue = VaThunk "sys_thunk_0" []
     }
 , TmDefCodeSection
-    { tmDefCodeSectionName = "var_u_main"
-    , tmDefValue = VaThunk "sys_thunk_1"
-        [ AIdent "var_u_fib" ]
+    { tmDefCodeSectionName = "top_u_main"
+    , tmDefValue = VaThunk "sys_thunk_1" []
     }
 , TmDefCodeSection
-    { tmDefCodeSectionName = "var_u_recFib"
+    { tmDefCodeSectionName = "top_u_recFib"
     , tmDefValue = VaThunk "sys_thunk_7" []
     }
 , ThunkCodeSection
@@ -24,7 +22,7 @@
             )
         , ICall
             ( VaAddr
-                ( ALocalEnv 0 )
+                ( AIdent "top_u_recFib" )
             )
         , IEndScope
         , IReceive
@@ -57,7 +55,7 @@
             )
         , IExit
         ]
-    , thunkEnvSize = 1
+    , thunkEnvSize = 0
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
@@ -66,11 +64,11 @@
             ( VaInt 10 )
         , ICall
             ( VaAddr
-                ( ALocalEnv 0 )
+                ( AIdent "top_u_fib" )
             )
         , IExit
         ]
-    , thunkEnvSize = 1
+    , thunkEnvSize = 0
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_2"

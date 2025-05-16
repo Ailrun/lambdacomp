@@ -1,7 +1,7 @@
 #include <runtime.h>
 
 void sys_thunk_1(item *const env, item *const ret);
-item var_u_main;
+item top_u_main;
 
 void sys_thunk_1(item *const _, item *const ret)
 {
@@ -18,9 +18,9 @@ item retv;
 {
 item *const ret = &retv;
 /* TmThunk (TmPrintInt (TmInt 5) (TmReturn (TmInt 0))) */
-var_u_main.thunk_item.code = sys_thunk_1;
-var_u_main.thunk_item.env = NULL;
-var_u_main.thunk_item.code(var_u_main.thunk_item.env, ret);
+top_u_main.thunk_item.code = sys_thunk_1;
+top_u_main.thunk_item.env = NULL;
+top_u_main.thunk_item.code(top_u_main.thunk_item.env, ret);
 }
 return retv.int_item;
 }

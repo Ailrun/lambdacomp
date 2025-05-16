@@ -5,7 +5,7 @@ fromList
             ( TmTo
                 ( TmApp
                     ( TmForce
-                        ( TmVar "u_recF" )
+                        ( TmGlobal "u_recF" )
                     )
                     ( TmInt 1000000 )
                 ) "c_f1_7"

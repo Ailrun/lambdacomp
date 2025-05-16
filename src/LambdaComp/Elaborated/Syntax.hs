@@ -32,6 +32,7 @@ data Param where
 
 data Tm where
   TmVar         :: !Ident -> Tm
+  TmGlobal      :: !Ident -> Tm
   TmUnit        :: Tm
   TmTrue        :: Tm
   TmFalse       :: Tm

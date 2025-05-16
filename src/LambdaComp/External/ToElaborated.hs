@@ -6,12 +6,13 @@ module LambdaComp.External.ToElaborated
   , ElaborationError
   ) where
 
+import Control.Applicative            (Alternative ((<|>)))
 import Control.Monad                  (unless, when, zipWithM)
-import Control.Monad.Except           (MonadError (throwError, catchError))
+import Control.Monad.Except           (MonadError (catchError, throwError))
 import Control.Monad.Reader           (MonadReader (local), ReaderT (runReaderT), asks)
 import Control.Monad.Trans.Writer.CPS (WriterT, runWriterT)
 import Control.Monad.Writer.CPS       (MonadWriter (listen, tell))
-import Data.Bifunctor                 (Bifunctor (first, second, bimap))
+import Data.Bifunctor                 (Bifunctor (bimap, second))
 import Data.Map                       (Map)
 import Data.Map                       qualified as Map
 import Data.Semigroup                 (Any (Any))
@@ -19,10 +20,15 @@ import Data.Semigroup                 (Any (Any))
 import LambdaComp.Elaborated.Syntax qualified as E
 import LambdaComp.External.Syntax
 import LambdaComp.PrimOp            (PrimOpTypeBase (..), getPrimOpType)
-import Debug.Trace (traceShow)
 
 type Context = Map Ident XTp
-type ToElaborated = ReaderT (Context, Ident) (WriterT Any (Either ElaborationError))
+data ToElaboratedInfo
+  = ToElaboratedInfo
+    { topDefs :: Context
+    , localCtx :: Context
+    , currentDef :: Ident
+    }
+type ToElaborated = ReaderT ToElaboratedInfo (WriterT Any (Either ElaborationError))
 
 runToElaborated :: Program -> Either ElaborationError E.Program
 runToElaborated = go Map.empty
@@ -30,11 +36,11 @@ runToElaborated = go Map.empty
     go _   [] = pure []
     go ctx ((TopTmDecl x xtp, _) : (TopTmDef x' xtm, _) : prog)
       | x == x' = do
-        (top, _) <- runWriterT $ topCheck x xtm xtp `runReaderT` (Map.insert x xtp ctx, x)
+        (top, _) <- runWriterT $ topCheck x xtm xtp `runReaderT` ToElaboratedInfo ctx (Map.singleton x xtp) x
         (top :) <$> go (addTop top xtp ctx) prog
     go _   ((TopTmDecl x _, _) : _) = throwError $ InvalidTopDecl x
     go ctx ((TopTmDef x xtm, defSpan) : prog) = do
-      ((top, tp), _) <- runWriterT $ topInfer x xtm defSpan `runReaderT` (ctx, x)
+      ((top, tp), _) <- runWriterT $ topInfer x xtm defSpan `runReaderT` ToElaboratedInfo ctx Map.empty x
       (top :) <$> go (addTop top tp ctx) prog
 
     addTop :: E.Top -> XTp -> Context -> Context
@@ -87,10 +93,8 @@ check (TmIf xtm0 xtm1 xtm2)      = \tp -> do
 check (TmLam xps xtm)            = \case
   tpPs `TpFun` tpR -> do
     bs <- zipWithM xcheckParam xps tpPs
-    E.TmLam (uncurry E.Param . second fst <$> bs) <$> local (first $ Map.union (Map.fromList bs)) (xcheck xtm tpR)
-  tp               -> do
-    name <- asks snd
-    throwError $ traceShow name $ NonFunType tp
+    E.TmLam (uncurry E.Param . second fst <$> bs) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm tpR)
+  tp               -> throwError $ NonFunType tp
 check (TmPrimBinOp op xtm0 xtm1) = \tp -> do
   unless (tp == retTp) $
     throwError $ TypeMismatch retTp tp
@@ -120,9 +124,10 @@ xinfer (tm, tmSpan) = wrapErrorWithSpan tmSpan (infer tm)
 infer :: Tm -> ToElaborated (Tp, E.Tm)
 infer (xtm `TmAnn` xtp)          = (fst xtp,) <$> xcheck xtm (fst xtp)
 infer (TmVar x)                  = do
-  currentFun <- asks snd
-  tell (Any (currentFun == x))
-  asks (Map.lookup x . fst) >>= maybe (throwError $ NotInScope x) (pure . (, E.TmVar x) . fst)
+  current <- asks currentDef
+  tell (Any (current == x))
+  mayLocalX <- asks (\d -> (fmap ((, E.TmVar x) . fst) . Map.lookup x $ localCtx d) <|> (fmap ((, E.TmGlobal x) . fst) . Map.lookup x $ topDefs d))
+  maybe (throwError $ NotInScope x) pure mayLocalX
 infer TmUnit                     = pure (TpUnit, E.TmUnit)
 infer TmTrue                     = pure (TpBool, E.TmTrue)
 infer TmFalse                    = pure (TpBool, E.TmFalse)
@@ -140,7 +145,7 @@ infer (TmIf xtm0 xtm1 xtm2)      = do
     _      -> throwError $ TypeMismatch TpBool tp0
 infer (TmLam xps xtm)            = do
   bs <- traverse xinferParam xps
-  tpR <- local (first $ Map.union (Map.fromList bs)) (xinfer xtm)
+  tpR <- local (addLocalCtx (Map.fromList bs)) (xinfer xtm)
   pure
     $ bimap
       (TpFun (fst . snd <$> bs))
@@ -192,6 +197,9 @@ inferParam (Param x mayTpP) = do
 
 primOpTypeBase :: PrimOpTypeBase Tp
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
+
+addLocalCtx :: Context -> ToElaboratedInfo -> ToElaboratedInfo
+addLocalCtx newctx info = info{ localCtx = Map.union newctx $ localCtx info }
 
 wrapErrorWithSpan :: SourceSpan -> ToElaborated a -> ToElaborated a
 wrapErrorWithSpan s m = catchError m $ throwError . (`OfSpan` s)

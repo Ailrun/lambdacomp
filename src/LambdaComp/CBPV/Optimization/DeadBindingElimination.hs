@@ -18,6 +18,7 @@ type WithFreeVars = Writer (Set Ident)
 
 deadLetElimination :: Tm c -> WithFreeVars (Tm c)
 deadLetElimination tm@(TmVar x)             = tm <$ tell (Set.singleton x)
+deadLetElimination tm@(TmGlobal _)          = pure tm
 deadLetElimination tm@TmUnit                = pure tm
 deadLetElimination tm@TmTrue                = pure tm
 deadLetElimination tm@TmFalse               = pure tm

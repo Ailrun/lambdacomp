@@ -61,7 +61,7 @@ fromList
             ( TmTo
                 ( TmApp
                     ( TmForce
-                        ( TmVar "u_sin" )
+                        ( TmGlobal "u_sin" )
                     )
                     ( TmDouble 0.5 )
                 ) "c_v_32"
@@ -166,7 +166,7 @@ fromList
                 ( TmTo
                     ( TmApp
                         ( TmForce
-                            ( TmVar "u_sinEntry" )
+                            ( TmGlobal "u_sinEntry" )
                         )
                         ( TmVar "u_x" )
                     ) "c_f1_16"
@@ -180,7 +180,7 @@ fromList
                         ( TmTo
                             ( TmApp
                                 ( TmForce
-                                    ( TmVar "u_sinEntry" )
+                                    ( TmGlobal "u_sinEntry" )
                                 )
                                 ( TmVar "u_x" )
                             ) "c_f1_17"
@@ -199,7 +199,7 @@ fromList
                                     ( TmTo
                                         ( TmApp
                                             ( TmForce
-                                                ( TmVar "u_sinEntry" )
+                                                ( TmGlobal "u_sinEntry" )
                                             )
                                             ( TmVar "u_x" )
                                         ) "c_f1_19"
@@ -218,7 +218,7 @@ fromList
                                                 ( TmTo
                                                     ( TmApp
                                                         ( TmForce
-                                                            ( TmVar "u_sinEntry" )
+                                                            ( TmGlobal "u_sinEntry" )
                                                         )
                                                         ( TmVar "u_x" )
                                                     ) "c_f1_21"
@@ -237,7 +237,7 @@ fromList
                                                             ( TmTo
                                                                 ( TmApp
                                                                     ( TmForce
-                                                                        ( TmVar "u_sinEntry" )
+                                                                        ( TmGlobal "u_sinEntry" )
                                                                     )
                                                                     ( TmVar "u_x" )
                                                                 ) "c_f1_23"
@@ -256,7 +256,7 @@ fromList
                                                                         ( TmTo
                                                                             ( TmApp
                                                                                 ( TmForce
-                                                                                    ( TmVar "u_sinEntry" )
+                                                                                    ( TmGlobal "u_sinEntry" )
                                                                                 )
                                                                                 ( TmVar "u_x" )
                                                                             ) "c_f1_25"
@@ -275,7 +275,7 @@ fromList
                                                                                     ( TmTo
                                                                                         ( TmApp
                                                                                             ( TmForce
-                                                                                                ( TmVar "u_sinEntry" )
+                                                                                                ( TmGlobal "u_sinEntry" )
                                                                                             )
                                                                                             ( TmVar "u_x" )
                                                                                         ) "c_f1_27"
@@ -294,7 +294,7 @@ fromList
                                                                                                 ( TmTo
                                                                                                     ( TmApp
                                                                                                         ( TmForce
-                                                                                                            ( TmVar "u_sinEntry" )
+                                                                                                            ( TmGlobal "u_sinEntry" )
                                                                                                         )
                                                                                                         ( TmVar "u_x" )
                                                                                                     ) "c_f1_29"
@@ -353,7 +353,7 @@ fromList
                             ( TmTo
                                 ( TmApp
                                     ( TmForce
-                                        ( TmVar "u_pow" )
+                                        ( TmGlobal "u_pow" )
                                     )
                                     ( TmVar "u_x" )
                                 ) "c_f1_12"
@@ -367,7 +367,7 @@ fromList
                                     ( TmTo
                                         ( TmApp
                                             ( TmForce
-                                                ( TmVar "u_fact" )
+                                                ( TmGlobal "u_fact" )
                                             )
                                             ( TmVar "u_n" )
                                         ) "c_inp_14"

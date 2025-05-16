@@ -20,6 +20,7 @@ inlineSimpleLet :: Tm c -> WithSimpleBinding (Tm c)
 inlineSimpleLet tm@(TmVar x)             = do
   mayTm' <- asks (Map.!? x)
   pure $ fromMaybe tm mayTm'
+inlineSimpleLet tm@(TmGlobal _)          = pure tm
 inlineSimpleLet tm@TmUnit                = pure tm
 inlineSimpleLet tm@TmTrue                = pure tm
 inlineSimpleLet tm@TmFalse               = pure tm
@@ -45,6 +46,7 @@ inlineSimpleLet (TmRec p tm)             = TmRec p <$> local (Map.insert (paramN
 
 isSimpleTm :: Ident -> Tm Val -> Bool
 isSimpleTm x (TmVar y)    = x /= y
+isSimpleTm _ (TmGlobal _) = True
 isSimpleTm _ TmUnit       = True
 isSimpleTm _ TmTrue       = True
 isSimpleTm _ TmFalse      = True

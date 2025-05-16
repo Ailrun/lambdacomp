@@ -31,6 +31,7 @@ commutingToUnder x = uncurry (commitToUnder x) . runWriter . commutingTo
 
 commutingTo :: Tm c -> CommutingTo c (Tm c)
 commutingTo tm@(TmVar _)             = tm
+commutingTo tm@(TmGlobal _)          = tm
 commutingTo tm@TmUnit                = tm
 commutingTo tm@TmTrue                = tm
 commutingTo tm@TmFalse               = tm
@@ -44,7 +45,7 @@ commutingTo (TmForce tm)             = pure . TmForce $ commutingTo tm
 commutingTo (TmReturn tm)            = pure . TmReturn $ commutingTo tm
 commutingTo (TmTo tm0 x tm1)         = do
   tm0' <- commutingTo tm0
-  tell [TmToPrefix (freeVarOfTm tm0') tm0' x]
+  tell [TmToPrefix (freeVarAndGlobalOfTm tm0') tm0' x]
   commutingTo tm1
 commutingTo (TmLet x tm0 tm1)        = TmLet x (commutingTo tm0) <$> commutingToUnder x tm1
 commutingTo (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingTo tm0) (commutingTo tm1)
@@ -77,6 +78,7 @@ liftingLetUnder x = uncurry (commitLetUnder x) . runWriter . liftingLet
 
 liftingLet :: Tm c -> LiftingLet c (Tm c)
 liftingLet tm@(TmVar _)             = tm
+liftingLet tm@(TmGlobal _)          = tm
 liftingLet tm@TmUnit                = tm
 liftingLet tm@TmTrue                = tm
 liftingLet tm@TmFalse               = tm

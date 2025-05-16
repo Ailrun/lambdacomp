@@ -49,7 +49,7 @@ instance ToC Program where
     then
       fmap showC
       . runWriterT
-      . fmap ((<> [forceThunkStmt (toVar "u_main")]) . join)
+      . fmap ((<> [forceThunkStmt (toGlobal "u_main")]) . join)
       . traverse (WriterT . toC)
       $ Map.toList prog
     else error "No main function is given!"
@@ -60,14 +60,15 @@ instance ToC (Ident, Tm Val) where
   toC :: (Ident, Tm Val) -> WithClosure (CData (Ident, Tm Val))
   toC (tmDefName, tmDefBody) = runWriterT $ do
     tmDefBody' <- WriterT $ toC tmDefBody
-    tell $ Dual [TmDef $ toVar tmDefName]
-    pure $ comment (show tmDefBody) : tmDefBody' False (toVar tmDefName)
+    tell $ Dual [TmDef $ toGlobal tmDefName]
+    pure $ comment (show tmDefBody) : tmDefBody' False (toGlobal tmDefName)
 
 instance ToC (Tm Val) where
   type CData (Tm Val) = (Bool -> String -> [String], Dual [TopDef])
 
   toC :: Tm Val -> WithClosure (CData (Tm Val))
   toC (TmVar x)    = getVar x >>= valueOfConst Nothing
+  toC (TmGlobal x) = getGlobal x >>= valueOfConst Nothing
   toC TmUnit       = valueOfConst (Just ".int_item") "0"
   toC TmTrue       = valueOfConst (Just ".int_item") "1"
   toC TmFalse      = valueOfConst (Just ".int_item") "0"
@@ -98,6 +99,9 @@ getVar x = do
   pure $ case mayInd of
       Just i  -> nthEnvItem i
       Nothing -> toVar x
+
+getGlobal :: Ident -> WithClosure String
+getGlobal x = pure $ toGlobal x
 
 thunkOfCode :: Int -> [Ident] -> [String] -> WithClosure ((Bool -> String -> [String], String -> [String]), Dual [TopDef])
 thunkOfCode thunkEnvSize thunkEnvVars thunkBody = do
@@ -305,6 +309,9 @@ underScope = id -- (["{"] <>) . (<> ["}"])
 
 toVar :: Ident -> String
 toVar (Ident x) = "var_" <> Text.unpack x
+
+toGlobal :: Ident -> String
+toGlobal (Ident x) = "top_" <> Text.unpack x
 
 retValue :: String
 retValue = "(*" <> retPointer <> ")"

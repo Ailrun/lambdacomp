@@ -17,12 +17,17 @@ import LambdaComp.Elaborated.Syntax
 import LambdaComp.PrimOp            (PrimOpTypeBase (..), getPrimOpType)
 
 type Context = Map Ident Tp
-type TypeCheck = ReaderT Context (Either TypeError)
+data TypeCheckInfo
+  = TypeCheckInfo
+    { topDefs :: Context
+    , localCtx :: Context
+    }
+type TypeCheck = ReaderT TypeCheckInfo (Either TypeError)
 
 runProgramInfer :: Program -> Either TypeError Context
 runProgramInfer = foldM go Map.empty
   where
-    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` ctx
+    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
 
 topInfer :: Top -> TypeCheck Tp
 topInfer = infer . tmDefBody
@@ -49,7 +54,8 @@ check tm                       = \tp -> do
     throwError $ TypeMismatch tp tp'
 
 infer :: Tm -> TypeCheck Tp
-infer (TmVar x)                = asks (Map.lookup x) >>= maybe (throwError $ NotInScope x) pure
+infer (TmVar x)                = asks (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
+infer (TmGlobal x)             = asks (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
 infer TmUnit                   = pure TpUnit
 infer TmTrue                   = pure TpBool
 infer TmFalse                  = pure TpBool
@@ -65,7 +71,7 @@ infer (TmIf tm0 tm1 tm2)       = do
         throwError $ BranchTypeMismatch tp1 tp2
       pure tp1
     _      -> throwError $ TypeMismatch TpBool tp0
-infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> local (flip (foldr' insertParam) ps) (infer tm)
+infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> local (insertParamsToInfo ps) (infer tm)
 infer (tmf `TmApp` tmas)       = do
   tpf <- infer tmf
   case tpf of
@@ -92,16 +98,23 @@ infer (TmPrintDouble tm0 tm1)  = do
   case tp0 of
     TpDouble -> infer tm1
     _        -> throwError $ TypeMismatch TpDouble tp0
-infer (TmRec p tm)             = paramType p <$ local (insertParam p) (check tm $ paramType p)
+infer (TmRec p tm)             = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
 
-insertParam :: Param -> Context -> Context
-insertParam Param {..} = Map.insert paramName paramType
+insertParamsToInfo :: [Param] -> TypeCheckInfo -> TypeCheckInfo
+insertParamsToInfo ps info = info{ localCtx = foldr' insertParamToContext (localCtx info) ps }
+
+insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
+insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }
+
+insertParamToContext :: Param -> Context -> Context
+insertParamToContext Param {..} = Map.insert paramName paramType
 
 primOpTypeBase :: PrimOpTypeBase Tp
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
 
 data TypeError where
   NotInScope         :: Ident -> TypeError
+  NotDefined         :: Ident -> TypeError
   TypeMismatch       :: Tp -> Tp -> TypeError
   BranchTypeMismatch :: Tp -> Tp -> TypeError
   InvalidConsType    :: Tp -> [Tp] -> TypeError

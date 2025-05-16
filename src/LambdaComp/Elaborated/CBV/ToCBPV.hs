@@ -57,6 +57,7 @@ instance ToCBPV Tm where
 
   toCBPV :: Tm -> CBPVData Tm
   toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar $ "u_" <> x
+  toCBPV (TmGlobal x)             = pure $ CBPV.TmReturn $ CBPV.TmGlobal $ "u_" <> x
   toCBPV TmUnit                   = pure $ CBPV.TmReturn CBPV.TmUnit
   toCBPV TmTrue                   = pure $ CBPV.TmReturn CBPV.TmTrue
   toCBPV TmFalse                  = pure $ CBPV.TmReturn CBPV.TmFalse

@@ -13,7 +13,7 @@ fromList
                     ( TmTo
                         ( TmTo
                             ( TmReturn
-                                ( TmVar "u_recF" )
+                                ( TmGlobal "u_recF" )
                             ) "c_f0_7"
                             ( TmApp
                                 ( TmForce

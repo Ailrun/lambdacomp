@@ -37,6 +37,7 @@ data Param where
 
 data Tm (c :: Class) where
   TmVar    :: !Ident -> Tm Val
+  TmGlobal :: !Ident -> Tm Val
   TmUnit   :: Tm Val
   TmTrue   :: Tm Val
   TmFalse  :: Tm Val
@@ -83,4 +84,21 @@ freeVarOfTm (TmPrimBinOp _ tm0 tm1) = freeVarOfTm tm0 `Set.union` freeVarOfTm tm
 freeVarOfTm (TmPrimUnOp _ tm)       = freeVarOfTm tm
 freeVarOfTm (TmPrintInt tm0 tm1)    = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
 freeVarOfTm (TmRec p tm)            = paramName p `Set.delete` freeVarOfTm tm
-freeVarOfTm _                       = Set.empty -- ground values
+freeVarOfTm _                       = Set.empty -- ground values/global defs
+
+freeVarAndGlobalOfTm :: Tm c -> Set Ident
+freeVarAndGlobalOfTm (TmVar x)               = Set.singleton x
+freeVarAndGlobalOfTm (TmGlobal x)            = Set.singleton x
+freeVarAndGlobalOfTm (TmThunk tm)            = freeVarOfTm tm
+freeVarAndGlobalOfTm (TmIf tm0 tm1 tm2)      = Set.unions [freeVarOfTm tm0, freeVarOfTm tm1, freeVarOfTm tm2]
+freeVarAndGlobalOfTm (TmLam p tm)            = paramName p `Set.delete` freeVarOfTm tm
+freeVarAndGlobalOfTm (tmf `TmApp` tma)       = freeVarOfTm tmf `Set.union` freeVarOfTm tma
+freeVarAndGlobalOfTm (TmForce tm)            = freeVarOfTm tm
+freeVarAndGlobalOfTm (TmReturn tm)           = freeVarOfTm tm
+freeVarAndGlobalOfTm (TmTo tm0 x tm1)        = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
+freeVarAndGlobalOfTm (TmLet x tm0 tm1)       = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
+freeVarAndGlobalOfTm (TmPrimBinOp _ tm0 tm1) = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
+freeVarAndGlobalOfTm (TmPrimUnOp _ tm)       = freeVarOfTm tm
+freeVarAndGlobalOfTm (TmPrintInt tm0 tm1)    = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
+freeVarAndGlobalOfTm (TmRec p tm)            = paramName p `Set.delete` freeVarOfTm tm
+freeVarAndGlobalOfTm _                       = Set.empty

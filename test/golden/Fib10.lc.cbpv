@@ -29,7 +29,7 @@ fromList
                                         ( TmTo
                                             ( TmTo
                                                 ( TmReturn
-                                                    ( TmVar "u_recFib" )
+                                                    ( TmGlobal "u_recFib" )
                                                 ) "c_f0_8"
                                                 ( TmApp
                                                     ( TmForce
@@ -74,7 +74,7 @@ fromList
                 ) "c_a0_9"
                 ( TmTo
                     ( TmReturn
-                        ( TmVar "u_fib" )
+                        ( TmGlobal "u_fib" )
                     ) "c_f0_9"
                     ( TmApp
                         ( TmForce

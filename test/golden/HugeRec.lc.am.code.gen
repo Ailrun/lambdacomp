@@ -1,10 +1,9 @@
 [ TmDefCodeSection
-    { tmDefCodeSectionName = "var_u_main"
-    , tmDefValue = VaThunk "sys_thunk_0"
-        [ AIdent "var_u_recF" ]
+    { tmDefCodeSectionName = "top_u_main"
+    , tmDefValue = VaThunk "sys_thunk_0" []
     }
 , TmDefCodeSection
-    { tmDefCodeSectionName = "var_u_recF"
+    { tmDefCodeSectionName = "top_u_recF"
     , tmDefValue = VaThunk "sys_thunk_4" []
     }
 , ThunkCodeSection
@@ -15,7 +14,7 @@
             ( VaInt 1000000 )
         , ICall
             ( VaAddr
-                ( ALocalEnv 0 )
+                ( AIdent "top_u_recF" )
             )
         , IEndScope
         , IReceive
@@ -28,7 +27,7 @@
             )
         , IExit
         ]
-    , thunkEnvSize = 1
+    , thunkEnvSize = 0
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
