@@ -1,12 +1,11 @@
-fromList
-    [
-        ( "u_main"
-        , TmThunk
-            ( TmPrintInt
-                ( TmInt 5 )
-                ( TmReturn
-                    ( TmInt 0 )
-                )
+[ TopTmDef
+    { tmDefName = "u_main"
+    , tmDefBody = TmThunk
+        ( TmPrintInt
+            ( TmInt 5 )
+            ( TmReturn
+                ( TmInt 0 )
             )
         )
-    ]
+    }
+]

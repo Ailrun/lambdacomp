@@ -12,7 +12,7 @@ import Control.Monad.Except           (MonadError (catchError, throwError))
 import Control.Monad.Reader           (MonadReader (local), ReaderT (runReaderT), asks)
 import Control.Monad.Trans.Writer.CPS (WriterT, runWriterT)
 import Control.Monad.Writer.CPS       (MonadWriter (listen, tell))
-import Data.Bifunctor                 (Bifunctor (bimap, second))
+import Data.Bifunctor                 (Bifunctor (bimap, first, second))
 import Data.Map                       (Map)
 import Data.Map                       qualified as Map
 import Data.Semigroup                 (Any (Any))
@@ -153,9 +153,16 @@ infer (TmLam xps xtm)            = do
       tpR
 infer (xtmf `TmApp` xtmas)       = do
   (tpf, tmf') <- xinfer xtmf
-  case tpf of
-    tpPs `TpFun` tpR -> (tpR ,) . E.TmApp tmf' <$> zipWithM xcheck xtmas tpPs
-    _                -> throwError $ NonFunType tpf
+  case flattenFunctionType tpf of
+    ([], _)                       -> throwError $ NonFunType tpf
+    (tpPs, tpR)
+      | tpPsLength == xtmasLength -> (tpR,) . E.TmApp tmf' <$> zipWithM xcheck xtmas tpPs
+      | tpPsLength > xtmasLength  -> (tpPsRest `TpFun` tpR,) . E.TmApp tmf' <$> zipWithM xcheck xtmas tpPsUsed
+      | otherwise                 -> throwError $ NonFunType tpR
+      where
+        tpPsLength = length tpPs
+        xtmasLength = length xtmas
+        (tpPsUsed, tpPsRest) = splitAt xtmasLength tpPs
 infer (TmPrimBinOp op xtm0 xtm1) =
   (retTp,) <$> liftA2 (E.TmPrimBinOp op) (xcheck xtm0 arg0Tp) (xcheck xtm1 arg1Tp)
   where
@@ -174,6 +181,10 @@ infer (TmPrintDouble xtm0 xtm1)  = do
   case tp0 of
     TpDouble -> second (E.TmPrintDouble tm0') <$> xinfer xtm1
     _        -> throwError $ TypeMismatch TpDouble tp0
+
+flattenFunctionType :: Tp -> ([Tp], Tp)
+flattenFunctionType (tpPs `TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
+flattenFunctionType tpR                = ([], tpR)
 
 xcheckParam :: XParam -> Tp -> ToElaborated (Ident, XTp)
 xcheckParam (param, paramSpan) tp = wrapErrorWithSpan paramSpan $ second (, paramSpan) <$> checkParam param tp

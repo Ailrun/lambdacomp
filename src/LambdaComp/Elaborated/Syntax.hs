@@ -11,11 +11,8 @@ import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 
 type Program = [Top]
 
-data Top
-  = TopTmDef
-    { tmDefName :: Ident
-    , tmDefBody :: Tm
-    }
+data Top where
+  TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm } -> Top
   deriving stock (Eq, Ord, Show)
 
 data Tp where

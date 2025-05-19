@@ -21,15 +21,9 @@ data SourceSpan where
 
 type Program = [XTop]
 
-data Top
-  = TopTmDecl
-    { tmDefName :: Ident
-    , tmDefType :: XTp
-    }
-  | TopTmDef
-    { tmDefName :: Ident
-    , tmDefBody :: XTm
-    }
+data Top where
+  TopTmDecl :: { tmDefName :: Ident, tmDefType :: XTp } -> Top
+  TopTmDef :: { tmDefName :: Ident, tmDefBody :: XTm } -> Top
   deriving stock (Eq, Ord, Show)
 
 type XTop = (Top, SourceSpan)

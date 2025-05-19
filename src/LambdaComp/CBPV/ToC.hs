@@ -13,7 +13,6 @@ import Data.Bifunctor              (Bifunctor (..))
 import Data.Functor.Identity       (Identity (..))
 import Data.Functor.Product        (Product (Pair))
 import Data.List                   (elemIndex)
-import Data.Map.Strict             qualified as Map
 import Data.Maybe                  (fromMaybe)
 import Data.Semigroup              (Dual (..))
 import Data.Set                    qualified as Set
@@ -27,12 +26,12 @@ runToC = (`runReader` []) . (`evalStateT` 0) . toC
 
 data TopDef
   = ThunkBodyDef
-    { thunkBodyName :: String
-    , thunkBody     :: [String]
-    , thunkEnvSize  :: Int
+    { cThunkBodyName :: String
+    , cThunkBody     :: [String]
+    , cThunkEnvSize  :: Int
     }
   | TmDef
-    { tmDefName :: String
+    { cTmDefName :: String
     }
 
 type WithClosure = FreshNameT (Reader [Ident])
@@ -45,20 +44,19 @@ instance ToC Program where
   type CData Program = String
 
   toC :: Program -> WithClosure (CData Program)
-  toC prog = if "u_main" `Map.member` prog
+  toC prog = if any ((== "u_main") . tmDefName) prog
     then
       fmap showC
       . runWriterT
       . fmap ((<> [forceThunkStmt (toGlobal "u_main")]) . join)
-      . traverse (WriterT . toC)
-      $ Map.toList prog
+      $ traverse (WriterT . toC) prog
     else error "No main function is given!"
 
-instance ToC (Ident, Tm Val) where
-  type CData (Ident, Tm Val) = ([String], Dual [TopDef])
+instance ToC Top where
+  type CData Top = ([String], Dual [TopDef])
 
-  toC :: (Ident, Tm Val) -> WithClosure (CData (Ident, Tm Val))
-  toC (tmDefName, tmDefBody) = runWriterT $ do
+  toC :: Top -> WithClosure (CData Top)
+  toC TopTmDef {..} = runWriterT $ do
     tmDefBody' <- WriterT $ toC tmDefBody
     tell $ Dual [TmDef $ toGlobal tmDefName]
     pure $ comment (show tmDefBody) : tmDefBody' False (toGlobal tmDefName)
@@ -104,21 +102,21 @@ getGlobal :: Ident -> WithClosure String
 getGlobal x = pure $ toGlobal x
 
 thunkOfCode :: Int -> [Ident] -> [String] -> WithClosure ((Bool -> String -> [String], String -> [String]), Dual [TopDef])
-thunkOfCode thunkEnvSize thunkEnvVars thunkBody = do
-  thunkBodyName <- freshNameOf "sys_thunk"
+thunkOfCode cThunkEnvSize cThunkEnvVars cThunkBody = do
+  cThunkBodyName <- freshNameOf "sys_thunk"
   let
     initializeThunk ifDef y
-      | ifDef     = [defineConstItemStmt y $ "{.thunk_item = {.code = " <> thunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"]
-      | otherwise = [assignStmt (y <> ".thunk_item.code") thunkBodyName, assignStmt (y <> ".thunk_item.env") initialThunkEnv]
+      | ifDef     = [defineConstItemStmt y $ "{.thunk_item = {.code = " <> cThunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"]
+      | otherwise = [assignStmt (y <> ".thunk_item.code") cThunkBodyName, assignStmt (y <> ".thunk_item.env") initialThunkEnv]
   envInitializations <- zipWithM
                         (\x idx -> (\v y -> assignStmt (nthItem (y <> ".thunk_item.env") idx) v) <$> getVar x)
-                        thunkEnvVars
+                        cThunkEnvVars
                         [(0 :: Int)..]
   pure ((initializeThunk, sequence envInitializations), Dual [ThunkBodyDef {..}])
   where
     initialThunkEnv
-      | thunkEnvSize > 0 = "(item *) malloc(" <> show thunkEnvSize <> " * sizeof(item))"
-      | otherwise        = nullPointer
+      | cThunkEnvSize > 0 = "(item *) malloc(" <> show cThunkEnvSize <> " * sizeof(item))"
+      | otherwise         = nullPointer
 
 instance ToC (Tm Com) where
   type CData (Tm Com) = ([String], Dual [TopDef])
@@ -230,21 +228,21 @@ showC (mainBody, topDefs) =
     realTopDefs = reverse . getDual $ topDefs
 
 showTopDefPrototype :: TopDef -> String
-showTopDefPrototype ThunkBodyDef {..} = "void " <> thunkBodyName <> "(item *const env, item *const ret);"
-showTopDefPrototype TmDef {..}        = "item " <> tmDefName <> ";"
+showTopDefPrototype ThunkBodyDef {..} = "void " <> cThunkBodyName <> "(item *const env, item *const ret);"
+showTopDefPrototype TmDef {..}        = "item " <> cTmDefName <> ";"
 
 showTopDef :: TopDef -> String
 showTopDef ThunkBodyDef {..} =
   unlines
-  $ [ "void " <> thunkBodyName <> "(" <> thunkEnvArg <> ", item *const ret)"
+  $ [ "void " <> cThunkBodyName <> "(" <> cThunkEnvArg <> ", item *const ret)"
     , "{"
     ]
-  <> thunkBody
+  <> cThunkBody
   <> ["}"]
   where
-    thunkEnvArg
-      | thunkEnvSize > 0 = "item *const env"
-      | otherwise        = "item *const _"
+    cThunkEnvArg
+      | cThunkEnvSize > 0 = "item *const env"
+      | otherwise         = "item *const _"
 showTopDef TmDef{}           = ""
 
 showMain :: [String] -> String

@@ -2,13 +2,12 @@
 {-# LANGUAGE LambdaCase      #-}
 {-# LANGUAGE RecordWildCards #-}
 module LambdaComp.CBPV.TypeCheck
-  ( topCheck
-  , topInfer
+  ( runProgramInfer
 
   , TypeError
   ) where
 
-import Control.Monad        (when)
+import Control.Monad        (foldM, when)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (MonadReader (local), ReaderT (runReaderT), asks)
 import Data.Map             (Map)
@@ -18,17 +17,20 @@ import LambdaComp.CBPV.Syntax
 import LambdaComp.PrimOp      (PrimOpTypeBase (..), getPrimOpType)
 
 type Context = Map Ident (Tp Val)
-type TypeCheck = ReaderT Context (Either TypeError)
+data TypeCheckInfo
+  = TypeCheckInfo
+    { topDefs :: Context
+    , localCtx :: Context
+    }
+type TypeCheck = ReaderT TypeCheckInfo (Either TypeError)
 
-topCheck :: Tm c -> Tp c -> Either TypeError ()
-topCheck tm = (`runReaderT` initialContext) . check tm
+runProgramInfer :: Program -> Either TypeError Program
+runProgramInfer p = p <$ foldM go Map.empty p
   where
-    initialContext = Map.empty
+    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
 
-topInfer :: Tm c -> Either TypeError (Tp c)
-topInfer = (`runReaderT` initialContext) . infer
-  where
-    initialContext = Map.empty
+topInfer :: Top -> TypeCheck (Tp Val)
+topInfer = infer . tmDefBody
 
 check :: Tm c -> Tp c -> TypeCheck ()
 check TmUnit                   = \case
@@ -55,18 +57,19 @@ check (TmReturn tm)            = \case
 check (TmTo tm0 x tm1)         = \tp -> do
   tp0 <- infer tm0
   case tp0 of
-    TpDown tp0' -> local (Map.insert x tp0') $ check tm1 tp
+    TpDown tp0' -> local (insertEntryToInfo x tp0') $ check tm1 tp
     _           -> throwError $ NonDownType tp0
 check (TmLet x tm0 tm1)        = \tp -> do
   tp0 <- infer tm0
-  local (Map.insert x tp0) $ check tm1 tp
+  local (insertEntryToInfo x tp0) $ check tm1 tp
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
-    throwError $ TypeMismatch tp tp'
+    throwError $ TypeMismatch "infer-to-check" tp tp'
 
 infer :: Tm c -> TypeCheck (Tp c)
-infer (TmVar x)                = asks (Map.lookup x) >>= maybe (throwError $ NotInScope x) pure
+infer (TmVar x)                = asks (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
+infer (TmGlobal x)             = asks (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
 infer TmUnit                   = pure TpUnit
 infer TmTrue                   = pure TpBool
 infer TmFalse                  = pure TpBool
@@ -82,8 +85,8 @@ infer (TmIf tm0 tm1 tm2)       = do
       if tp1 == tp2
         then pure tp1
         else throwError $ BranchTypeMismatch tp1 tp2
-    _      -> throwError $ TypeMismatch TpBool tpc
-infer (TmLam p tm)             = TpFun (paramType p) <$> local (insertParam p) (infer tm)
+    _      -> throwError $ TypeMismatch "If" TpBool tpc
+infer (TmLam p tm)             = TpFun (paramType p) <$> local (insertParamToInfo p) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
   case tpf of
@@ -98,11 +101,11 @@ infer (TmReturn tm)            = TpDown <$> infer tm
 infer (TmTo tm0 x tm1)         = do
   tp0 <- infer tm0
   case tp0 of
-    TpDown tp0' -> local (Map.insert x tp0') $ infer tm1
+    TpDown tp0' -> local (insertEntryToInfo x tp0') $ infer tm1
     _           -> throwError $ NonDownType tp0
 infer (TmLet x tm0 tm1)        = do
   tp0 <- infer tm0
-  local (Map.insert x tp0) $ infer tm1
+  local (insertEntryToInfo x tp0) $ infer tm1
 infer (TmPrimBinOp op tm0 tm1) = do
   check tm0 arg0Tp
   check tm1 arg1Tp
@@ -118,25 +121,33 @@ infer (TmPrintInt tm0 tm1)     = do
   tp0 <- infer tm0
   case tp0 of
     TpInt -> infer tm1
-    _     -> throwError $ TypeMismatch TpInt tp0
+    _     -> throwError $ TypeMismatch "PrintInt" TpInt tp0
 infer (TmPrintDouble tm0 tm1)  = do
   tp0 <- infer tm0
   case tp0 of
     TpDouble -> infer tm1
-    _        -> throwError $ TypeMismatch TpDouble tp0
-infer (TmRec p tm)             = tp <$ local (insertParam p) (check tm tp)
-  where
-    tp = TpDown (paramType p)
+    _        -> throwError $ TypeMismatch "PrintDouble" TpDouble tp0
+infer (TmRec p tm)             =
+  case paramType p of
+    TpUp tp -> tp <$ local (insertParamToInfo p) (check tm tp)
+    tp      -> throwError $ NonUpType tp
 
-insertParam :: Param -> Context -> Context
-insertParam Param {..} = Map.insert paramName paramType
+insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
+insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }
+
+insertEntryToInfo :: Ident -> Tp Val -> TypeCheckInfo -> TypeCheckInfo
+insertEntryToInfo x tp info = info{ localCtx = Map.insert x tp $ localCtx info }
+
+insertParamToContext :: Param -> Context -> Context
+insertParamToContext Param {..} = Map.insert paramName paramType
 
 primOpTypeBase :: PrimOpTypeBase (Tp Val)
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
 
 data TypeError where
   NotInScope         :: Ident -> TypeError
-  TypeMismatch       :: Tp c -> Tp c -> TypeError
+  NotDefined         :: Ident -> TypeError
+  TypeMismatch       :: String -> Tp c -> Tp c -> TypeError
   BranchTypeMismatch :: Tp c -> Tp c -> TypeError
   InvalidConsType    :: Tp Val -> [Tp Val] -> TypeError
   NonFunType         :: Tp Com -> TypeError

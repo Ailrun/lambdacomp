@@ -14,7 +14,7 @@ const item var_u_x = (global_stack.items[--global_stack.top]);
 
 void sys_thunk_2(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "u_x", paramType = TpUp (TpFun TpInt (TpDown TpInt))}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)) */
+/* TmLam (Param {paramName = "u_x", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)) */
 const item var_u_x = (global_stack.items[--global_stack.top]);
 (global_stack.items[global_stack.top++]).int_item = 5;
 const item sys_t_1 = var_u_x;
@@ -23,7 +23,7 @@ sys_t_1.thunk_item.code(sys_t_1.thunk_item.env, ret);
 
 void sys_thunk_5(item *const _, item *const ret)
 {
-/* TmLet "c_a0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmReturn (TmVar "u_x")))) (TmLet "c_f0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpUp (TpFun TpInt (TpDown TpInt))}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)))) (TmTo (TmApp (TmForce (TmVar "c_f0_1")) (TmVar "c_a0_1")) "c_v_2" (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 0))))) */
+/* TmLet "c_a0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmReturn (TmVar "u_x")))) (TmLet "c_f0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)))) (TmTo (TmApp (TmForce (TmVar "c_f0_1")) (TmVar "c_a0_1")) "c_v_2" (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 0))))) */
 const item var_c_a0_1 = {.thunk_item = {.code = sys_thunk_0, .env = NULL}};
 const item var_c_f0_1 = {.thunk_item = {.code = sys_thunk_2, .env = NULL}};
 (global_stack.items[global_stack.top++]) = var_c_a0_1;
@@ -41,7 +41,7 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmThunk (TmLet "c_a0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmReturn (TmVar "u_x")))) (TmLet "c_f0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpUp (TpFun TpInt (TpDown TpInt))}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)))) (TmTo (TmApp (TmForce (TmVar "c_f0_1")) (TmVar "c_a0_1")) "c_v_2" (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 0)))))) */
+/* TmThunk (TmLet "c_a0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmReturn (TmVar "u_x")))) (TmLet "c_f0_1" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmApp (TmForce (TmVar "u_x")) (TmInt 5)))) (TmTo (TmApp (TmForce (TmVar "c_f0_1")) (TmVar "c_a0_1")) "c_v_2" (TmPrintInt (TmVar "c_v_2") (TmReturn (TmInt 0)))))) */
 top_u_main.thunk_item.code = sys_thunk_5;
 top_u_main.thunk_item.env = NULL;
 top_u_main.thunk_item.code(top_u_main.thunk_item.env, ret);

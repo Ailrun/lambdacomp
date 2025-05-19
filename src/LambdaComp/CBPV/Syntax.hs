@@ -1,5 +1,6 @@
-{-# LANGUAGE GADTs    #-}
-{-# LANGUAGE TypeData #-}
+{-# LANGUAGE GADTs           #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE TypeData        #-}
 module LambdaComp.CBPV.Syntax
   ( module LambdaComp.CBPV.Syntax
   , module LambdaComp.Ident
@@ -11,12 +12,15 @@ import Data.Set qualified as Set
 
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
-import Data.Map.Strict (Map)
 
 type data Class where
   Val, Com :: Class
 
-type Program = Map Ident (Tm Val)
+type Program = [Top]
+
+data Top where
+  TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm Val } -> Top
+  deriving stock (Eq, Ord, Show)
 
 data Tp (c :: Class) where
   TpUnit   :: Tp Val
@@ -25,11 +29,16 @@ data Tp (c :: Class) where
   TpDouble :: Tp Val
   TpUp     :: Tp Com -> Tp Val
 
-  TpFun  :: Tp Val -> Tp Com -> Tp Com
+  (:->:) :: Tp Val -> Tp Com -> Tp Com
   TpDown :: Tp Val -> Tp Com
 deriving stock instance Eq (Tp c)
 deriving stock instance Ord (Tp c)
 deriving stock instance Show (Tp c)
+
+infixr 8 :->:
+
+pattern TpFun :: Tp Val -> Tp Com -> Tp Com
+pattern TpFun tp0 tp1 = tp0 :->: tp1
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !(Tp Val) } -> Param

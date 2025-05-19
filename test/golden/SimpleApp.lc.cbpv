@@ -1,66 +1,64 @@
-fromList
-    [
-        ( "u_main"
-        , TmThunk
+[ TopTmDef
+    { tmDefName = "u_main"
+    , tmDefBody = TmThunk
+        ( TmTo
             ( TmTo
+                ( TmReturn
+                    ( TmThunk
+                        ( TmLam
+                            ( Param
+                                { paramName = "u_x"
+                                , paramType = TpInt
+                                }
+                            )
+                            ( TmReturn
+                                ( TmVar "u_x" )
+                            )
+                        )
+                    )
+                ) "c_a0_1"
                 ( TmTo
                     ( TmReturn
                         ( TmThunk
                             ( TmLam
                                 ( Param
                                     { paramName = "u_x"
-                                    , paramType = TpInt
+                                    , paramType = TpUp ( TpInt :->: TpDown TpInt )
                                     }
                                 )
-                                ( TmReturn
-                                    ( TmVar "u_x" )
-                                )
-                            )
-                        )
-                    ) "c_a0_1"
-                    ( TmTo
-                        ( TmReturn
-                            ( TmThunk
-                                ( TmLam
-                                    ( Param
-                                        { paramName = "u_x"
-                                        , paramType = TpUp
-                                            ( TpFun TpInt ( TpDown TpInt ) )
-                                        }
-                                    )
+                                ( TmTo
+                                    ( TmReturn
+                                        ( TmInt 5 )
+                                    ) "c_a0_0"
                                     ( TmTo
                                         ( TmReturn
-                                            ( TmInt 5 )
-                                        ) "c_a0_0"
-                                        ( TmTo
-                                            ( TmReturn
-                                                ( TmVar "u_x" )
-                                            ) "c_f0_0"
-                                            ( TmApp
-                                                ( TmForce
-                                                    ( TmVar "c_f0_0" )
-                                                )
-                                                ( TmVar "c_a0_0" )
+                                            ( TmVar "u_x" )
+                                        ) "c_f0_0"
+                                        ( TmApp
+                                            ( TmForce
+                                                ( TmVar "c_f0_0" )
                                             )
+                                            ( TmVar "c_a0_0" )
                                         )
                                     )
                                 )
                             )
-                        ) "c_f0_1"
-                        ( TmApp
-                            ( TmForce
-                                ( TmVar "c_f0_1" )
-                            )
-                            ( TmVar "c_a0_1" )
                         )
+                    ) "c_f0_1"
+                    ( TmApp
+                        ( TmForce
+                            ( TmVar "c_f0_1" )
+                        )
+                        ( TmVar "c_a0_1" )
                     )
-                ) "c_v_2"
-                ( TmPrintInt
-                    ( TmVar "c_v_2" )
-                    ( TmReturn
-                        ( TmInt 0 )
-                    )
+                )
+            ) "c_v_2"
+            ( TmPrintInt
+                ( TmVar "c_v_2" )
+                ( TmReturn
+                    ( TmInt 0 )
                 )
             )
         )
-    ]
+    }
+]

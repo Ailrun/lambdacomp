@@ -9,6 +9,7 @@ module LambdaComp.Elaborated.TypeCheck
 import Control.Monad        (foldM, unless, when, zipWithM_)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (ReaderT (runReaderT), asks, local)
+import Data.Bifunctor       (Bifunctor (first))
 import Data.Foldable        (foldr')
 import Data.Map             (Map)
 import Data.Map             qualified as Map
@@ -24,8 +25,8 @@ data TypeCheckInfo
     }
 type TypeCheck = ReaderT TypeCheckInfo (Either TypeError)
 
-runProgramInfer :: Program -> Either TypeError Context
-runProgramInfer = foldM go Map.empty
+runProgramInfer :: Program -> Either TypeError Program
+runProgramInfer p = p <$ foldM go Map.empty p
   where
     go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
 
@@ -74,9 +75,16 @@ infer (TmIf tm0 tm1 tm2)       = do
 infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> local (insertParamsToInfo ps) (infer tm)
 infer (tmf `TmApp` tmas)       = do
   tpf <- infer tmf
-  case tpf of
-    tpPs `TpFun` tpR -> tpR <$ zipWithM_ check tmas tpPs
-    _                -> throwError $ NonFunType tpf
+  case flattenFunctionType tpf of
+    ([], _)                      -> throwError $ NonFunType tpf
+    (tpPs, tpR)
+      | tpPsLength == tmasLength -> tpR <$ zipWithM_ check tmas tpPs
+      | tpPsLength > tmasLength  -> tpPsRest `TpFun` tpR <$ zipWithM_ check tmas tpPsUsed
+      | otherwise                -> throwError $ NonFunType tpR
+      where
+        tpPsLength = length tpPs
+        tmasLength = length tmas
+        (tpPsUsed, tpPsRest) = splitAt tmasLength tpPs
 infer (TmPrimBinOp op tm0 tm1) = do
   check tm0 arg0Tp
   check tm1 arg1Tp
@@ -99,6 +107,10 @@ infer (TmPrintDouble tm0 tm1)  = do
     TpDouble -> infer tm1
     _        -> throwError $ TypeMismatch TpDouble tp0
 infer (TmRec p tm)             = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
+
+flattenFunctionType :: Tp -> ([Tp], Tp)
+flattenFunctionType (tpPs `TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
+flattenFunctionType tpR                = ([], tpR)
 
 insertParamsToInfo :: [Param] -> TypeCheckInfo -> TypeCheckInfo
 insertParamsToInfo ps info = info{ localCtx = foldr' insertParamToContext (localCtx info) ps }
