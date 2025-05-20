@@ -23,11 +23,11 @@ data Tp where
   TpDouble :: Tp
   (:->:)   :: ![Tp] -> Tp -> Tp
   deriving stock (Eq, Ord, Show)
-
 infixr 8 :->:
 
 pattern TpFun :: [Tp] -> Tp -> Tp
 pattern TpFun tpPs tpR = tpPs :->: tpR
+{-# COMPLETE TpUnit, TpBool, TpInt, TpDouble, TpFun #-}
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !Tp } -> Param

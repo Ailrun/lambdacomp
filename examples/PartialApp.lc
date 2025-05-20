@@ -1,0 +1,7 @@
+f : Int -> Int -> Int -> Int;;
+f = \x y z -> x + y + z;;
+
+g : Int -> Int -> Int;;
+g = f 3;;
+
+main = printInt g 2 5 before 0

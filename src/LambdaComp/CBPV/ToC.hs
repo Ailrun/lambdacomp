@@ -35,36 +35,37 @@ data TopDef
     }
 
 type WithClosure = FreshNameT (Reader [Ident])
+type WithClosureAndTop = WriterT (Dual [TopDef]) WithClosure
 
 class ToC a where
   type CData a
-  toC :: a -> WithClosure (CData a)
+  toC :: a -> CData a
 
 instance ToC Program where
-  type CData Program = String
+  type CData Program = WithClosure String
 
-  toC :: Program -> WithClosure (CData Program)
+  toC :: Program -> CData Program
   toC prog = if any ((== "u_main") . tmDefName) prog
     then
       fmap showC
       . runWriterT
       . fmap ((<> [forceThunkStmt (toGlobal "u_main")]) . join)
-      $ traverse (WriterT . toC) prog
+      $ traverse toC prog
     else error "No main function is given!"
 
 instance ToC Top where
-  type CData Top = ([String], Dual [TopDef])
+  type CData Top = WithClosureAndTop [String]
 
-  toC :: Top -> WithClosure (CData Top)
-  toC TopTmDef {..} = runWriterT $ do
-    tmDefBody' <- WriterT $ toC tmDefBody
+  toC :: Top -> CData Top
+  toC TopTmDef {..} = do
+    tmDefBody' <- toC tmDefBody
     tell $ Dual [TmDef $ toGlobal tmDefName]
     pure $ comment (show tmDefBody) : tmDefBody' False (toGlobal tmDefName)
 
 instance ToC (Tm Val) where
-  type CData (Tm Val) = (Bool -> String -> [String], Dual [TopDef])
+  type CData (Tm Val) = WithClosureAndTop (Bool -> String -> [String])
 
-  toC :: Tm Val -> WithClosure (CData (Tm Val))
+  toC :: Tm Val -> CData (Tm Val)
   toC (TmVar x)    = getVar x >>= valueOfConst Nothing
   toC (TmGlobal x) = getGlobal x >>= valueOfConst Nothing
   toC TmUnit       = valueOfConst (Just ".int_item") "0"
@@ -72,38 +73,36 @@ instance ToC (Tm Val) where
   toC TmFalse      = valueOfConst (Just ".int_item") "0"
   toC (TmInt n)    = valueOfConst (Just ".int_item") $ show n
   toC (TmDouble f) = valueOfConst (Just ".double_item") $ show f
-  toC (TmThunk tm) = runWriterT $ do
-    thunkBody <- WriterT $ local (const thunkEnvVars) $ toC tm
-    uncurry (<>) . second const <$> WriterT (thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : thunkBody))
+  toC (TmThunk tm) = do
+    thunkBody <- local (const thunkEnvVars) $ toC tm
+    uncurry (<>) . second const <$> thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : thunkBody)
     where
       thunkEnvSize = Set.size thunkEnv
       thunkEnv = freeVarOfTm tm
       thunkEnvVars = Set.toList thunkEnv
 
-valueOfConst :: Maybe String -> String -> WithClosure (CData (Tm Val))
+valueOfConst :: Maybe String -> String -> CData (Tm Val)
 valueOfConst mayMem c =
   pure
-  ( \isDef y ->
-      [ if isDef
+  $ \isDef y ->
+      pure
+      $ if isDef
         then defineConstItemStmt y (maybe c (\mem -> "{" <> mem <> " = " <> c <> "}") mayMem)
         else assignStmt (y <> fromMaybe "" mayMem) c
-      ]
-  , Dual []
-  )
 
-getVar :: Ident -> WithClosure String
+getVar :: Ident -> WithClosureAndTop String
 getVar x = do
   mayInd <- asks (elemIndex x)
   pure $ case mayInd of
       Just i  -> nthEnvItem i
       Nothing -> toVar x
 
-getGlobal :: Ident -> WithClosure String
+getGlobal :: Ident -> WithClosureAndTop String
 getGlobal x = pure $ toGlobal x
 
-thunkOfCode :: Int -> [Ident] -> [String] -> WithClosure ((Bool -> String -> [String], String -> [String]), Dual [TopDef])
+thunkOfCode :: Int -> [Ident] -> [String] -> WithClosureAndTop (Bool -> String -> [String], String -> [String])
 thunkOfCode cThunkEnvSize cThunkEnvVars cThunkBody = do
-  cThunkBodyName <- freshNameOf "sys_thunk"
+  cThunkBodyName <- lift $ freshNameOf "sys_thunk"
   let
     initializeThunk ifDef y
       | ifDef     = [defineConstItemStmt y $ "{.thunk_item = {.code = " <> cThunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"]
@@ -112,63 +111,64 @@ thunkOfCode cThunkEnvSize cThunkEnvVars cThunkBody = do
                         (\x idx -> (\v y -> assignStmt (nthItem (y <> ".thunk_item.env") idx) v) <$> getVar x)
                         cThunkEnvVars
                         [(0 :: Int)..]
-  pure ((initializeThunk, sequence envInitializations), Dual [ThunkBodyDef {..}])
+  tell $ Dual [ThunkBodyDef {..}]
+  pure (initializeThunk, sequence envInitializations)
   where
     initialThunkEnv
       | cThunkEnvSize > 0 = "(item *) malloc(" <> show cThunkEnvSize <> " * sizeof(item))"
       | otherwise         = nullPointer
 
 instance ToC (Tm Com) where
-  type CData (Tm Com) = ([String], Dual [TopDef])
+  type CData (Tm Com) = WithClosureAndTop [String]
 
-  toC :: Tm Com -> WithClosure (CData (Tm Com))
-  toC (TmIf tm0 tm1 tm2) = runWriterT $ do
-    tm0Code <- WriterT $ toC tm0
-    tm1Code <- WriterT $ toC tm1
-    tm2Code <- WriterT $ toC tm2
+  toC :: Tm Com -> CData (Tm Com)
+  toC (TmIf tm0 tm1 tm2) = do
+    tm0Code <- toC tm0
+    tm1Code <- toC tm1
+    tm2Code <- toC tm2
     c <- lift $ freshNameOf "sys_c"
     pure (tm0Code True c <> [ifStmt (intItem c) tm1Code tm2Code])
-  toC (TmLam p tm) = first (underScope . (globalStackPopStmt (toVar (paramName p)) :)) <$> toC tm
-  toC (tmf `TmApp` tma) = runWriterT $ liftA2 (<>) (globalStackPushStmt <$> WriterT (toC tma)) (WriterT $ toC tmf)
-  toC (TmForce tm) = runWriterT $ do
-    tmCode <- WriterT $ toC tm
+  toC (TmLam p tm) = underScope . (globalStackPopStmt (toVar (paramName p)) :) <$> toC tm
+  toC (tmf `TmApp` tma) = liftA2 (<>) (globalStackPushStmt <$> toC tma) (toC tmf)
+  toC (TmForce tm) = do
+    tmCode <- toC tm
     thunk <- lift $ freshNameOf "sys_t"
     pure (tmCode True thunk <> [forceThunkStmt thunk])
-  toC (TmReturn tm) = runWriterT $ do
-    tmCode <- WriterT $ toC tm
+  toC (TmReturn tm) = do
+    tmCode <- toC tm
     pure $ tmCode False retValue
-  toC (TmTo tm0 x tm1) = runWriterT $ do
-    tm0Code <- WriterT $ toC tm0
-    tm1Code <- WriterT $ toC tm1
+  toC (TmTo tm0 x tm1) = do
+    tm0Code <- toC tm0
+    tm1Code <- toC tm1
     pure (tm0Code <> underScope (defineConstItemStmt (toVar x) retValue : tm1Code))
-  toC (TmLet x tm0 tm1) = runWriterT $ do
-    tm0Code <- WriterT $ toC tm0
-    tm1Code <- WriterT $ toC tm1
+  toC (TmLet x tm0 tm1) = do
+    tm0Code <- toC tm0
+    tm1Code <- toC tm1
     pure (underScope (tm0Code True (toVar x) <> tm1Code))
-  toC (TmPrimBinOp op tm0 tm1) = runWriterT $ do
-    tm0Code <- WriterT $ toC tm0
-    tm1Code <- WriterT $ toC tm1
+  toC (TmPrimBinOp op tm0 tm1) = do
+    tm0Code <- toC tm0
+    tm1Code <- toC tm1
     Pair (Identity arg0) (Identity arg1) <- lift $ freshNamesOf (Pair "sys_arg0" "sys_arg1")
-    opCode <- WriterT $ toC op
+    opCode <- lift $ toC op
     pure (underScope (tm0Code True arg0 <> tm1Code True arg1 <> [opCode arg0 arg1 retValue]))
-  toC (TmPrimUnOp op tm) = runWriterT $ do
-    tmCode <- WriterT $ toC tm
+  toC (TmPrimUnOp op tm) = do
+    tmCode <- toC tm
     arg <- lift $ freshNameOf "sys_arg"
-    opCode <- WriterT $ toC op
+    opCode <- lift $ toC op
     pure (underScope (tmCode True arg <> [opCode arg retValue]))
-  toC (TmPrintInt tm0 tm1) = runWriterT $ do
-    tm0Code <- WriterT $ toC tm0
-    tm1Code <- WriterT $ toC tm1
+  toC (TmPrintInt tm0 tm1) = do
+    tm0Code <- toC tm0
+    tm1Code <- toC tm1
     msg <- lift $ freshNameOf "sys_msg"
     pure (tm0Code True msg <> (printlnAsIntStmt msg : tm1Code))
-  toC (TmPrintDouble tm0 tm1) = runWriterT $ do
-    tm0Code <- WriterT $ toC tm0
-    tm1Code <- WriterT $ toC tm1
+  toC (TmPrintDouble tm0 tm1) = do
+    tm0Code <- toC tm0
+    tm1Code <- toC tm1
     msg <- lift $ freshNameOf "sys_msg"
     pure (tm0Code True msg <> (printlnAsDoubleStmt msg : tm1Code))
-  toC (TmRec p tm) = runWriterT $ do
-    tmCode <- WriterT $ local (const thunkEnvVars) $ toC tm
-    (thunkInit, inits) <- WriterT $ thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
+  toC (TmRec p tm) = do
+    tmCode <- local (const thunkEnvVars) $ toC tm
+    (thunkInit, inits) <- thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
     pure (thunkInit True xVar <> inits xVar <> [forceThunkStmt xVar])
     where
       xVar = toVar (paramName p)
@@ -177,42 +177,42 @@ instance ToC (Tm Com) where
       thunkEnvVars = Set.toList thunkEnv
 
 instance ToC (PrimOp Binary) where
-  type CData (PrimOp Binary) = (String -> String -> String -> String, Dual [TopDef])
+  type CData (PrimOp Binary) = WithClosure (String -> String -> String -> String)
 
-  toC :: PrimOp Binary -> WithClosure (CData (PrimOp Binary))
-  toC PrimIAdd = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " + " <> intItem arg1)
-  toC PrimISub = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " - " <> intItem arg1)
-  toC PrimIMul = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " * " <> intItem arg1)
-  toC PrimIDiv = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " / " <> intItem arg1)
-  toC PrimIMod = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " % " <> intItem arg1)
-  toC PrimIEq  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " == " <> intItem arg1)
-  toC PrimINEq = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " != " <> intItem arg1)
-  toC PrimILt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " < " <> intItem arg1)
-  toC PrimILe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " <= " <> intItem arg1)
-  toC PrimIGt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " > " <> intItem arg1)
-  toC PrimIGe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " >= " <> intItem arg1)
-  toC PrimDAdd = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " + " <> doubleItem arg1)
-  toC PrimDSub = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " - " <> doubleItem arg1)
-  toC PrimDMul = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " * " <> doubleItem arg1)
-  toC PrimDDiv = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " / " <> doubleItem arg1)
-  toC PrimDEq  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " == " <> doubleItem arg1)
-  toC PrimDNEq = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " != " <> doubleItem arg1)
-  toC PrimDLt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " < " <> doubleItem arg1)
-  toC PrimDLe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " <= " <> doubleItem arg1)
-  toC PrimDGt  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " > " <> doubleItem arg1)
-  toC PrimDGe  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " >= " <> doubleItem arg1)
-  toC PrimBAnd = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " && " <> intItem arg1)
-  toC PrimBOr  = runWriterT . pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " || " <> intItem arg1)
+  toC :: PrimOp Binary -> CData (PrimOp Binary)
+  toC PrimIAdd = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " + " <> intItem arg1)
+  toC PrimISub = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " - " <> intItem arg1)
+  toC PrimIMul = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " * " <> intItem arg1)
+  toC PrimIDiv = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " / " <> intItem arg1)
+  toC PrimIMod = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " % " <> intItem arg1)
+  toC PrimIEq  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " == " <> intItem arg1)
+  toC PrimINEq = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " != " <> intItem arg1)
+  toC PrimILt  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " < " <> intItem arg1)
+  toC PrimILe  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " <= " <> intItem arg1)
+  toC PrimIGt  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " > " <> intItem arg1)
+  toC PrimIGe  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " >= " <> intItem arg1)
+  toC PrimDAdd = pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " + " <> doubleItem arg1)
+  toC PrimDSub = pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " - " <> doubleItem arg1)
+  toC PrimDMul = pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " * " <> doubleItem arg1)
+  toC PrimDDiv = pure $ \arg0 arg1 ret -> assignStmt (doubleItem ret) (doubleItem arg0 <> " / " <> doubleItem arg1)
+  toC PrimDEq  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " == " <> doubleItem arg1)
+  toC PrimDNEq = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " != " <> doubleItem arg1)
+  toC PrimDLt  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " < " <> doubleItem arg1)
+  toC PrimDLe  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " <= " <> doubleItem arg1)
+  toC PrimDGt  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " > " <> doubleItem arg1)
+  toC PrimDGe  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (doubleItem arg0 <> " >= " <> doubleItem arg1)
+  toC PrimBAnd = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " && " <> intItem arg1)
+  toC PrimBOr  = pure $ \arg0 arg1 ret -> assignStmt (intItem ret) (intItem arg0 <> " || " <> intItem arg1)
 
 instance ToC (PrimOp Unary) where
-  type CData (PrimOp Unary) = (String -> String -> String, Dual [TopDef])
+  type CData (PrimOp Unary) = WithClosure (String -> String -> String)
 
-  toC :: PrimOp Unary -> WithClosure (CData (PrimOp Unary))
-  toC PrimINeg = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("- " <> intItem arg)
-  toC PrimIToD = runWriterT . pure $ \arg ret -> assignStmt (doubleItem ret) ("(double)" <> intItem arg)
-  toC PrimDNeg = runWriterT . pure $ \arg ret -> assignStmt (doubleItem ret) ("- " <> doubleItem arg)
-  toC PrimDToI = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("(int)" <> doubleItem arg)
-  toC PrimBNot = runWriterT . pure $ \arg ret -> assignStmt (intItem ret) ("! " <> intItem arg)
+  toC :: PrimOp Unary -> CData (PrimOp Unary)
+  toC PrimINeg = pure $ \arg ret -> assignStmt (intItem ret) ("- " <> intItem arg)
+  toC PrimIToD = pure $ \arg ret -> assignStmt (doubleItem ret) ("(double)" <> intItem arg)
+  toC PrimDNeg = pure $ \arg ret -> assignStmt (doubleItem ret) ("- " <> doubleItem arg)
+  toC PrimDToI = pure $ \arg ret -> assignStmt (intItem ret) ("(int)" <> doubleItem arg)
+  toC PrimBNot = pure $ \arg ret -> assignStmt (intItem ret) ("! " <> intItem arg)
 
 showC :: ([String], Dual [TopDef]) -> String
 showC (mainBody, topDefs) =

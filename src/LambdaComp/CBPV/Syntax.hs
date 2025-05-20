@@ -34,11 +34,10 @@ data Tp (c :: Class) where
 deriving stock instance Eq (Tp c)
 deriving stock instance Ord (Tp c)
 deriving stock instance Show (Tp c)
-
 infixr 8 :->:
-
 pattern TpFun :: Tp Val -> Tp Com -> Tp Com
 pattern TpFun tp0 tp1 = tp0 :->: tp1
+{-# COMPLETE TpUnit, TpBool, TpInt, TpDouble, TpUp, TpFun, TpDown #-}
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !(Tp Val) } -> Param

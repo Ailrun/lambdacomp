@@ -32,10 +32,7 @@ instance ToCBPV Top where
   toCBPV :: Top -> CBPVData Top
   toCBPV TopTmDef {..} = do
     tmDefBody' <- toCBPV tmDefBody
-    let tmDefBody'' =
-          case tmDefBody' of
-            CBPV.TmReturn tm -> tm
-            _                -> CBPV.TmThunk tmDefBody'
+    let tmDefBody'' = CBPV.TmThunk tmDefBody'
     pure $ CBPV.TopTmDef ("u_" <> tmDefName) tmDefBody''
 
 instance ToCBPV Tp where
@@ -53,7 +50,7 @@ instance ToCBPV Tm where
 
   toCBPV :: Tm -> CBPVData Tm
   toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar $ "u_" <> x
-  toCBPV (TmGlobal x)             = pure $ CBPV.TmReturn $ CBPV.TmGlobal $ "u_" <> x
+  toCBPV (TmGlobal x)             = pure $ CBPV.TmForce $ CBPV.TmGlobal $ "u_" <> x
   toCBPV TmUnit                   = pure $ CBPV.TmReturn CBPV.TmUnit
   toCBPV TmTrue                   = pure $ CBPV.TmReturn CBPV.TmTrue
   toCBPV TmFalse                  = pure $ CBPV.TmReturn CBPV.TmFalse

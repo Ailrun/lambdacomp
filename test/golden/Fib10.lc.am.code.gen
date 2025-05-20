@@ -1,14 +1,14 @@
 [ TmDefCodeSection
     { tmDefCodeSectionName = "top_u_recFib"
-    , tmDefValue = VaThunk "sys_thunk_5" []
-    }
-, TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_fib"
     , tmDefValue = VaThunk "sys_thunk_6" []
     }
 , TmDefCodeSection
+    { tmDefCodeSectionName = "top_u_fib"
+    , tmDefValue = VaThunk "sys_thunk_8" []
+    }
+, TmDefCodeSection
     { tmDefCodeSectionName = "top_u_main"
-    , tmDefValue = VaThunk "sys_thunk_7" []
+    , tmDefValue = VaThunk "sys_thunk_9" []
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
@@ -196,8 +196,25 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_6"
     , thunkCode =
+        [ ISetReturn
+            ( VaThunk "sys_thunk_5" [] )
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_7"
+    , thunkCode =
         [ IPop
             ( AIdent "var_u_n" )
+        , IScope
+        , ICall
+            ( VaAddr
+                ( AIdent "top_u_recFib" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f0_8" )
         , IScope
         , IPush
             ( VaAddr
@@ -205,7 +222,7 @@
             )
         , ICall
             ( VaAddr
-                ( AIdent "top_u_recFib" )
+                ( AIdent "var_c_f0_8" )
             )
         , IEndScope
         , IReceive
@@ -241,13 +258,30 @@
     , thunkEnvSize = 0
     }
 , ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_7"
+    { thunkCodeSectionName = "sys_thunk_8"
     , thunkCode =
-        [ IPush
-            ( VaInt 10 )
+        [ ISetReturn
+            ( VaThunk "sys_thunk_7" [] )
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_9"
+    , thunkCode =
+        [ IScope
         , ICall
             ( VaAddr
                 ( AIdent "top_u_fib" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f0_9" )
+        , IPush
+            ( VaInt 10 )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f0_9" )
             )
         , IExit
         ]
