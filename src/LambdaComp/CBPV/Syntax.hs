@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs           #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE TypeData        #-}
 module LambdaComp.CBPV.Syntax
@@ -22,6 +21,7 @@ data Top where
   TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm Com } -> Top
   deriving stock (Eq, Ord, Show)
 
+type role Tp nominal
 data Tp (c :: Class) where
   TpUnit   :: Tp Val
   TpBool   :: Tp Val
@@ -43,6 +43,7 @@ data Param where
   Param :: { paramName :: !Ident, paramType :: !(Tp Val) } -> Param
   deriving stock (Eq, Ord, Show)
 
+type role Tm nominal
 data Tm (c :: Class) where
   TmVar    :: !Ident -> Tm Val
   TmGlobal :: !Ident -> Tm Val

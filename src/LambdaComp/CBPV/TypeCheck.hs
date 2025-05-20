@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs           #-}
 {-# LANGUAGE LambdaCase      #-}
 {-# LANGUAGE RecordWildCards #-}
 module LambdaComp.CBPV.TypeCheck

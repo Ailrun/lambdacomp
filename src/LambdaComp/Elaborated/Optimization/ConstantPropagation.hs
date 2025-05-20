@@ -1,10 +1,10 @@
-{-# LANGUAGE GADTs #-}
 module LambdaComp.Elaborated.Optimization.ConstantPropagation
   ( runConstantsPropagation
   ) where
 
-import LambdaComp.Elaborated.Syntax
 import Data.Maybe (fromMaybe)
+
+import LambdaComp.Elaborated.Syntax
 
 runConstantsPropagation :: Tm -> Tm
 runConstantsPropagation = propagateConstants

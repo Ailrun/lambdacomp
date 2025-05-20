@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs        #-}
 {-# LANGUAGE TypeFamilies #-}
 module LambdaComp.CBPV.Optimization.BindingConversion
   ( runCommutingTo

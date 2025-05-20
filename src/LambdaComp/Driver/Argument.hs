@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings      #-}
 {-# LANGUAGE TypeData               #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 module LambdaComp.Driver.Argument
@@ -19,10 +18,12 @@ import Options.Applicative
 type data BackendType where
   DirectCBackendType, AMBackendType :: BackendType
 
+type role Backend nominal
 data Backend (c :: BackendType) where
   DirectCBackend :: Backend DirectCBackendType
   AMBackend :: Backend AMBackendType
 
+type role Phase nominal
 data Phase (c :: BackendType) where
   UntilAST            :: Phase c
   UntilElaboration    :: Phase c

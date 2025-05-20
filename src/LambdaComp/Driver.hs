@@ -1,7 +1,7 @@
-{-# LANGUAGE GADTs             #-}
-{-# LANGUAGE LambdaCase        #-}
-{-# LANGUAGE OverloadedStrings #-}
-module LambdaComp.Driver where
+{-# LANGUAGE LambdaCase #-}
+module LambdaComp.Driver
+  ( mainFuncWithOptions
+  ) where
 
 import Paths_lambdacomp (getDataDir)
 

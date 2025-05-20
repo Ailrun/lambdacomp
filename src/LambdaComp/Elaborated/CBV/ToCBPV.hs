@@ -1,7 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
-{-# LANGUAGE TypeFamilies      #-}
-module LambdaComp.Elaborated.CBV.ToCBPV where
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies    #-}
+module LambdaComp.Elaborated.CBV.ToCBPV
+  ( runToCBPV
+  ) where
 
 import Control.Monad.State.Strict (evalState)
 import Data.Functor.Identity      (Identity (..))

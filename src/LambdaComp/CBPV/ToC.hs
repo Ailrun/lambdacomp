@@ -1,7 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
-{-# LANGUAGE TypeFamilies      #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies    #-}
+{-# LANGUAGE ViewPatterns    #-}
 module LambdaComp.CBPV.ToC
   ( runToC
   ) where
@@ -17,11 +16,11 @@ import Data.List                   (elemIndex)
 import Data.Maybe                  (fromMaybe)
 import Data.Semigroup              (Dual (..))
 import Data.Set                    qualified as Set
+import Data.String                 (IsString (fromString))
 import Data.Text                   qualified as Text
 
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName   (FreshNameT, freshNameOf, freshNamesOf)
-import Data.String (IsString(fromString))
 
 runToC :: Program -> String
 runToC = (`runReader` []) . (`evalStateT` 0) . toC

@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module LambdaComp.FreshName
   ( FreshNameT
   , FreshName
@@ -17,7 +16,7 @@ import Data.String                (IsString (..))
 type FreshNameT = StateT Integer
 type FreshName = FreshNameT Identity
 
-makeFreshNameIndex :: (Monad m, Semigroup s, IsString s) => FreshNameT m s
+makeFreshNameIndex :: (Monad m, IsString s) => FreshNameT m s
 makeFreshNameIndex = fromString . show <$> state (\i -> (i, 1 + i))
 
 freshNameOf :: (Monad m, Semigroup s, IsString s) => s -> FreshNameT m s
@@ -30,6 +29,8 @@ freshNamesOf stems = do
 
 runFreshNameT :: Monad m => FreshNameT m a -> m a
 runFreshNameT = (`evalStateT` 0)
+{-# INLINE runFreshNameT #-}
 
 runFreshName :: FreshName a -> a
 runFreshName = (`evalState` 0)
+{-# INLINE runFreshName #-}

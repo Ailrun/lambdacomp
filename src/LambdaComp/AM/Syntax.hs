@@ -13,7 +13,7 @@ import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 data Addr where
   AIdent    :: !Ident -> Addr
   ALocalEnv :: !Int -> Addr
-  deriving (Eq, Show)
+  deriving stock (Eq, Show)
 
 instance IsString Addr where
   fromString = AIdent . fromString
@@ -25,7 +25,7 @@ data Value where
   VaDouble :: !Double -> Value
   VaThunk  :: !Ident -> !(Vector Addr) -> Value
   VaAddr   :: !Addr -> Value
-  deriving Show
+  deriving stock Show
 
 instance IsString Value where
   fromString = VaAddr . fromString
@@ -48,17 +48,11 @@ data Inst where
   IPrintDouble :: !Value -> Inst
   IExit        :: Inst
   IEndScope    :: Inst
-  deriving Show
+  deriving stock Show
 
 type Code = Vector Inst
 
-data CodeSection
-  = ThunkCodeSection
-    { thunkCodeSectionName :: !Ident
-    , thunkCode            :: !Code
-    , thunkEnvSize         :: !Int
-    }
-  | TmDefCodeSection
-    { tmDefCode            :: !Code
-    }
-  deriving Show
+data CodeSection where
+  ThunkCodeSection :: { thunkCodeSectionName :: !Ident, thunkCode :: !Code, thunkEnvSize :: !Int } -> CodeSection
+  TmDefCodeSection :: { tmDefCode :: !Code } -> CodeSection
+  deriving stock Show

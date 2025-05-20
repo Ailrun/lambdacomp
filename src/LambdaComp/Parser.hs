@@ -1,10 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE ApplicativeDo   #-}
+{-# LANGUAGE RecordWildCards #-}
 module LambdaComp.Parser
   ( runProgramParser
   ) where
 
-import Control.Monad                  (void, join)
+import Control.Monad                  (join, void)
 import Control.Monad.Combinators.Expr qualified as Expr
 import Data.Bifunctor                 (Bifunctor (first))
 import Data.Char                      (isAlphaNum, isLower)
@@ -71,29 +71,32 @@ xtm :: Parser XTm
 xtm = withSourceSpan (tmLam <|> tmIf <|> tmPrintInt <|> tmPrintDouble) <|> Expr.makeExprParser atomicXTm tmTable
 
 tmLam :: Parser Tm
-tmLam =
-  TmLam . join
-  <$> some (between (symbol "\\") (symbol "->") . some $ withSourceSpan param)
-  <*> xtm
+tmLam = do
+  ps <- join <$> some (between (symbol "\\") (symbol "->") . some $ withSourceSpan param)
+  TmLam ps <$> xtm
 
 tmIf :: Parser Tm
-tmIf =
-  TmIf <$ keyword "if"
-  <*> xtm <* keyword "then"
-  <*> xtm <* keyword "else"
-  <*> xtm
+tmIf = do
+  keyword "if"
+  xtm0 <- xtm
+  keyword "then"
+  xtm1 <- xtm
+  keyword "else"
+  TmIf xtm0 xtm1 <$> xtm
 
 tmPrintInt :: Parser Tm
-tmPrintInt =
-  TmPrintInt <$ keyword "printInt"
-  <*> xtm <* keyword "before"
-  <*> xtm
+tmPrintInt = do
+  keyword "printInt"
+  xtm0 <- xtm
+  keyword "before"
+  TmPrintInt xtm0 <$> xtm
 
 tmPrintDouble :: Parser Tm
-tmPrintDouble =
-  TmPrintDouble <$ keyword "printDouble"
-  <*> xtm <* keyword "before"
-  <*> xtm
+tmPrintDouble = do
+  keyword "printDouble"
+  xtm0 <- xtm
+  keyword "before"
+  TmPrintDouble xtm0 <$> xtm
 
 tmTable :: [[Expr.Operator Parser XTm]]
 tmTable =
@@ -179,7 +182,7 @@ ident :: Parser Ident
 ident = Ident <$> identifier
 
 parened :: Parser a -> Parser a
-parened = between (symbol "(") (symbol ")")
+parened = between (hidden $ symbol "(") (symbol ")")
 
 identifier :: Parser Text
 identifier = label "identifier" $ lexeme $ do

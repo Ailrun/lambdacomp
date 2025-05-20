@@ -41,10 +41,22 @@ extra-doc-files:
 common extensions
   default-extensions:
     DerivingStrategies
+    GADTs
     ImportQualifiedPost
+    OverloadedStrings
+    RoleAnnotations
 
 common warnings
-  ghc-options: -Wall
+  ghc-options:
+    -Wall -Wredundant-constraints -Widentities
+    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
+    -Wmissing-export-lists -Wmissing-local-signatures
+    -Wmissing-poly-kind-signatures
+    -Wmissing-exported-pattern-synonym-signatures
+    -Wunticked-promoted-constructors -Wunused-type-patterns
+    -Wredundant-bang-patterns -Wredundant-strictness-flags
+    -Wunused-packages -Winvalid-haddock -Woperator-whitespace
+    -Wterm-variable-capture -Wmissing-role-annotations
 
 library
   import:
@@ -146,8 +158,8 @@ test-suite lambdacomp-test
     , filepath
     , lambdacomp
     , tasty
-    , temporary
     , tasty-golden
+    , temporary
 
   -- Modules included in this executable, other than Main.
   -- other-modules:    Paths_lambdacomp

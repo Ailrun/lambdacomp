@@ -1,8 +1,6 @@
-{-# LANGUAGE GADTs             #-}
-{-# LANGUAGE OverloadedLists   #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
-{-# LANGUAGE RecursiveDo       #-}
+{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecursiveDo     #-}
 module LambdaComp.AM.Eval
   ( Item(..)
 
@@ -14,6 +12,7 @@ import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
 import Control.Monad.State.Strict (StateT, execStateT, gets, modify')
 import Data.Bifunctor             (Bifunctor (first, second))
 import Data.Either                (lefts)
+import Data.List                  ((!?))
 import Data.List.NonEmpty         (NonEmpty)
 import Data.List.NonEmpty         qualified as NonEmpty
 import Data.Map.Strict            (Map)
@@ -25,7 +24,6 @@ import Data.Vector                qualified as Vector
 import System.IO                  (Handle, hPrint)
 
 import LambdaComp.AM.Syntax
-import Data.List ((!?))
 
 data Item where
   ItUnit   :: Item
@@ -33,7 +31,7 @@ data Item where
   ItInt    :: !Int -> Item
   ItDouble :: !Double -> Item
   ItThunk  :: !Ident -> !(Vector Item) -> Item
-  deriving Show
+  deriving stock Show
 
 topEval :: Handle -> [CodeSection] -> IO Item
 topEval out cs = returnReg <$> runMachine evalData evalState
@@ -60,15 +58,15 @@ type CallStack = StackLike CallStackEntry
 
 type EvalData = (Map Ident (Either Value Code), ([Code], Handle))
 
-data EvalState
-  = EvalState
+data EvalState where
+  EvalState ::
     { codePointer :: CodePointer
     , globalStack :: GlobalStack
     , globalEnvs  :: Envs
     , localEnv    :: LocalEnv
     , callStack   :: CallStack
     , returnReg   :: Item
-    }
+    } -> EvalState
 
 type Eval = StateT EvalState (ReaderT EvalData IO)
 
@@ -96,6 +94,7 @@ fetchInst = do
 fetchTmDefInst :: Int -> Int -> Eval (Maybe Inst)
 fetchTmDefInst topIdx index = asks (fst . snd) >>= helper
   where
+    helper :: [Code] -> Eval (Maybe Inst)
     helper tops
       | Just code <- tops !? topIdx
       , Just it <- code Vector.!? index = do
@@ -106,6 +105,7 @@ fetchTmDefInst topIdx index = asks (fst . snd) >>= helper
 fetchThunkCodeInst :: Ident -> Int -> Eval (Maybe Inst)
 fetchThunkCodeInst funId index = asks ((Map.! funId) . fst) >>= helper
   where
+    helper :: Either a Code -> Eval (Maybe Inst)
     helper (Right code)
       | Just it <- code Vector.!? index = do
           modify' (\m -> m{ codePointer = (Left funId, index + 1) })
@@ -157,7 +157,10 @@ iDefine x = modify' $ \m ->
    , globalEnvs = mapLast (Map.insert x $ returnReg m) $ globalEnvs m
    }
   where
+    mapLast :: (a -> a) -> NonEmpty a -> NonEmpty a
     mapLast f = NonEmpty.reverse . mapHead f . NonEmpty.reverse
+
+    mapHead :: (a -> a) -> NonEmpty a -> NonEmpty a
     mapHead f (y NonEmpty.:| ys) = f y NonEmpty.:| ys
 
 iScope :: Eval ()

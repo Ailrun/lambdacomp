@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs #-}
 module LambdaComp.CBPV.Optimization.SkipReturn
   ( runSkipReturn
   ) where

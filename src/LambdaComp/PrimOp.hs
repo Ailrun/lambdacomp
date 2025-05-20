@@ -1,12 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeData        #-}
 {-# LANGUAGE TypeFamilies    #-}
-module LambdaComp.PrimOp where
+module LambdaComp.PrimOp
+  ( module LambdaComp.PrimOp
+  ) where
 
 type data PrimOpArity where
   Unary  :: PrimOpArity
   Binary :: PrimOpArity
 
+type role PrimOp nominal
 data PrimOp (a :: PrimOpArity) where
   PrimIAdd :: PrimOp Binary
   PrimISub :: PrimOp Binary
@@ -37,14 +40,15 @@ data PrimOp (a :: PrimOpArity) where
   PrimBAnd :: PrimOp Binary
   PrimBOr  :: PrimOp Binary
 
-deriving instance Eq (PrimOp a)
-deriving instance Ord (PrimOp a)
-deriving instance Show (PrimOp a)
+deriving stock instance Eq (PrimOp a)
+deriving stock instance Ord (PrimOp a)
+deriving stock instance Show (PrimOp a)
 
 type family PrimOpArgs (a :: PrimOpArity) tp where
   PrimOpArgs Binary tp = (tp, tp)
   PrimOpArgs Unary tp = tp
 
+type role PrimOpTypeBase representational
 data PrimOpTypeBase tp where
   PrimOpTypeBase :: { boolTp :: tp, intTp :: tp, doubleTp :: tp } -> PrimOpTypeBase tp
 
