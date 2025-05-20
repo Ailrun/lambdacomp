@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternSynonyms #-}
 module LambdaComp.Elaborated.Syntax
   ( module LambdaComp.Elaborated.Syntax
   , module LambdaComp.Ident
@@ -20,8 +21,13 @@ data Tp where
   TpBool   :: Tp
   TpInt    :: Tp
   TpDouble :: Tp
-  TpFun    :: ![Tp] -> Tp -> Tp
+  (:->:)   :: ![Tp] -> Tp -> Tp
   deriving stock (Eq, Ord, Show)
+
+infixr 8 :->:
+
+pattern TpFun :: [Tp] -> Tp -> Tp
+pattern TpFun tpPs tpR = tpPs :->: tpR
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !Tp } -> Param

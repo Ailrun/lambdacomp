@@ -42,14 +42,11 @@ instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Val
 
   toCBPV :: Tp -> CBPVData Tp
-  toCBPV = helper
-    where
-      helper :: Tp -> CBPV.Tp CBPV.Val
-      helper TpUnit             = CBPV.TpUnit
-      helper TpBool             = CBPV.TpBool
-      helper TpInt              = CBPV.TpInt
-      helper TpDouble           = CBPV.TpDouble
-      helper (tyPs `TpFun` tyR) = foldr ((CBPV.TpUp .) . (. CBPV.TpDown) . CBPV.TpFun . helper) (helper tyR) tyPs
+  toCBPV TpUnit             = CBPV.TpUnit
+  toCBPV TpBool             = CBPV.TpBool
+  toCBPV TpInt              = CBPV.TpInt
+  toCBPV TpDouble           = CBPV.TpDouble
+  toCBPV (tyPs `TpFun` tyR) = foldr ((CBPV.TpUp .) . (. CBPV.TpDown) . CBPV.TpFun . toCBPV) (toCBPV tyR) tyPs
 
 instance ToCBPV Tm where
   type CBPVData Tm = FreshName (CBPV.Tm CBPV.Com)

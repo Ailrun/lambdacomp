@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternSynonyms #-}
 module LambdaComp.External.Syntax
   ( module LambdaComp.External.Syntax
   , module LambdaComp.Elaborated.Syntax
@@ -11,7 +12,7 @@ module LambdaComp.External.Syntax
 import Data.String     (IsString (..))
 import Text.Megaparsec (SourcePos (..), mkPos, sourcePosPretty)
 
-import LambdaComp.Elaborated.Syntax (Tp (..))
+import LambdaComp.Elaborated.Syntax (Tp (..), pattern TpFun)
 import LambdaComp.Ident
 import LambdaComp.PrimOp            (PrimOp (..), PrimOpArity (..))
 
