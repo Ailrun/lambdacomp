@@ -65,7 +65,7 @@ check (TmLet x tm0 tm1)        = \tp -> do
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
-    throwError $ TypeMismatch "infer-to-check" tp tp'
+    throwError $ TypeMismatch "infer to check" tp tp'
 
 infer :: Tm c -> TypeCheck (Tp c)
 infer (TmVar x)                = asks (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
@@ -85,7 +85,7 @@ infer (TmIf tm0 tm1 tm2)       = do
       if tp1 == tp2
         then pure tp1
         else throwError $ BranchTypeMismatch tp1 tp2
-    _      -> throwError $ TypeMismatch "If" TpBool tpc
+    _      -> throwError $ TypeMismatch "If condition" TpBool tpc
 infer (TmLam p tm)             = TpFun (paramType p) <$> local (insertParamToInfo p) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
@@ -121,12 +121,12 @@ infer (TmPrintInt tm0 tm1)     = do
   tp0 <- infer tm0
   case tp0 of
     TpInt -> infer tm1
-    _     -> throwError $ TypeMismatch "PrintInt" TpInt tp0
+    _     -> throwError $ TypeMismatch "PrintInt printing value" TpInt tp0
 infer (TmPrintDouble tm0 tm1)  = do
   tp0 <- infer tm0
   case tp0 of
     TpDouble -> infer tm1
-    _        -> throwError $ TypeMismatch "PrintDouble" TpDouble tp0
+    _        -> throwError $ TypeMismatch "PrintDouble printing value" TpDouble tp0
 infer (TmRec p tm)             =
   case paramType p of
     TpUp tp -> tp <$ local (insertParamToInfo p) (check tm tp)
