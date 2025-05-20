@@ -14,7 +14,6 @@ import Control.Monad.Reader       (MonadIO (liftIO), ReaderT (runReaderT), asks)
 import Control.Monad.State.Strict (StateT, execStateT, gets, modify')
 import Data.Bifunctor             (Bifunctor (first, second))
 import Data.Either                (lefts)
-import Data.List                  (foldl')
 import Data.List.NonEmpty         (NonEmpty)
 import Data.List.NonEmpty         qualified as NonEmpty
 import Data.Map.Strict            (Map)
@@ -26,6 +25,7 @@ import Data.Vector                qualified as Vector
 import System.IO                  (Handle, hPrint)
 
 import LambdaComp.AM.Syntax
+import Data.List ((!?))
 
 data Item where
   ItUnit   :: Item
@@ -38,29 +38,31 @@ data Item where
 topEval :: Handle -> [CodeSection] -> IO Item
 topEval out cs = returnReg <$> runMachine evalData evalState
   where
-    evalData = foldl' insertCodeSection (Map.singleton mainName $ Right [ICall mainTopValue], out) cs
+    evalData = foldr insertCodeSection (Map.empty, ([], out)) cs
     evalState =
       EvalState
-      { codePointer = (mainName, 0)
+      { codePointer = (Right 0, 0)
       , globalStack = []
       , globalEnvs = Map.empty NonEmpty.:| [Map.empty]
       , localEnv = []
       , callStack = []
-      , returnReg = ItUnit
+      , returnReg = ItInt 0
       }
 
+type SectionPointer = Either Ident Int
+type CodePointer = (SectionPointer, Int)
 type StackLike a = [a]
 type GlobalStack = StackLike Item
 type Envs = NonEmpty (Map Ident Item)
 type LocalEnv = Vector Item
-type CallStackEntry = ((Ident, Int), LocalEnv)
+type CallStackEntry = (CodePointer, LocalEnv)
 type CallStack = StackLike CallStackEntry
 
-type EvalData = (Map Ident (Either Value Code), Handle)
+type EvalData = (Map Ident (Either Value Code), ([Code], Handle))
 
 data EvalState
   = EvalState
-    { codePointer :: (Ident, Int)
+    { codePointer :: CodePointer
     , globalStack :: GlobalStack
     , globalEnvs  :: Envs
     , localEnv    :: LocalEnv
@@ -70,9 +72,9 @@ data EvalState
 
 type Eval = StateT EvalState (ReaderT EvalData IO)
 
-insertCodeSection :: EvalData -> CodeSection -> EvalData
-insertCodeSection ed TmDefCodeSection {..} = first (Map.insert tmDefCodeSectionName (Left tmDefValue)) ed
-insertCodeSection ed ThunkCodeSection {..} = first (Map.insert thunkCodeSectionName (Right thunkCode)) ed
+insertCodeSection :: CodeSection -> EvalData -> EvalData
+insertCodeSection TmDefCodeSection {..} = second (first (tmDefCode :))
+insertCodeSection ThunkCodeSection {..} = first (Map.insert thunkCodeSectionName (Right thunkCode))
 
 runMachine :: EvalData -> EvalState -> IO EvalState
 runMachine evalData evalState = go `execStateT` evalState `runReaderT` evalData
@@ -86,17 +88,32 @@ runMachine evalData evalState = go `execStateT` evalState `runReaderT` evalData
 
 fetchInst :: Eval (Maybe Inst)
 fetchInst = do
-  (funId, index) <- gets codePointer
-  code <- asks ((Map.! funId) . fst)
-  helper funId code index
+  (curr, index) <- gets codePointer
+  case curr of
+    Right topIdx -> fetchTmDefInst topIdx index
+    Left funId   -> fetchThunkCodeInst funId index
+
+fetchTmDefInst :: Int -> Int -> Eval (Maybe Inst)
+fetchTmDefInst topIdx index = asks (fst . snd) >>= helper
   where
-    helper funId (Right code) index
-      | Just it <- code Vector.!? index = do
-          modify' (\m -> m{ codePointer = (funId, index + 1) })
+    helper tops
+      | Just code <- tops !? topIdx
+      , Just it <- code Vector.!? index = do
+          modify' (\m -> m{ codePointer = (Right topIdx, index + 1) })
           pure $ Just it
-    helper _     _            _         = pure Nothing
+      | otherwise                       = pure Nothing
+
+fetchThunkCodeInst :: Ident -> Int -> Eval (Maybe Inst)
+fetchThunkCodeInst funId index = asks ((Map.! funId) . fst) >>= helper
+  where
+    helper (Right code)
+      | Just it <- code Vector.!? index = do
+          modify' (\m -> m{ codePointer = (Left funId, index + 1) })
+          pure $ Just it
+    helper _                            = pure Nothing
 
 evalInst :: Inst -> Eval ()
+evalInst (IDefine x)             = iDefine x
 evalInst IScope                  = iScope
 evalInst (IPush v)               = embodyValue v >>= iPush
 evalInst (IPop addr)             = iPop addr
@@ -134,6 +151,15 @@ embodyAddr (AIdent x)    = do
     it : _ -> pure it
 embodyAddr (ALocalEnv n) = gets $ (Vector.! n) . localEnv
 
+iDefine :: Ident -> Eval ()
+iDefine x = modify' $ \m ->
+  m{ codePointer = (fmap (+ 1) . fst $ codePointer m, 0)
+   , globalEnvs = mapLast (Map.insert x $ returnReg m) $ globalEnvs m
+   }
+  where
+    mapLast f = NonEmpty.reverse . mapHead f . NonEmpty.reverse
+    mapHead f (y NonEmpty.:| ys) = f y NonEmpty.:| ys
+
 iScope :: Eval ()
 iScope = modify' (\m -> m{ globalEnvs = Map.empty NonEmpty.<| globalEnvs m })
 
@@ -160,7 +186,7 @@ iCall :: Item -> Eval ()
 iCall (ItThunk x env) =
   modify' $ \m ->
               m
-              { codePointer = (x, 0)
+              { codePointer = (Left x, 0)
               , localEnv = env
               , callStack = (codePointer m, localEnv m) : callStack m
               }
@@ -221,11 +247,11 @@ iPrimUnOp PrimDToI = stackDoublePop >>= iSetReturn . ItInt . truncate
 iPrimUnOp PrimBNot = stackBoolPop >>= iSetReturn . ItBool . not
 
 iPrintInt :: Item -> Eval ()
-iPrintInt (ItInt i) = asks snd >>= liftIO . flip hPrint i
+iPrintInt (ItInt i) = asks (snd . snd) >>= liftIO . flip hPrint i
 iPrintInt _         = fail "Invalid PrintInt argument"
 
 iPrintDouble :: Item -> Eval ()
-iPrintDouble (ItDouble d) = asks snd >>= liftIO . flip hPrint d
+iPrintDouble (ItDouble d) = asks (snd . snd) >>= liftIO . flip hPrint d
 iPrintDouble _            = fail "Invalid PrintDouble argument"
 
 iExit :: Eval ()
@@ -273,9 +299,3 @@ stackPop = do
       modify' (\m -> m{ globalStack = t })
       pure h
     []    -> fail "Invalid stack pop"
-
-mainName :: Ident
-mainName = "main"
-
-mainTopValue :: Value
-mainTopValue = "top_u_main"

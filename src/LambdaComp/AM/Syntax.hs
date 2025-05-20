@@ -31,6 +31,7 @@ instance IsString Value where
   fromString = VaAddr . fromString
 
 data Inst where
+  IDefine      :: !Ident -> Inst
   IScope       :: Inst
   IPush        :: !Value -> Inst
   IPop         :: !Addr -> Inst
@@ -58,7 +59,6 @@ data CodeSection
     , thunkEnvSize         :: !Int
     }
   | TmDefCodeSection
-    { tmDefCodeSectionName :: !Ident
-    , tmDefValue           :: !Value
+    { tmDefCode            :: !Code
     }
   deriving Show

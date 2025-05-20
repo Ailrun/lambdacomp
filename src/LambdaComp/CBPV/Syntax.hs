@@ -19,7 +19,7 @@ type data Class where
 type Program = [Top]
 
 data Top where
-  TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm Val } -> Top
+  TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm Com } -> Top
   deriving stock (Eq, Ord, Show)
 
 data Tp (c :: Class) where

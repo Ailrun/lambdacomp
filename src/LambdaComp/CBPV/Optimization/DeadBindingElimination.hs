@@ -3,15 +3,15 @@ module LambdaComp.CBPV.Optimization.DeadBindingElimination
   ( runDeadLetElimination
   ) where
 
-import Control.Monad.Writer.CPS (MonadWriter (tell), Writer, censor, runWriter, listens)
+import Control.Applicative      (liftA3)
+import Control.Monad.Writer.CPS (MonadWriter (tell), Writer, censor, listens, runWriter)
+import Data.Functor             ((<&>))
 import Data.Set                 (Set)
 import Data.Set                 qualified as Set
 
 import LambdaComp.CBPV.Syntax
-import Control.Applicative (liftA3)
-import Data.Functor ((<&>))
 
-runDeadLetElimination :: Tm Val -> Tm Val
+runDeadLetElimination :: Tm Com -> Tm Com
 runDeadLetElimination = fst . runWriter . deadLetElimination
 
 type WithFreeVars = Writer (Set Ident)

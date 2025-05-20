@@ -29,16 +29,13 @@ instance ToAM Program where
   type AMData Program = [CodeSection]
 
   toAM :: Program -> WithAMInfo (AMData Program)
-  toAM prog =
-    if any ((== "u_main") . tmDefName) prog
-    then traverse toAM prog
-    else error "No main function is given!"
+  toAM = traverse toAM
 
 instance ToAM Top where
   type AMData Top = CodeSection
 
   toAM :: Top -> WithAMInfo (AMData Top)
-  toAM TopTmDef {..} = TmDefCodeSection (toGlobalIdent tmDefName) <$> toAM tmDefBody
+  toAM TopTmDef {..} = TmDefCodeSection . (<> [IDefine (toGlobalIdent tmDefName)]) <$> toAM tmDefBody
 
 instance ToAM (Tm Val) where
   type AMData (Tm Val) = Value
@@ -53,7 +50,7 @@ instance ToAM (Tm Val) where
   toAM (TmDouble d) = pure $ VaDouble d
   toAM (TmThunk tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
-    thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"
+    thunkCodeSectionName <- lift $ freshNameOf $ toLowSysVar "thunk"
     tell [ThunkCodeSection {..}]
     VaThunk thunkCodeSectionName . Vector.fromList <$> traverse getVar thunkEnvVars
     where
@@ -90,7 +87,7 @@ instance ToAM (Tm Com) where
   toAM (TmPrintDouble tm0 tm1) = liftA2 Vector.cons (IPrintDouble <$> toAM tm0) (toAM tm1)
   toAM (TmRec p tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
-    thunkCodeSectionName <- lift $ freshNameOf "sys_thunk"
+    thunkCodeSectionName <- lift $ freshNameOf $ toLowSysVar "thunk"
     tell [ThunkCodeSection {..}]
     initCode <- IRecAssign xVar thunkCodeSectionName . Vector.fromList <$> traverse getVar thunkEnvVars
     pure [initCode, ICall (VaAddr xVar)]
@@ -115,9 +112,3 @@ getGlobal x = pure $ toGlobalAddr x
 
 toGlobalAddr :: Ident -> Addr
 toGlobalAddr = AIdent . toGlobalIdent
-
-toGlobalIdent :: Ident -> Ident
-toGlobalIdent = ("top_" <>)
-
-toVarIdent :: Ident -> Ident
-toVarIdent = ("var_" <>)

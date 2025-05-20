@@ -1,10 +1,30 @@
 [ TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_recF"
-    , tmDefValue = VaThunk "sys_thunk_4" []
+    { tmDefCode =
+        [ ISetReturn
+            ( VaThunk "sys_thunk_3" [] )
+        , IDefine "top_u_recF"
+        ]
     }
 , TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_main"
-    , tmDefValue = VaThunk "sys_thunk_5" []
+    { tmDefCode =
+        [ IScope
+        , IPush
+            ( VaInt 1000000 )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_u_recF" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_7" )
+        , IPush
+            ( VaInt 3 )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_7" )
+            )
+        , IDefine "top_u_main"
+        ]
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
@@ -110,46 +130,6 @@
         , ICall
             ( VaAddr
                 ( AIdent "var_u_recF" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_4"
-    , thunkCode =
-        [ ISetReturn
-            ( VaThunk "sys_thunk_3" [] )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_5"
-    , thunkCode =
-        [ IScope
-        , ICall
-            ( VaAddr
-                ( AIdent "top_u_recF" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f0_7" )
-        , IScope
-        , IPush
-            ( VaInt 1000000 )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_7" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_7" )
-        , IPush
-            ( VaInt 3 )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f1_7" )
             )
         , IExit
         ]

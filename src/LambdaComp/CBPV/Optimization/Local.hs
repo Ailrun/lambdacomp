@@ -15,5 +15,5 @@ runLocalOptDefault = fmap runLocalOptDefaultTop
 runLocalOptDefaultTop :: Top -> Top
 runLocalOptDefaultTop TopTmDef {..} = TopTmDef { tmDefName, tmDefBody = runLocalOptDefaultTm tmDefBody }
 
-runLocalOptDefaultTm :: Tm Val -> Tm Val
+runLocalOptDefaultTm :: Tm Com -> Tm Com
 runLocalOptDefaultTm = runDeadLetElimination . runInlineSimpleLet . runLiftingLet . runSkipReturn . runCommutingTo

@@ -17,11 +17,11 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmThunk (TmPrintInt (TmInt 5) (TmReturn (TmInt 0))) */
-top_u_main.thunk_item.code = sys_thunk_1;
-top_u_main.thunk_item.env = NULL;
-top_u_main.thunk_item.code(top_u_main.thunk_item.env, ret);
+/* TmPrintInt (TmInt 5) (TmReturn (TmInt 0)) */
+const item sys_t_2 = {.thunk_item = {.code = sys_thunk_1, .env = NULL}};
+sys_t_2.thunk_item.code(sys_t_2.thunk_item.env, ret);
+top_u_main = (*ret);
 }
-return retv.int_item;
+return top_u_main.int_item;
 }
 

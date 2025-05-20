@@ -1,15 +1,13 @@
 [ TopTmDef
     { tmDefName = "u_main"
-    , tmDefBody = TmThunk
-        ( TmTo
+    , tmDefBody = TmTo
+        ( TmReturn
+            ( TmInt 5 )
+        ) "c_v_0"
+        ( TmPrintInt
+            ( TmVar "c_v_0" )
             ( TmReturn
-                ( TmInt 5 )
-            ) "c_v_0"
-            ( TmPrintInt
-                ( TmVar "c_v_0" )
-                ( TmReturn
-                    ( TmInt 0 )
-                )
+                ( TmInt 0 )
             )
         )
     }

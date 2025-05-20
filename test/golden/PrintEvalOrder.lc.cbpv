@@ -1,79 +1,77 @@
 [ TopTmDef
     { tmDefName = "u_main"
-    , tmDefBody = TmThunk
+    , tmDefBody = TmTo
         ( TmTo
             ( TmTo
-                ( TmTo
+                ( TmReturn
+                    ( TmInt 7 )
+                ) "c_v_0"
+                ( TmPrintInt
+                    ( TmVar "c_v_0" )
                     ( TmReturn
-                        ( TmInt 7 )
-                    ) "c_v_0"
-                    ( TmPrintInt
-                        ( TmVar "c_v_0" )
-                        ( TmReturn
-                            ( TmInt 3 )
-                        )
+                        ( TmInt 3 )
                     )
-                ) "c_a0_3"
-                ( TmTo
-                    ( TmReturn
-                        ( TmThunk
-                            ( TmLam
-                                ( Param
-                                    { paramName = "u_x"
-                                    , paramType = TpInt
-                                    }
-                                )
+                )
+            ) "c_a0_3"
+            ( TmTo
+                ( TmReturn
+                    ( TmThunk
+                        ( TmLam
+                            ( Param
+                                { paramName = "u_x"
+                                , paramType = TpInt
+                                }
+                            )
+                            ( TmTo
+                                ( TmReturn
+                                    ( TmInt 2 )
+                                ) "c_a0_2"
                                 ( TmTo
                                     ( TmReturn
-                                        ( TmInt 2 )
-                                    ) "c_a0_2"
-                                    ( TmTo
-                                        ( TmReturn
-                                            ( TmThunk
-                                                ( TmLam
-                                                    ( Param
-                                                        { paramName = "u_y"
-                                                        , paramType = TpInt
-                                                        }
-                                                    )
-                                                    ( TmTo
+                                        ( TmThunk
+                                            ( TmLam
+                                                ( Param
+                                                    { paramName = "u_y"
+                                                    , paramType = TpInt
+                                                    }
+                                                )
+                                                ( TmTo
+                                                    ( TmReturn
+                                                        ( TmVar "u_y" )
+                                                    ) "c_v_1"
+                                                    ( TmPrintInt
+                                                        ( TmVar "c_v_1" )
                                                         ( TmReturn
-                                                            ( TmVar "u_y" )
-                                                        ) "c_v_1"
-                                                        ( TmPrintInt
-                                                            ( TmVar "c_v_1" )
-                                                            ( TmReturn
-                                                                ( TmVar "u_x" )
-                                                            )
+                                                            ( TmVar "u_x" )
                                                         )
                                                     )
                                                 )
                                             )
-                                        ) "c_f0_2"
-                                        ( TmApp
-                                            ( TmForce
-                                                ( TmVar "c_f0_2" )
-                                            )
-                                            ( TmVar "c_a0_2" )
                                         )
+                                    ) "c_f0_2"
+                                    ( TmApp
+                                        ( TmForce
+                                            ( TmVar "c_f0_2" )
+                                        )
+                                        ( TmVar "c_a0_2" )
                                     )
                                 )
                             )
                         )
-                    ) "c_f0_3"
-                    ( TmApp
-                        ( TmForce
-                            ( TmVar "c_f0_3" )
-                        )
-                        ( TmVar "c_a0_3" )
                     )
+                ) "c_f0_3"
+                ( TmApp
+                    ( TmForce
+                        ( TmVar "c_f0_3" )
+                    )
+                    ( TmVar "c_a0_3" )
                 )
-            ) "c_v_4"
-            ( TmPrintInt
-                ( TmVar "c_v_4" )
-                ( TmReturn
-                    ( TmInt 0 )
-                )
+            )
+        ) "c_v_4"
+        ( TmPrintInt
+            ( TmVar "c_v_4" )
+            ( TmReturn
+                ( TmInt 0 )
             )
         )
     }

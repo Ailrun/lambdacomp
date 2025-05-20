@@ -1,23 +1,5 @@
 [ TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_main"
-    , tmDefValue = VaThunk "sys_thunk_1" []
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_0"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_u_x" )
-        , ISetReturn
-            ( VaAddr
-                ( AIdent "var_u_x" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_1"
-    , thunkCode =
+    { tmDefCode =
         [ IAssign
             ( AIdent "var_c_f0_0" )
             ( VaThunk "sys_thunk_0" [] )
@@ -43,6 +25,18 @@
             ( VaInt 0 )
         , ISetReturn
             ( VaInt 0 )
+        , IDefine "top_u_main"
+        ]
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_0"
+    , thunkCode =
+        [ IPop
+            ( AIdent "var_u_x" )
+        , ISetReturn
+            ( VaAddr
+                ( AIdent "var_u_x" )
+            )
         , IExit
         ]
     , thunkEnvSize = 0

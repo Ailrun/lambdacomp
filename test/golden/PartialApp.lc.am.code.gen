@@ -1,14 +1,51 @@
 [ TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_f"
-    , tmDefValue = VaThunk "sys_thunk_3" []
+    { tmDefCode =
+        [ ISetReturn
+            ( VaThunk "sys_thunk_2" [] )
+        , IDefine "top_u_f"
+        ]
     }
 , TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_g"
-    , tmDefValue = VaThunk "sys_thunk_4" []
+    { tmDefCode =
+        [ IPush
+            ( VaInt 3 )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_u_f" )
+            )
+        , IDefine "top_u_g"
+        ]
     }
 , TmDefCodeSection
-    { tmDefCodeSectionName = "top_u_main"
-    , tmDefValue = VaThunk "sys_thunk_5" []
+    { tmDefCode =
+        [ IScope
+        , IPush
+            ( VaInt 2 )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_u_g" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f1_3" )
+        , IScope
+        , IPush
+            ( VaInt 5 )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f1_3" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_v_4" )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_4" )
+            )
+        , ISetReturn
+            ( VaInt 0 )
+        , IDefine "top_u_main"
+        ]
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
@@ -65,77 +102,6 @@
             ( VaThunk "sys_thunk_1"
                 [ AIdent "var_u_x" ]
             )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_3"
-    , thunkCode =
-        [ ISetReturn
-            ( VaThunk "sys_thunk_2" [] )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_4"
-    , thunkCode =
-        [ IScope
-        , ICall
-            ( VaAddr
-                ( AIdent "top_u_f" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f0_2" )
-        , IPush
-            ( VaInt 3 )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_2" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_5"
-    , thunkCode =
-        [ IScope
-        , ICall
-            ( VaAddr
-                ( AIdent "top_u_g" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f0_3" )
-        , IScope
-        , IPush
-            ( VaInt 2 )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_3" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_3" )
-        , IScope
-        , IPush
-            ( VaInt 5 )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f1_3" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_v_4" )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_4" )
-            )
-        , ISetReturn
-            ( VaInt 0 )
         , IExit
         ]
     , thunkEnvSize = 0

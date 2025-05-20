@@ -5,7 +5,7 @@ module LambdaComp.CBPV.Optimization.SkipReturn
 
 import LambdaComp.CBPV.Syntax
 
-runSkipReturn :: Tm Val -> Tm Val
+runSkipReturn :: Tm Com -> Tm Com
 runSkipReturn = skipReturn
 
 skipReturn :: Tm c -> Tm c

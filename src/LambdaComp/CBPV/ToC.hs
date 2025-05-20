@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE ViewPatterns #-}
 module LambdaComp.CBPV.ToC
   ( runToC
   ) where
@@ -20,6 +21,7 @@ import Data.Text                   qualified as Text
 
 import LambdaComp.CBPV.Syntax
 import LambdaComp.FreshName   (FreshNameT, freshNameOf, freshNamesOf)
+import Data.String (IsString(fromString))
 
 runToC :: Program -> String
 runToC = (`runReader` []) . (`evalStateT` 0) . toC
@@ -45,22 +47,20 @@ instance ToC Program where
   type CData Program = WithClosure String
 
   toC :: Program -> CData Program
-  toC prog = if any ((== "u_main") . tmDefName) prog
-    then
-      fmap showC
-      . runWriterT
-      . fmap ((<> [forceThunkStmt (toGlobal "u_main")]) . join)
-      $ traverse toC prog
-    else error "No main function is given!"
+  toC prog =
+    fmap (showC . toGlobal . tmDefName $ last prog)
+    . runWriterT
+    . fmap join
+    $ traverse toC prog
 
 instance ToC Top where
   type CData Top = WithClosureAndTop [String]
 
   toC :: Top -> CData Top
   toC TopTmDef {..} = do
-    tmDefBody' <- toC tmDefBody
+    tmDefBody' <- toC $ TmForce $ TmThunk tmDefBody
     tell $ Dual [TmDef $ toGlobal tmDefName]
-    pure $ comment (show tmDefBody) : tmDefBody' False (toGlobal tmDefName)
+    pure $ comment (show tmDefBody) : tmDefBody' <> [assignStmt (toGlobal tmDefName) retValue]
 
 instance ToC (Tm Val) where
   type CData (Tm Val) = WithClosureAndTop (Bool -> String -> [String])
@@ -102,7 +102,7 @@ getGlobal x = pure $ toGlobal x
 
 thunkOfCode :: Int -> [Ident] -> [String] -> WithClosureAndTop (Bool -> String -> [String], String -> [String])
 thunkOfCode cThunkEnvSize cThunkEnvVars cThunkBody = do
-  cThunkBodyName <- lift $ freshNameOf "sys_thunk"
+  cThunkBodyName <- lift $ freshNameOf $ toSys "thunk"
   let
     initializeThunk ifDef y
       | ifDef     = [defineConstItemStmt y $ "{.thunk_item = {.code = " <> cThunkBodyName <> ", .env = " <> initialThunkEnv <> "}}"]
@@ -126,13 +126,13 @@ instance ToC (Tm Com) where
     tm0Code <- toC tm0
     tm1Code <- toC tm1
     tm2Code <- toC tm2
-    c <- lift $ freshNameOf "sys_c"
+    c <- lift $ freshNameOf $ toSys "c"
     pure (tm0Code True c <> [ifStmt (intItem c) tm1Code tm2Code])
   toC (TmLam p tm) = underScope . (globalStackPopStmt (toVar (paramName p)) :) <$> toC tm
   toC (tmf `TmApp` tma) = liftA2 (<>) (globalStackPushStmt <$> toC tma) (toC tmf)
   toC (TmForce tm) = do
     tmCode <- toC tm
-    thunk <- lift $ freshNameOf "sys_t"
+    thunk <- lift $ freshNameOf $ toSys "t"
     pure (tmCode True thunk <> [forceThunkStmt thunk])
   toC (TmReturn tm) = do
     tmCode <- toC tm
@@ -148,23 +148,23 @@ instance ToC (Tm Com) where
   toC (TmPrimBinOp op tm0 tm1) = do
     tm0Code <- toC tm0
     tm1Code <- toC tm1
-    Pair (Identity arg0) (Identity arg1) <- lift $ freshNamesOf (Pair "sys_arg0" "sys_arg1")
+    Pair (Identity arg0) (Identity arg1) <- lift $ freshNamesOf (Pair (toSys <$> "arg0") (toSys <$> "arg1"))
     opCode <- lift $ toC op
     pure (underScope (tm0Code True arg0 <> tm1Code True arg1 <> [opCode arg0 arg1 retValue]))
   toC (TmPrimUnOp op tm) = do
     tmCode <- toC tm
-    arg <- lift $ freshNameOf "sys_arg"
+    arg <- lift $ freshNameOf $ toSys "arg"
     opCode <- lift $ toC op
     pure (underScope (tmCode True arg <> [opCode arg retValue]))
   toC (TmPrintInt tm0 tm1) = do
     tm0Code <- toC tm0
     tm1Code <- toC tm1
-    msg <- lift $ freshNameOf "sys_msg"
+    msg <- lift $ freshNameOf $ toSys "msg"
     pure (tm0Code True msg <> (printlnAsIntStmt msg : tm1Code))
   toC (TmPrintDouble tm0 tm1) = do
     tm0Code <- toC tm0
     tm1Code <- toC tm1
-    msg <- lift $ freshNameOf "sys_msg"
+    msg <- lift $ freshNameOf $ toSys "msg"
     pure (tm0Code True msg <> (printlnAsDoubleStmt msg : tm1Code))
   toC (TmRec p tm) = do
     tmCode <- local (const thunkEnvVars) $ toC tm
@@ -214,8 +214,8 @@ instance ToC (PrimOp Unary) where
   toC PrimDToI = pure $ \arg ret -> assignStmt (intItem ret) ("(int)" <> doubleItem arg)
   toC PrimBNot = pure $ \arg ret -> assignStmt (intItem ret) ("! " <> intItem arg)
 
-showC :: ([String], Dual [TopDef]) -> String
-showC (mainBody, topDefs) =
+showC :: String -> ([String], Dual [TopDef]) -> String
+showC mainDef (mainBody, topDefs) =
   unlines
   $ [ "#include <runtime.h>"
     , ""
@@ -223,7 +223,7 @@ showC (mainBody, topDefs) =
   <> (showTopDefPrototype <$> realTopDefs)
   <> [""]
   <> (showTopDef <$> realTopDefs)
-  <> [showMain mainBody]
+  <> [showMain mainDef mainBody]
   where
     realTopDefs = reverse . getDual $ topDefs
 
@@ -245,8 +245,8 @@ showTopDef ThunkBodyDef {..} =
       | otherwise         = "item *const _"
 showTopDef TmDef{}           = ""
 
-showMain :: [String] -> String
-showMain mainBody =
+showMain :: String -> [String] -> String
+showMain mainDef mainBody =
   unlines
   $ [ "int main(void)"
     , "{"
@@ -256,7 +256,7 @@ showMain mainBody =
     ]
   <> mainBody
   <> [ "}"
-     , "return " <> intItem retValueVar <> ";"
+     , "return " <> intItem mainDef <> ";"
      , "}"
      ]
   where
@@ -306,10 +306,13 @@ underScope :: [String] -> [String]
 underScope = id -- (["{"] <>) . (<> ["}"])
 
 toVar :: Ident -> String
-toVar (Ident x) = "var_" <> Text.unpack x
+toVar (toVarIdent -> Ident x) = Text.unpack x
 
 toGlobal :: Ident -> String
-toGlobal (Ident x) = "top_" <> Text.unpack x
+toGlobal (toGlobalIdent -> Ident x) = Text.unpack x
+
+toSys :: String -> String
+toSys (toLowSysVar . Ident . fromString -> Ident x) = Text.unpack x
 
 retValue :: String
 retValue = "(*" <> retPointer <> ")"

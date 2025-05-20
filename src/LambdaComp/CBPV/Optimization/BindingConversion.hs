@@ -11,11 +11,11 @@ import Data.Set                    qualified as Set
 
 import LambdaComp.CBPV.Syntax
 
-runCommutingTo :: Tm Val -> Tm Val
-runCommutingTo = commutingTo
+runCommutingTo :: Tm Com -> Tm Com
+runCommutingTo = closedCommutingTo
 
-runLiftingLet :: Tm Val -> Tm Val
-runLiftingLet = liftingLet
+runLiftingLet :: Tm Com -> Tm Com
+runLiftingLet = closedLiftingLet
 
 data TmToPrefix = TmToPrefix (Set Ident) (Tm Com) Ident
 

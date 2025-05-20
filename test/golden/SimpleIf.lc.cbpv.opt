@@ -1,38 +1,36 @@
 [ TopTmDef
     { tmDefName = "u_main"
-    , tmDefBody = TmThunk
-        ( TmLet "c_f0_0"
-            ( TmThunk
-                ( TmLam
-                    ( Param
-                        { paramName = "u_x"
-                        , paramType = TpBool
-                        }
-                    )
-                    ( TmReturn
-                        ( TmVar "u_x" )
-                    )
+    , tmDefBody = TmLet "c_f0_0"
+        ( TmThunk
+            ( TmLam
+                ( Param
+                    { paramName = "u_x"
+                    , paramType = TpBool
+                    }
+                )
+                ( TmReturn
+                    ( TmVar "u_x" )
                 )
             )
-            ( TmTo
-                ( TmApp
-                    ( TmForce
-                        ( TmVar "c_f0_0" )
-                    ) TmTrue
-                ) "c_c_1"
-                ( TmIf
-                    ( TmVar "c_c_1" )
-                    ( TmPrintInt
+        )
+        ( TmTo
+            ( TmApp
+                ( TmForce
+                    ( TmVar "c_f0_0" )
+                ) TmTrue
+            ) "c_c_1"
+            ( TmIf
+                ( TmVar "c_c_1" )
+                ( TmPrintInt
+                    ( TmInt 1 )
+                    ( TmReturn
                         ( TmInt 1 )
-                        ( TmReturn
-                            ( TmInt 1 )
-                        )
                     )
-                    ( TmPrintInt
+                )
+                ( TmPrintInt
+                    ( TmInt 0 )
+                    ( TmReturn
                         ( TmInt 0 )
-                        ( TmReturn
-                            ( TmInt 0 )
-                        )
                     )
                 )
             )

@@ -31,7 +31,11 @@ runProgramInfer = foldM go Map.empty
     go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
 
 topInfer :: Top -> TypeCheck (Tp Val)
-topInfer = infer . tmDefBody
+topInfer top = do
+  tp <- infer . tmDefBody $ top
+  case tp of
+    TpDown tp' -> pure tp'
+    _          -> throwError $ NonDownType tp
 
 check :: Tm c -> Tp c -> TypeCheck ()
 check TmUnit                   = \case
