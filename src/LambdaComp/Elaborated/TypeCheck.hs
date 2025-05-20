@@ -3,6 +3,7 @@
 module LambdaComp.Elaborated.TypeCheck
   ( runProgramInfer
 
+  , Context
   , TypeError
   ) where
 
@@ -25,8 +26,8 @@ data TypeCheckInfo
     }
 type TypeCheck = ReaderT TypeCheckInfo (Either TypeError)
 
-runProgramInfer :: Program -> Either TypeError Program
-runProgramInfer p = p <$ foldM go Map.empty p
+runProgramInfer :: Program -> Either TypeError Context
+runProgramInfer = foldM go Map.empty
   where
     go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
 

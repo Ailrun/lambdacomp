@@ -20,14 +20,12 @@ import Text.Pretty.Simple   (pHPrintNoColor)
 
 import LambdaComp.AM.Eval                       (topEval)
 import LambdaComp.CBPV.Optimization.Local       qualified as CBPV
-import LambdaComp.CBPV.Syntax                   qualified as CBPV
 import LambdaComp.CBPV.ToAM                     (runToAM)
 import LambdaComp.CBPV.ToC                      (runToC)
 import LambdaComp.CBPV.TypeCheck                qualified as CBPV
 import LambdaComp.Driver.Argument
 import LambdaComp.Elaborated.CBV.ToCBPV         (runToCBPV)
 import LambdaComp.Elaborated.Optimization.Local qualified as El
-import LambdaComp.Elaborated.Syntax             qualified as El
 import LambdaComp.Elaborated.TypeCheck          qualified as El
 import LambdaComp.External.ToElaborated         (ElaborationError, runToElaborated)
 import LambdaComp.Parser                        (runProgramParser)
@@ -37,13 +35,13 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
   input <- lift $ T.readFile inputFp
   let getTm          = either ((>> throwError 1) . lift . hPutStrLn stderr) pure $ runProgramParser inputFp input
       getElTm        = getTm >>= handleElabError outH . runToElaborated
-      getElTmTc      = getElTm >>= handleElTcError outH . El.runProgramInfer
+      getElTmTc      = getElTm >>= \p -> p <$ handleElTcError outH (El.runProgramInfer p)
       getElOptTm     = El.runLocalOptDefault <$> getElTmTc
-      getElOptTmTc   = getElOptTm >>= handleElTcError outH . El.runProgramInfer
+      getElOptTmTc   = getElOptTm >>= \p -> p <$ handleElTcError outH (El.runProgramInfer p)
       getCBPVTm      = runToCBPV <$> getElOptTmTc
-      getCBPVTmTc    = getCBPVTm >>= handleCBPVTcError outH . CBPV.runProgramInfer
+      getCBPVTmTc    = getCBPVTm >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
       getCBPVOptTm   = CBPV.runLocalOptDefault <$> getCBPVTmTc
-      getCBPVOptTmTc = getCBPVOptTm >>= handleCBPVTcError outH . CBPV.runProgramInfer
+      getCBPVOptTmTc = getCBPVOptTm >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
       getCCode       = runToC <$> getCBPVOptTmTc
       getAMTm        = runToAM <$> getCBPVOptTmTc
   case phase of
@@ -62,15 +60,15 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
           runWithFp (const $ genAndExeCExe outH cCode) mayFp
         AMBackend      -> getAMTm >>= lift . topEval outH >>= pHPrintNoColor outH
 
-handleElabError :: Handle -> Either ElaborationError El.Program -> ExceptT Int IO El.Program
+handleElabError :: Handle -> Either ElaborationError a -> ExceptT Int IO a
 handleElabError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
 handleElabError _    (Right prog)   = pure prog
 
-handleElTcError :: Handle -> Either El.TypeError El.Program -> ExceptT Int IO El.Program
+handleElTcError :: Handle -> Either El.TypeError a -> ExceptT Int IO a
 handleElTcError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
 handleElTcError _    (Right prog)   = pure prog
 
-handleCBPVTcError :: Handle -> Either CBPV.TypeError CBPV.Program -> ExceptT Int IO CBPV.Program
+handleCBPVTcError :: Handle -> Either CBPV.TypeError a -> ExceptT Int IO a
 handleCBPVTcError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
 handleCBPVTcError _    (Right prog)   = pure prog
 
