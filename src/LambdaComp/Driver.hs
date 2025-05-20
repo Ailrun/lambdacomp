@@ -1,4 +1,5 @@
 {-# LANGUAGE GADTs             #-}
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 module LambdaComp.Driver where
 
@@ -7,6 +8,7 @@ import Paths_lambdacomp (getDataDir)
 import Control.Exception    (bracketOnError)
 import Control.Monad.Except (ExceptT (ExceptT, runExceptT), MonadError (throwError))
 import Control.Monad.Trans  (MonadTrans (lift))
+import Data.Functor         ((<&>))
 import Data.Text.IO         qualified as T
 import System.Directory     (makeAbsolute)
 import System.Exit          (ExitCode (ExitFailure, ExitSuccess))
@@ -31,7 +33,7 @@ import LambdaComp.External.ToElaborated         (ElaborationError, runToElaborat
 import LambdaComp.Parser                        (runProgramParser)
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
-mainFuncWithOptions outH (Options inputFp backend phase mayFp) = fmap (either ExitFailure (const ExitSuccess)) . runExceptT $ do
+mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH) . exceptTToExitCode $ do
   input <- lift $ T.readFile inputFp
   let getTm          = either ((>> throwError 1) . lift . hPutStrLn stderr) pure $ runProgramParser inputFp input
       getElTm        = getTm >>= handleElabError outH . runToElaborated
@@ -59,7 +61,6 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = fmap (either Ex
           cCode <- getCCode
           runWithFp (const $ genAndExeCExe outH cCode) mayFp
         AMBackend      -> getAMTm >>= lift . topEval outH >>= pHPrintNoColor outH
-  lift $ hFlush outH
 
 handleElabError :: Handle -> Either ElaborationError El.Program -> ExceptT Int IO El.Program
 handleElabError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
@@ -105,9 +106,10 @@ genCExe outH cCode fp = do
       cleanupProcess
       (\(_, _, _, p) -> waitForProcess p)
 
-exitCodeToExceptT :: IO ExitCode -> ExceptT Int IO ()
-exitCodeToExceptT a = ExceptT $ do
-  e <- a
-  case e of
-    ExitSuccess -> pure $ Right ()
-    ExitFailure c -> pure $ Left c
+exitCodeToExceptT :: Functor m => m ExitCode -> ExceptT Int m ()
+exitCodeToExceptT a = ExceptT $ a <&> \case
+  ExitSuccess -> Right ()
+  ExitFailure c -> Left c
+
+exceptTToExitCode :: Functor m => ExceptT Int m () -> m ExitCode
+exceptTToExitCode = fmap (either ExitFailure (const ExitSuccess)) . runExceptT
