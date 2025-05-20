@@ -1,0 +1,66 @@
+[ TopTmDef
+    { tmDefName = "u_f"
+    , tmDefBody = TmThunk
+        ( TmTo
+            ( TmReturn
+                ( TmInt 5 )
+            ) "c_v_0"
+            ( TmPrintInt
+                ( TmVar "c_v_0" )
+                ( TmReturn
+                    ( TmThunk
+                        ( TmLam
+                            ( Param
+                                { paramName = "u_x"
+                                , paramType = TpInt
+                                }
+                            )
+                            ( TmTo
+                                ( TmReturn
+                                    ( TmVar "u_x" )
+                                ) "c_inp0_1"
+                                ( TmTo
+                                    ( TmReturn
+                                        ( TmInt 3 )
+                                    ) "c_inp1_1"
+                                    ( TmPrimBinOp PrimIAdd
+                                        ( TmVar "c_inp0_1" )
+                                        ( TmVar "c_inp1_1" )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+, TopTmDef
+    { tmDefName = "u_main"
+    , tmDefBody = TmThunk
+        ( TmTo
+            ( TmTo
+                ( TmReturn
+                    ( TmInt 3 )
+                ) "c_a0_2"
+                ( TmTo
+                    ( TmForce
+                        ( TmGlobal "u_f" )
+                    ) "c_f0_2"
+                    ( TmApp
+                        ( TmForce
+                            ( TmVar "c_f0_2" )
+                        )
+                        ( TmVar "c_a0_2" )
+                    )
+                )
+            ) "c_v_3"
+            ( TmPrintInt
+                ( TmVar "c_v_3" )
+                ( TmReturn
+                    ( TmInt 0 )
+                )
+            )
+        )
+    }
+]

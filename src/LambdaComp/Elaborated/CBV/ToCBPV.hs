@@ -33,7 +33,7 @@ instance ToCBPV Top where
   toCBPV TopTmDef {..} = do
     tmDefBody' <- toCBPV tmDefBody
     let tmDefBody'' = CBPV.TmThunk tmDefBody'
-    pure $ CBPV.TopTmDef ("u_" <> tmDefName) tmDefBody''
+    pure $ CBPV.TopTmDef (toUserVar tmDefName) tmDefBody''
 
 instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Val
@@ -49,8 +49,8 @@ instance ToCBPV Tm where
   type CBPVData Tm = FreshName (CBPV.Tm CBPV.Com)
 
   toCBPV :: Tm -> CBPVData Tm
-  toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar $ "u_" <> x
-  toCBPV (TmGlobal x)             = pure $ CBPV.TmForce $ CBPV.TmGlobal $ "u_" <> x
+  toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar $ toUserVar x
+  toCBPV (TmGlobal x)             = pure $ CBPV.TmForce $ CBPV.TmGlobal $ toUserVar x
   toCBPV TmUnit                   = pure $ CBPV.TmReturn CBPV.TmUnit
   toCBPV TmTrue                   = pure $ CBPV.TmReturn CBPV.TmTrue
   toCBPV TmFalse                  = pure $ CBPV.TmReturn CBPV.TmFalse
@@ -86,13 +86,16 @@ instance ToCBPV Tm where
   toCBPV (TmRec (Param {..}) tm)  = do
     tm' <- toCBPV tm
     v <- freshNameOf "c_r"
-    pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec (CBPV.Param ("u_" <> paramName) (toCBPV paramType)) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
+    pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec (CBPV.Param (toUserVar paramName) (toCBPV paramType)) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
 
 instance ToCBPV Param where
   type CBPVData Param = CBPV.Param
 
   toCBPV :: Param -> CBPVData Param
-  toCBPV Param {..} = CBPV.Param ("u_" <> paramName) (toCBPV paramType)
+  toCBPV Param {..} = CBPV.Param (toUserVar paramName) (toCBPV paramType)
 
 appTmOnVar :: CBPV.Tm CBPV.Com -> Ident -> Ident -> CBPV.Tm CBPV.Com
 appTmOnVar tmf f a = CBPV.TmTo tmf f $ CBPV.TmForce (CBPV.TmVar f) `CBPV.TmApp` CBPV.TmVar a
+
+toUserVar :: Ident -> Ident
+toUserVar = ("u_" <>)

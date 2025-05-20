@@ -1,0 +1,4 @@
+f : Int -> Int;;
+f = printInt 5 before \x -> x + 3;;
+
+main = printInt f 3 before 0
