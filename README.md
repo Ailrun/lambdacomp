@@ -21,14 +21,14 @@ Currently, this repository implements a primitive compiler from Call-By-Value $\
 a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CBPV. This repository also comes with an interpreter for AM.
 
 - [x] Frontend Parser for $\lambda$-calculus
-- [x] Simple bidirectional type-checker for $\lambda$-calculus
-- [ ] Constraint-based bidirectional type checker for $\lambda$-calculus
+- [x] Bidirectional type-checker for $\lambda$-calculus
+- [x] Local $\lambda$-calculus optimization pass
 - [x] Call-By-Value $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Name $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Need $\lambda$-calculus-To-CBPV pass
-- [x] Simple bidirectional type-checker for CBPV
-- [ ] Constraint-based bidirectional type checker for CBPV
-- [x] Simple CBPV optimization pass
+- [ ] Arity analysis
+- [x] Type-checker for CBPV
+- [x] Local CBPV optimization pass
 - [ ] Tail call optimization pass (or lowering pass)
 - [x] CBPV-to-C pass without GC
 - [x] CBPV-to-AM pass without GC
