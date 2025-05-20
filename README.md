@@ -43,3 +43,4 @@ a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CB
 - [ ] Read effect
 - [ ] Exception-handling effects
 - [ ] General I/O effect
+- [ ] Simple module system
