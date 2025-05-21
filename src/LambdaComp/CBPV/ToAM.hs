@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedLists #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies    #-}
 module LambdaComp.CBPV.ToAM
   ( runToAM
   ) where
 
+import Control.Monad.FreshName     (FreshNameT, freshNameOf, runFreshNameT)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
 import Control.Monad.Writer.Strict (MonadWriter (tell), WriterT (runWriterT), lift)
 import Data.List                   (elemIndex)
@@ -13,7 +13,6 @@ import Data.Vector                 qualified as Vector
 
 import LambdaComp.AM.Syntax
 import LambdaComp.CBPV.Syntax
-import LambdaComp.FreshName   (FreshNameT, freshNameOf, runFreshNameT)
 
 runToAM :: Program -> [CodeSection]
 runToAM = uncurry (<>) . (`runReader` []) . runFreshNameT . runWriterT . toAM

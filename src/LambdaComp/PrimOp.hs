@@ -1,6 +1,5 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeData        #-}
-{-# LANGUAGE TypeFamilies    #-}
+{-# LANGUAGE TypeData     #-}
+{-# LANGUAGE TypeFamilies #-}
 module LambdaComp.PrimOp
   ( module LambdaComp.PrimOp
   ) where

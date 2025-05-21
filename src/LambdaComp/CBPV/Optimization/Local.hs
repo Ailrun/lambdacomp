@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 module LambdaComp.CBPV.Optimization.Local
   ( runLocalOptDefault
   ) where
@@ -13,7 +12,7 @@ runLocalOptDefault :: Program -> Program
 runLocalOptDefault = fmap runLocalOptDefaultTop
 
 runLocalOptDefaultTop :: Top -> Top
-runLocalOptDefaultTop TopTmDef {..} = TopTmDef { tmDefName, tmDefBody = runLocalOptDefaultTm tmDefBody }
+runLocalOptDefaultTop m = m{ tmDefBody = runLocalOptDefaultTm $ tmDefBody m }
 
 runLocalOptDefaultTm :: Tm Com -> Tm Com
 runLocalOptDefaultTm = runDeadLetElimination . runInlineSimpleLet . runLiftingLet . runSkipReturn . runCommutingTo

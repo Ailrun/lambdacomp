@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module LambdaComp.Driver
   ( mainFuncWithOptions
   ) where

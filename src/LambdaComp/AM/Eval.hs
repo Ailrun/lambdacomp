@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedLists #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE RecursiveDo     #-}
 module LambdaComp.AM.Eval
   ( Item(..)

@@ -1,13 +1,12 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeFamilies    #-}
-{-# LANGUAGE ViewPatterns    #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ViewPatterns #-}
 module LambdaComp.CBPV.ToC
   ( runToC
   ) where
 
 import Control.Monad               (join, zipWithM)
+import Control.Monad.FreshName     (FreshNameT, freshNameOf, freshNamesOf, runFreshNameT)
 import Control.Monad.Reader        (MonadReader (local), Reader, asks, runReader)
-import Control.Monad.State.Strict  (evalStateT)
 import Control.Monad.Writer.Strict (MonadWriter (tell), WriterT (..), lift)
 import Data.Bifunctor              (Bifunctor (..))
 import Data.Functor.Identity       (Identity (..))
@@ -20,10 +19,9 @@ import Data.String                 (IsString (fromString))
 import Data.Text                   qualified as Text
 
 import LambdaComp.CBPV.Syntax
-import LambdaComp.FreshName   (FreshNameT, freshNameOf, freshNamesOf)
 
 runToC :: Program -> String
-runToC = (`runReader` []) . (`evalStateT` 0) . toC
+runToC = (`runReader` []) . runFreshNameT . toC
 
 data TopDef
   = ThunkBodyDef

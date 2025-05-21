@@ -1,21 +1,19 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeFamilies    #-}
+{-# LANGUAGE TypeFamilies #-}
 module LambdaComp.Elaborated.CBV.ToCBPV
   ( runToCBPV
   ) where
 
-import Control.Monad.State.Strict (evalState)
-import Data.Functor.Identity      (Identity (..))
-import Data.Functor.Product       (Product (..))
-import Data.List                  (foldl')
-import Data.String                (IsString (fromString))
+import Control.Monad.FreshName (FreshName, freshNameOf, freshNamesOf, runFreshName)
+import Data.Functor.Identity   (Identity (..))
+import Data.Functor.Product    (Product (..))
+import Data.List               (foldl')
+import Data.String             (IsString (fromString))
 
 import LambdaComp.CBPV.Syntax       qualified as CBPV
 import LambdaComp.Elaborated.Syntax
-import LambdaComp.FreshName
 
 runToCBPV :: Program -> CBPV.Program
-runToCBPV = (`evalState` 0) . toCBPV
+runToCBPV = runFreshName . toCBPV
 
 class ToCBPV a where
   type CBPVData a

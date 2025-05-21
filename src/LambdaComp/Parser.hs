@@ -1,5 +1,4 @@
-{-# LANGUAGE ApplicativeDo   #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ApplicativeDo #-}
 module LambdaComp.Parser
   ( runProgramParser
   ) where
