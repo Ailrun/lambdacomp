@@ -25,7 +25,11 @@ data TypeCheckInfo
 type TypeCheck = ReaderT TypeCheckInfo (Either TypeError)
 
 runProgramInfer :: Program -> Either TypeError Context
-runProgramInfer = foldM go Map.empty
+runProgramInfer p = do
+  ctx <- foldM go Map.empty p
+  let lastDef = tmDefName (last p)
+  when (ctx Map.! lastDef /= TpInt) $ throwError $ NonIntLastTopDecl lastDef
+  pure ctx
   where
     go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
 
@@ -124,6 +128,7 @@ primOpTypeBase :: PrimOpTypeBase Tp
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
 
 data TypeError where
+  NonIntLastTopDecl  :: Ident -> TypeError
   NotInScope         :: Ident -> TypeError
   NotDefined         :: Ident -> TypeError
   TypeMismatch       :: Tp -> Tp -> TypeError

@@ -34,11 +34,13 @@ runToElaborated = go Map.empty
     go _   [] = pure []
     go ctx ((TopTmDecl x xtp, _) : (TopTmDef x' xtm, _) : prog)
       | x == x' = do
-        (top, _) <- runWriterT $ topCheck x xtm xtp `runReaderT` ToElaboratedInfo ctx (Map.singleton x xtp) x
-        (top :) <$> go (addTop top xtp ctx) prog
+          when (null prog && fst xtp /= TpInt) $ throwError $ NonIntLastTopDecl x
+          (top, _) <- runWriterT $ topCheck x xtm xtp `runReaderT` ToElaboratedInfo ctx (Map.singleton x xtp) x
+          (top :) <$> go (addTop top xtp ctx) prog
     go _   ((TopTmDecl x _, _) : _) = throwError $ InvalidTopDecl x
     go ctx ((TopTmDef x xtm, defSpan) : prog) = do
       ((top, tp), _) <- runWriterT $ topInfer x xtm defSpan `runReaderT` ToElaboratedInfo ctx Map.empty x
+      when (null prog && (fst tp /= TpInt)) $ throwError $ NonIntLastTopDecl x
       (top :) <$> go (addTop top tp ctx) prog
 
     addTop :: E.Top -> XTp -> Context -> Context
@@ -214,6 +216,7 @@ wrapErrorWithSpan :: SourceSpan -> ToElaborated a -> ToElaborated a
 wrapErrorWithSpan s m = catchError m $ throwError . (`OfSpan` s)
 
 data ElaborationError where
+  NonIntLastTopDecl  :: !Ident -> ElaborationError
   InvalidTopDecl     :: !Ident -> ElaborationError
   NotInScope         :: !Ident -> ElaborationError
   TypeMismatch       :: Tp -> Tp -> ElaborationError
