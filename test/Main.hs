@@ -60,7 +60,7 @@ anyCBPVOptTests allExamples =
   $ getCBPVOptOfExample (makeAMOptions UntilCBPVOpt) <$> allExamples
 
 getCBPVOptOfExample :: (FilePath -> Options) -> String -> TestTree
-getCBPVOptOfExample = goldenOf Nothing ("cbpv" <.> "opt") mainFuncWithOptions
+getCBPVOptOfExample = goldenOf Nothing ("opt" <.> "cbpv") mainFuncWithOptions
 
 cGenTests :: [FilePath] -> TestTree
 cGenTests allExamples =
@@ -73,7 +73,7 @@ amGenTests allExamples =
   $ codeGenOfExample "am" (makeAMOptions UntilAM) <$> allExamples
 
 codeGenOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-codeGenOfExample tag = goldenOf Nothing (tag <.> "code" <.> "gen") mainFuncWithOptions
+codeGenOfExample tag = goldenOf Nothing ("code" <.> "gen" <.> tag) mainFuncWithOptions
 
 cCompileTests :: [FilePath] -> TestTree
 cCompileTests allExamples =
@@ -81,7 +81,7 @@ cCompileTests allExamples =
   $ compileOfExample "c" (makeCOptions UntilExe) <$> allExamples
 
 compileOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-compileOfExample tag = goldenOf Nothing (tag <.> "compile") mainFuncWithOptions
+compileOfExample tag = goldenOf Nothing ("compile" <.> tag <.> "log") mainFuncWithOptions
 
 cExecutionTests :: [FilePath] -> TestTree
 cExecutionTests allExamples =
@@ -94,7 +94,7 @@ amExecutionTests allExamples =
   $ executionOfExample "am" (makeAMOptions Run) <$> allExamples
 
 executionOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-executionOfExample tag = goldenOf (Just 10000) (tag <.> "execution") $ \handle ->
+executionOfExample tag = goldenOf (Just 10000) ("execution" <.> tag <.> "out") $ \handle ->
   timeout 300000 . mainFuncWithOptions handle
 
 goldenOf :: Maybe Int64 -> String -> (Handle -> Options -> IO a) -> (FilePath -> Options) -> String -> TestTree
