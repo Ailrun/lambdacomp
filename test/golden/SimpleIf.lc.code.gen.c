@@ -2,18 +2,18 @@
 
 void sys_thunk_0(item *const env, item *const ret);
 void sys_thunk_5(item *const env, item *const ret);
-item top_u_main;
+item top_e_main;
 
 void sys_thunk_0(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")) */
-const item var_u_x = (global_stack.items[--global_stack.top]);
-(*ret) = var_u_x;
+/* TmLam (Param {paramName = "e_x", paramType = TpBool}) (TmReturn (TmVar "e_x")) */
+const item var_e_x = (global_stack.items[--global_stack.top]);
+(*ret) = var_e_x;
 }
 
 void sys_thunk_5(item *const _, item *const ret)
 {
-/* TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0))))) */
+/* TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpBool}) (TmReturn (TmVar "e_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0))))) */
 const item var_c_f0_0 = {.thunk_item = {.code = sys_thunk_0, .env = NULL}};
 (global_stack.items[global_stack.top++]).int_item = 1;
 const item sys_t_1 = var_c_f0_0;
@@ -41,11 +41,11 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpBool}) (TmReturn (TmVar "u_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0))))) */
+/* TmLet "c_f0_0" (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpBool}) (TmReturn (TmVar "e_x")))) (TmTo (TmApp (TmForce (TmVar "c_f0_0")) TmTrue) "c_c_1" (TmIf (TmVar "c_c_1") (TmPrintInt (TmInt 1) (TmReturn (TmInt 1))) (TmPrintInt (TmInt 0) (TmReturn (TmInt 0))))) */
 const item sys_t_6 = {.thunk_item = {.code = sys_thunk_5, .env = NULL}};
 sys_t_6.thunk_item.code(sys_t_6.thunk_item.env, ret);
-top_u_main = (*ret);
+top_e_main = (*ret);
 }
-return top_u_main.int_item;
+return top_e_main.int_item;
 }
 

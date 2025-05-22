@@ -2,7 +2,7 @@
     { tmDefCode =
         [ ISetReturn
             ( VaThunk "sys_thunk_3" [] )
-        , IDefine "top_u_recF"
+        , IDefine "top_e_recF"
         ]
     }
 , TmDefCodeSection
@@ -12,7 +12,7 @@
             ( VaInt 1000000 )
         , ICall
             ( VaAddr
-                ( AIdent "top_u_recF" )
+                ( AIdent "top_e_recF" )
             )
         , IEndScope
         , IReceive
@@ -23,14 +23,14 @@
             ( VaAddr
                 ( AIdent "var_c_f1_7" )
             )
-        , IDefine "top_u_main"
+        , IDefine "top_e_main"
         ]
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
     , thunkCode =
         [ IPop
-            ( AIdent "var_u_x" )
+            ( AIdent "var_e_x" )
         , IScope
         , IPush
             ( VaAddr
@@ -44,7 +44,7 @@
             ( AIdent "var_c_c_3" )
         , IPrintInt
             ( VaAddr
-                ( AIdent "var_u_x" )
+                ( AIdent "var_e_x" )
             )
         , IPrintInt
             ( VaInt 2 )
@@ -77,7 +77,7 @@
             ( AIdent "var_c_f1_5" )
         , IPush
             ( VaAddr
-                ( AIdent "var_u_x" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -94,10 +94,10 @@
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
         [ IPop
-            ( AIdent "var_u_n" )
+            ( AIdent "var_e_n" )
         , ISetReturn
             ( VaThunk "sys_thunk_0"
-                [ AIdent "var_u_n"
+                [ AIdent "var_e_n"
                 , ALocalEnv 0
                 ]
             )
@@ -125,11 +125,11 @@
     { thunkCodeSectionName = "sys_thunk_3"
     , thunkCode =
         [ IRecAssign
-            ( AIdent "var_u_recF" ) "sys_thunk_2"
-            [ AIdent "var_u_recF" ]
+            ( AIdent "var_e_recF" ) "sys_thunk_2"
+            [ AIdent "var_e_recF" ]
         , ICall
             ( VaAddr
-                ( AIdent "var_u_recF" )
+                ( AIdent "var_e_recF" )
             )
         , IExit
         ]

@@ -1,10 +1,10 @@
 [ TopTmDef
-    { tmDefName = "u_recF"
+    { tmDefName = "e_recF"
     , tmDefBody = TmReturn
         ( TmThunk
             ( TmRec
                 ( Param
-                    { paramName = "u_recF"
+                    { paramName = "e_recF"
                     , paramType = TpUp
                         ( TpInt :->: TpDown
                             ( TpUp ( TpInt :->: TpDown TpInt ) )
@@ -16,7 +16,7 @@
                         ( TmThunk
                             ( TmLam
                                 ( Param
-                                    { paramName = "u_n"
+                                    { paramName = "e_n"
                                     , paramType = TpInt
                                     }
                                 )
@@ -24,13 +24,13 @@
                                     ( TmThunk
                                         ( TmLam
                                             ( Param
-                                                { paramName = "u_x"
+                                                { paramName = "e_x"
                                                 , paramType = TpInt
                                                 }
                                             )
                                             ( TmTo
                                                 ( TmReturn
-                                                    ( TmVar "u_x" )
+                                                    ( TmVar "e_x" )
                                                 ) "c_v_0"
                                                 ( TmPrintInt
                                                     ( TmVar "c_v_0" )
@@ -43,7 +43,7 @@
                                                             ( TmTo
                                                                 ( TmTo
                                                                     ( TmReturn
-                                                                        ( TmVar "u_n" )
+                                                                        ( TmVar "e_n" )
                                                                     ) "c_inp0_2"
                                                                     ( TmTo
                                                                         ( TmReturn
@@ -60,7 +60,7 @@
                                                                     ( TmTo
                                                                         ( TmTo
                                                                             ( TmReturn
-                                                                                ( TmVar "u_n" )
+                                                                                ( TmVar "e_n" )
                                                                             ) "c_inp0_4"
                                                                             ( TmTo
                                                                                 ( TmReturn
@@ -74,12 +74,12 @@
                                                                         ) "c_a0_5"
                                                                         ( TmTo
                                                                             ( TmReturn
-                                                                                ( TmVar "u_x" )
+                                                                                ( TmVar "e_x" )
                                                                             ) "c_a1_5"
                                                                             ( TmTo
                                                                                 ( TmTo
                                                                                     ( TmReturn
-                                                                                        ( TmVar "u_recF" )
+                                                                                        ( TmVar "e_recF" )
                                                                                     ) "c_f0_5"
                                                                                     ( TmApp
                                                                                         ( TmForce
@@ -120,7 +120,7 @@
         )
     }
 , TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmTo
         ( TmReturn
             ( TmInt 1000000 )
@@ -132,7 +132,7 @@
             ( TmTo
                 ( TmTo
                     ( TmReturn
-                        ( TmGlobal "u_recF" )
+                        ( TmGlobal "e_recF" )
                     ) "c_f0_7"
                     ( TmApp
                         ( TmForce

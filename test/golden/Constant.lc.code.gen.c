@@ -1,7 +1,7 @@
 #include <runtime.h>
 
 void sys_thunk_1(item *const env, item *const ret);
-item top_u_main;
+item top_e_main;
 
 void sys_thunk_1(item *const _, item *const ret)
 {
@@ -20,8 +20,8 @@ item *const ret = &retv;
 /* TmPrintInt (TmInt 5) (TmReturn (TmInt 0)) */
 const item sys_t_2 = {.thunk_item = {.code = sys_thunk_1, .env = NULL}};
 sys_t_2.thunk_item.code(sys_t_2.thunk_item.env, ret);
-top_u_main = (*ret);
+top_e_main = (*ret);
 }
-return top_u_main.int_item;
+return top_e_main.int_item;
 }
 

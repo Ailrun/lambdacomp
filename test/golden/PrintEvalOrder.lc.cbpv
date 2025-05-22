@@ -1,5 +1,5 @@
 [ TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmTo
         ( TmTo
             ( TmTo
@@ -18,7 +18,7 @@
                     ( TmThunk
                         ( TmLam
                             ( Param
-                                { paramName = "u_x"
+                                { paramName = "e_x"
                                 , paramType = TpInt
                                 }
                             )
@@ -31,18 +31,18 @@
                                         ( TmThunk
                                             ( TmLam
                                                 ( Param
-                                                    { paramName = "u_y"
+                                                    { paramName = "e_y"
                                                     , paramType = TpInt
                                                     }
                                                 )
                                                 ( TmTo
                                                     ( TmReturn
-                                                        ( TmVar "u_y" )
+                                                        ( TmVar "e_y" )
                                                     ) "c_v_1"
                                                     ( TmPrintInt
                                                         ( TmVar "c_v_1" )
                                                         ( TmReturn
-                                                            ( TmVar "u_x" )
+                                                            ( TmVar "e_x" )
                                                         )
                                                     )
                                                 )

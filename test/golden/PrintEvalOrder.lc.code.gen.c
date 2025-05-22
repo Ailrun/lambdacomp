@@ -3,23 +3,23 @@
 void sys_thunk_1(item *const env, item *const ret);
 void sys_thunk_3(item *const env, item *const ret);
 void sys_thunk_7(item *const env, item *const ret);
-item top_u_main;
+item top_e_main;
 
 void sys_thunk_1(item *const env, item *const ret)
 {
-/* TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))) */
-const item var_u_y = (global_stack.items[--global_stack.top]);
-const item sys_msg_0 = var_u_y;
+/* TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmPrintInt (TmVar "e_y") (TmReturn (TmVar "e_x"))) */
+const item var_e_y = (global_stack.items[--global_stack.top]);
+const item sys_msg_0 = var_e_y;
 printf("%d\n", sys_msg_0.int_item);
 (*ret) = (env[0]);
 }
 
 void sys_thunk_3(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))) */
-const item var_u_x = (global_stack.items[--global_stack.top]);
+/* TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmPrintInt (TmVar "e_y") (TmReturn (TmVar "e_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))) */
+const item var_e_x = (global_stack.items[--global_stack.top]);
 const item var_c_f0_2 = {.thunk_item = {.code = sys_thunk_1, .env = (item *) malloc(1 * sizeof(item))}};
-(var_c_f0_2.thunk_item.env[0]) = var_u_x;
+(var_c_f0_2.thunk_item.env[0]) = var_e_x;
 (global_stack.items[global_stack.top++]).int_item = 2;
 const item sys_t_2 = var_c_f0_2;
 sys_t_2.thunk_item.code(sys_t_2.thunk_item.env, ret);
@@ -27,7 +27,7 @@ sys_t_2.thunk_item.code(sys_t_2.thunk_item.env, ret);
 
 void sys_thunk_7(item *const _, item *const ret)
 {
-/* TmLet "c_f0_3" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))))) (TmTo (TmPrintInt (TmInt 7) (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0))))) */
+/* TmLet "c_f0_3" (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmPrintInt (TmVar "e_y") (TmReturn (TmVar "e_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))))) (TmTo (TmPrintInt (TmInt 7) (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0))))) */
 const item var_c_f0_3 = {.thunk_item = {.code = sys_thunk_3, .env = NULL}};
 const item sys_msg_4 = {.int_item = 7};
 printf("%d\n", sys_msg_4.int_item);
@@ -48,11 +48,11 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmLet "c_f0_3" (TmThunk (TmLam (Param {paramName = "u_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "u_y", paramType = TpInt}) (TmPrintInt (TmVar "u_y") (TmReturn (TmVar "u_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))))) (TmTo (TmPrintInt (TmInt 7) (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0))))) */
+/* TmLet "c_f0_3" (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmLet "c_f0_2" (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmPrintInt (TmVar "e_y") (TmReturn (TmVar "e_x"))))) (TmApp (TmForce (TmVar "c_f0_2")) (TmInt 2))))) (TmTo (TmPrintInt (TmInt 7) (TmReturn (TmInt 3))) "c_a0_3" (TmTo (TmApp (TmForce (TmVar "c_f0_3")) (TmVar "c_a0_3")) "c_v_4" (TmPrintInt (TmVar "c_v_4") (TmReturn (TmInt 0))))) */
 const item sys_t_8 = {.thunk_item = {.code = sys_thunk_7, .env = NULL}};
 sys_t_8.thunk_item.code(sys_t_8.thunk_item.env, ret);
-top_u_main = (*ret);
+top_e_main = (*ret);
 }
-return top_u_main.int_item;
+return top_e_main.int_item;
 }
 

@@ -1,5 +1,5 @@
 [ TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmTo
         ( TmTo ( TmReturn TmTrue ) "c_a0_0"
             ( TmTo
@@ -7,12 +7,12 @@
                     ( TmThunk
                         ( TmLam
                             ( Param
-                                { paramName = "u_x"
+                                { paramName = "e_x"
                                 , paramType = TpBool
                                 }
                             )
                             ( TmReturn
-                                ( TmVar "u_x" )
+                                ( TmVar "e_x" )
                             )
                         )
                     )

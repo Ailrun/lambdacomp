@@ -8,9 +8,9 @@ import Data.Text   (Text)
 newtype Ident = Ident Text
   deriving newtype (Eq, Ord, Show, Read, IsString, Semigroup)
 
-toUserVar :: Ident -> Ident
-toUserVar = ("u_" <>)
-{-# INLINE toUserVar #-}
+toExtVar :: Ident -> Ident
+toExtVar = ("e_" <>)
+{-# INLINE toExtVar #-}
 
 toCBPVVar :: Ident -> Ident
 toCBPVVar = ("c_" <>)

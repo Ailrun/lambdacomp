@@ -1,10 +1,10 @@
 [ TopTmDef
-    { tmDefName = "u_f"
+    { tmDefName = "e_f"
     , tmDefBody = TmReturn
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "u_x"
+                    { paramName = "e_x"
                     , paramType = TpInt
                     }
                 )
@@ -12,7 +12,7 @@
                     ( TmThunk
                         ( TmLam
                             ( Param
-                                { paramName = "u_y"
+                                { paramName = "e_y"
                                 , paramType = TpInt
                                 }
                             )
@@ -20,18 +20,18 @@
                                 ( TmThunk
                                     ( TmTo
                                         ( TmPrimBinOp PrimIAdd
-                                            ( TmVar "u_x" )
-                                            ( TmVar "u_y" )
+                                            ( TmVar "e_x" )
+                                            ( TmVar "e_y" )
                                         ) "c_inp0_1"
                                         ( TmLam
                                             ( Param
-                                                { paramName = "u_z"
+                                                { paramName = "e_z"
                                                 , paramType = TpInt
                                                 }
                                             )
                                             ( TmPrimBinOp PrimIAdd
                                                 ( TmVar "c_inp0_1" )
-                                                ( TmVar "u_z" )
+                                                ( TmVar "e_z" )
                                             )
                                         )
                                     )
@@ -44,19 +44,19 @@
         )
     }
 , TopTmDef
-    { tmDefName = "u_g"
+    { tmDefName = "e_g"
     , tmDefBody = TmApp
         ( TmForce
-            ( TmGlobal "u_f" )
+            ( TmGlobal "e_f" )
         )
         ( TmInt 3 )
     }
 , TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmTo
         ( TmApp
             ( TmForce
-                ( TmGlobal "u_g" )
+                ( TmGlobal "e_g" )
             )
             ( TmInt 2 )
         ) "c_f1_3"

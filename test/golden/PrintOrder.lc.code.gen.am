@@ -4,7 +4,7 @@
             ( VaInt 5 )
         , ISetReturn
             ( VaThunk "sys_thunk_0" [] )
-        , IDefine "top_u_f"
+        , IDefine "top_e_f"
         ]
     }
 , TmDefCodeSection
@@ -14,7 +14,7 @@
             ( VaInt 3 )
         , ICall
             ( VaAddr
-                ( AIdent "top_u_f" )
+                ( AIdent "top_e_f" )
             )
         , IEndScope
         , IReceive
@@ -25,17 +25,17 @@
             )
         , ISetReturn
             ( VaInt 0 )
-        , IDefine "top_u_main"
+        , IDefine "top_e_main"
         ]
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
     , thunkCode =
         [ IPop
-            ( AIdent "var_u_x" )
+            ( AIdent "var_e_x" )
         , IPush
             ( VaAddr
-                ( AIdent "var_u_x" )
+                ( AIdent "var_e_x" )
             )
         , IPush
             ( VaInt 3 )

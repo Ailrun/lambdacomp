@@ -1,10 +1,10 @@
 [ TopTmDef
-    { tmDefName = "u_recFib"
+    { tmDefName = "e_recFib"
     , tmDefBody = TmReturn
         ( TmThunk
             ( TmRec
                 ( Param
-                    { paramName = "u_recFib"
+                    { paramName = "e_recFib"
                     , paramType = TpUp
                         ( TpInt :->: TpDown
                             ( TpUp
@@ -23,7 +23,7 @@
                     ( TmThunk
                         ( TmLam
                             ( Param
-                                { paramName = "u_n"
+                                { paramName = "e_n"
                                 , paramType = TpInt
                                 }
                             )
@@ -31,7 +31,7 @@
                                 ( TmThunk
                                     ( TmLam
                                         ( Param
-                                            { paramName = "u_l"
+                                            { paramName = "e_l"
                                             , paramType = TpInt
                                             }
                                         )
@@ -39,7 +39,7 @@
                                             ( TmThunk
                                                 ( TmLam
                                                     ( Param
-                                                        { paramName = "u_x"
+                                                        { paramName = "e_x"
                                                         , paramType = TpInt
                                                         }
                                                     )
@@ -47,12 +47,12 @@
                                                         ( TmThunk
                                                             ( TmTo
                                                                 ( TmPrimBinOp PrimILt
-                                                                    ( TmVar "u_n" )
-                                                                    ( TmVar "u_l" )
+                                                                    ( TmVar "e_n" )
+                                                                    ( TmVar "e_l" )
                                                                 ) "c_c_1"
                                                                 ( TmLam
                                                                     ( Param
-                                                                        { paramName = "u_y"
+                                                                        { paramName = "e_y"
                                                                         , paramType = TpInt
                                                                         }
                                                                     )
@@ -63,20 +63,20 @@
                                                                         )
                                                                         ( TmTo
                                                                             ( TmPrimBinOp PrimIAdd
-                                                                                ( TmVar "u_l" )
+                                                                                ( TmVar "e_l" )
                                                                                 ( TmInt 1 )
                                                                             ) "c_a1_6"
                                                                             ( TmTo
                                                                                 ( TmPrimBinOp PrimIAdd
-                                                                                    ( TmVar "u_x" )
-                                                                                    ( TmVar "u_y" )
+                                                                                    ( TmVar "e_x" )
+                                                                                    ( TmVar "e_y" )
                                                                                 ) "c_a3_6"
                                                                                 ( TmTo
                                                                                     ( TmApp
                                                                                         ( TmForce
-                                                                                            ( TmVar "u_recFib" )
+                                                                                            ( TmVar "e_recFib" )
                                                                                         )
-                                                                                        ( TmVar "u_n" )
+                                                                                        ( TmVar "e_n" )
                                                                                     ) "c_f1_6"
                                                                                     ( TmTo
                                                                                         ( TmApp
@@ -90,12 +90,12 @@
                                                                                                 ( TmForce
                                                                                                     ( TmVar "c_f2_6" )
                                                                                                 )
-                                                                                                ( TmVar "u_y" )
+                                                                                                ( TmVar "e_y" )
                                                                                             ) "c_f3_6"
                                                                                             ( TmPrintInt
-                                                                                                ( TmVar "u_l" )
+                                                                                                ( TmVar "e_l" )
                                                                                                 ( TmPrintInt
-                                                                                                    ( TmVar "u_x" )
+                                                                                                    ( TmVar "e_x" )
                                                                                                     ( TmApp
                                                                                                         ( TmForce
                                                                                                             ( TmVar "c_f3_6" )
@@ -130,21 +130,21 @@
         )
     }
 , TopTmDef
-    { tmDefName = "u_fib"
+    { tmDefName = "e_fib"
     , tmDefBody = TmReturn
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "u_n"
+                    { paramName = "e_n"
                     , paramType = TpInt
                     }
                 )
                 ( TmTo
                     ( TmApp
                         ( TmForce
-                            ( TmGlobal "u_recFib" )
+                            ( TmGlobal "e_recFib" )
                         )
-                        ( TmVar "u_n" )
+                        ( TmVar "e_n" )
                     ) "c_f1_8"
                     ( TmTo
                         ( TmApp
@@ -173,10 +173,10 @@
         )
     }
 , TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmApp
         ( TmForce
-            ( TmGlobal "u_fib" )
+            ( TmGlobal "e_fib" )
         )
         ( TmInt 10 )
     }

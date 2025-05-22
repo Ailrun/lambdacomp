@@ -1,15 +1,15 @@
 [ TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmLet "c_f0_0"
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "u_x"
+                    { paramName = "e_x"
                     , paramType = TpBool
                     }
                 )
                 ( TmReturn
-                    ( TmVar "u_x" )
+                    ( TmVar "e_x" )
                 )
             )
         )

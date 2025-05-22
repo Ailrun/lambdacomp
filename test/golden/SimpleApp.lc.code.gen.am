@@ -24,17 +24,17 @@
             )
         , ISetReturn
             ( VaInt 0 )
-        , IDefine "top_u_main"
+        , IDefine "top_e_main"
         ]
     }
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
     , thunkCode =
         [ IPop
-            ( AIdent "var_u_x" )
+            ( AIdent "var_e_x" )
         , ISetReturn
             ( VaAddr
-                ( AIdent "var_u_x" )
+                ( AIdent "var_e_x" )
             )
         , IExit
         ]
@@ -44,12 +44,12 @@
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
         [ IPop
-            ( AIdent "var_u_x" )
+            ( AIdent "var_e_x" )
         , IPush
             ( VaInt 5 )
         , ICall
             ( VaAddr
-                ( AIdent "var_u_x" )
+                ( AIdent "var_e_x" )
             )
         , IExit
         ]

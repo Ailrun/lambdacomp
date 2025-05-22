@@ -1,3 +1,4 @@
+{-# LANGUAGE ViewPatterns #-}
 module LambdaComp.External.ToElaborated
   ( runToElaborated
 
@@ -36,18 +37,18 @@ runToElaborated = go Map.empty
       | x == x' = do
           when (null prog && fst xtp /= TpInt) $ throwError $ NonIntLastTopDecl x
           (top, _) <- runWriterT $ topCheck x xtm xtp `runReaderT` ToElaboratedInfo ctx (Map.singleton x xtp) x
-          (top :) <$> go (addTop top xtp ctx) prog
+          (top :) <$> go (addTop x xtp ctx) prog
     go _   ((TopTmDecl x _, _) : _) = throwError $ InvalidTopDecl x
     go ctx ((TopTmDef x xtm, defSpan) : prog) = do
       ((top, tp), _) <- runWriterT $ topInfer x xtm defSpan `runReaderT` ToElaboratedInfo ctx Map.empty x
       when (null prog && (fst tp /= TpInt)) $ throwError $ NonIntLastTopDecl x
-      (top :) <$> go (addTop top tp ctx) prog
+      (top :) <$> go (addTop x tp ctx) prog
 
-    addTop :: E.Top -> XTp -> Context -> Context
-    addTop E.TopTmDef {..} = Map.insert tmDefName
+    addTop :: Ident -> XTp -> Context -> Context
+    addTop = Map.insert
 
 topCheck :: Ident -> XTm -> XTp -> ToElaborated E.Top
-topCheck tmDefName xtm (tmDefType, _) = do
+topCheck (toExtVar -> tmDefName) xtm (tmDefType, _) = do
   (tm', Any referSelf) <- listen $ xcheck xtm tmDefType
   let
     p = E.Param tmDefName tmDefType
@@ -57,7 +58,7 @@ topCheck tmDefName xtm (tmDefType, _) = do
   pure E.TopTmDef {..}
 
 topInfer :: Ident -> XTm -> SourceSpan -> ToElaborated (E.Top, XTp)
-topInfer tmDefName xtm topSpan = do
+topInfer (toExtVar -> tmDefName) xtm topSpan = do
   ((tp, tm'), Any referSelf) <- listen $ xinfer xtm
   let
     p = E.Param tmDefName tp
@@ -93,7 +94,7 @@ check (TmIf xtm0 xtm1 xtm2)      = \tp -> do
 check (TmLam xps xtm)            = \case
   tpPs `TpFun` tpR -> do
     bs <- zipWithM xcheckParam xps tpPs
-    E.TmLam (uncurry E.Param . second fst <$> bs) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm tpR)
+    E.TmLam (uncurry E.Param . bimap toExtVar fst <$> bs) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm tpR)
   tp               -> throwError $ NonFunType tp
 check (TmPrimBinOp op xtm0 xtm1) = \tp -> do
   unless (tp == retTp) $
@@ -126,7 +127,10 @@ infer (xtm `TmAnn` xtp)          = (fst xtp,) <$> xcheck xtm (fst xtp)
 infer (TmVar x)                  = do
   current <- asks currentDef
   tell (Any (current == x))
-  mayLocalX <- asks (\d -> (fmap ((, E.TmVar x) . fst) . Map.lookup x $ localCtx d) <|> (fmap ((, E.TmGlobal x) . fst) . Map.lookup x $ topDefs d))
+  let x' = toExtVar x
+  mayLocalX <- asks
+    (\d -> (fmap ((, E.TmVar x') . fst) . Map.lookup x $ localCtx d)
+           <|> (fmap ((, E.TmGlobal x') . fst) . Map.lookup x $ topDefs d))
   maybe (throwError $ NotInScope x) pure mayLocalX
 infer TmUnit                     = pure (TpUnit, E.TmUnit)
 infer TmTrue                     = pure (TpBool, E.TmTrue)
@@ -149,7 +153,7 @@ infer (TmLam xps xtm)            = do
   pure
     $ bimap
       (TpFun (fst . snd <$> bs))
-      (E.TmLam (uncurry E.Param . second fst <$> bs))
+      (E.TmLam (uncurry E.Param . bimap toExtVar fst <$> bs))
       tpR
 infer (xtmf `TmApp` xtmas)       = do
   (tpf, tmf') <- xinfer xtmf

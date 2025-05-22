@@ -1,10 +1,10 @@
 [ TopTmDef
-    { tmDefName = "u_f"
+    { tmDefName = "e_f"
     , tmDefBody = TmReturn
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "u_x"
+                    { paramName = "e_x"
                     , paramType = TpInt
                     }
                 )
@@ -12,7 +12,7 @@
                     ( TmThunk
                         ( TmLam
                             ( Param
-                                { paramName = "u_y"
+                                { paramName = "e_y"
                                 , paramType = TpInt
                                 }
                             )
@@ -20,18 +20,18 @@
                                 ( TmThunk
                                     ( TmLam
                                         ( Param
-                                            { paramName = "u_z"
+                                            { paramName = "e_z"
                                             , paramType = TpInt
                                             }
                                         )
                                         ( TmTo
                                             ( TmTo
                                                 ( TmReturn
-                                                    ( TmVar "u_x" )
+                                                    ( TmVar "e_x" )
                                                 ) "c_inp0_0"
                                                 ( TmTo
                                                     ( TmReturn
-                                                        ( TmVar "u_y" )
+                                                        ( TmVar "e_y" )
                                                     ) "c_inp1_0"
                                                     ( TmPrimBinOp PrimIAdd
                                                         ( TmVar "c_inp0_0" )
@@ -41,7 +41,7 @@
                                             ) "c_inp0_1"
                                             ( TmTo
                                                 ( TmReturn
-                                                    ( TmVar "u_z" )
+                                                    ( TmVar "e_z" )
                                                 ) "c_inp1_1"
                                                 ( TmPrimBinOp PrimIAdd
                                                     ( TmVar "c_inp0_1" )
@@ -59,14 +59,14 @@
         )
     }
 , TopTmDef
-    { tmDefName = "u_g"
+    { tmDefName = "e_g"
     , tmDefBody = TmTo
         ( TmReturn
             ( TmInt 3 )
         ) "c_a0_2"
         ( TmTo
             ( TmReturn
-                ( TmGlobal "u_f" )
+                ( TmGlobal "e_f" )
             ) "c_f0_2"
             ( TmApp
                 ( TmForce
@@ -77,7 +77,7 @@
         )
     }
 , TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmTo
         ( TmTo
             ( TmReturn
@@ -90,7 +90,7 @@
                 ( TmTo
                     ( TmTo
                         ( TmReturn
-                            ( TmGlobal "u_g" )
+                            ( TmGlobal "e_g" )
                         ) "c_f0_3"
                         ( TmApp
                             ( TmForce

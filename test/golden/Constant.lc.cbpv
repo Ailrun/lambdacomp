@@ -1,5 +1,5 @@
 [ TopTmDef
-    { tmDefName = "u_main"
+    { tmDefName = "e_main"
     , tmDefBody = TmTo
         ( TmReturn
             ( TmInt 5 )
