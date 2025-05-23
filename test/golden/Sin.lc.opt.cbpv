@@ -39,41 +39,41 @@
                                                                     )
                                                                     ( TmReturn
                                                                         ( TmThunk
-                                                                            ( TmLam
-                                                                                ( Param
-                                                                                    { paramName = "e_n"
-                                                                                    , paramType = TpInt
-                                                                                    }
-                                                                                )
-                                                                                ( TmLet "c_f0_3"
-                                                                                    ( TmThunk
-                                                                                        ( TmLam
-                                                                                            ( Param
-                                                                                                { paramName = "aa_0_0"
-                                                                                                , paramType = TpDouble
-                                                                                                }
-                                                                                            )
-                                                                                            ( TmReturn
-                                                                                                ( TmThunk
-                                                                                                    ( TmLam
-                                                                                                        ( Param
-                                                                                                            { paramName = "aa_1_0"
-                                                                                                            , paramType = TpInt
-                                                                                                            }
-                                                                                                        )
+                                                                            ( TmLet "c_f0_3"
+                                                                                ( TmThunk
+                                                                                    ( TmLam
+                                                                                        ( Param
+                                                                                            { paramName = "aa_0_0"
+                                                                                            , paramType = TpDouble
+                                                                                            }
+                                                                                        )
+                                                                                        ( TmReturn
+                                                                                            ( TmThunk
+                                                                                                ( TmLam
+                                                                                                    ( Param
+                                                                                                        { paramName = "aa_1_0"
+                                                                                                        , paramType = TpInt
+                                                                                                        }
+                                                                                                    )
+                                                                                                    ( TmApp
                                                                                                         ( TmApp
-                                                                                                            ( TmApp
-                                                                                                                ( TmForce
-                                                                                                                    ( TmVar "e_pow" )
-                                                                                                                )
-                                                                                                                ( TmVar "aa_0_0" )
+                                                                                                            ( TmForce
+                                                                                                                ( TmVar "e_pow" )
                                                                                                             )
-                                                                                                            ( TmVar "aa_1_0" )
+                                                                                                            ( TmVar "aa_0_0" )
                                                                                                         )
+                                                                                                        ( TmVar "aa_1_0" )
                                                                                                     )
                                                                                                 )
                                                                                             )
                                                                                         )
+                                                                                    )
+                                                                                )
+                                                                                ( TmLam
+                                                                                    ( Param
+                                                                                        { paramName = "e_n"
+                                                                                        , paramType = TpInt
+                                                                                        }
                                                                                     )
                                                                                     ( TmTo
                                                                                         ( TmPrimBinOp PrimILe
@@ -217,27 +217,27 @@
                                     ( TmThunk
                                         ( TmLet "c_r_11"
                                             ( TmThunk
-                                                ( TmLam
-                                                    ( Param
-                                                        { paramName = "e_x"
-                                                        , paramType = TpInt
-                                                        }
-                                                    )
-                                                    ( TmLet "c_f0_9"
-                                                        ( TmThunk
-                                                            ( TmLam
-                                                                ( Param
-                                                                    { paramName = "aa_0_0"
-                                                                    , paramType = TpInt
-                                                                    }
-                                                                )
-                                                                ( TmApp
-                                                                    ( TmForce
-                                                                        ( TmVar "e_fact" )
-                                                                    )
-                                                                    ( TmVar "aa_0_0" )
-                                                                )
+                                                ( TmLet "c_f0_9"
+                                                    ( TmThunk
+                                                        ( TmLam
+                                                            ( Param
+                                                                { paramName = "aa_0_0"
+                                                                , paramType = TpInt
+                                                                }
                                                             )
+                                                            ( TmApp
+                                                                ( TmForce
+                                                                    ( TmVar "e_fact" )
+                                                                )
+                                                                ( TmVar "aa_0_0" )
+                                                            )
+                                                        )
+                                                    )
+                                                    ( TmLam
+                                                        ( Param
+                                                            { paramName = "e_x"
+                                                            , paramType = TpInt
+                                                            }
                                                         )
                                                         ( TmTo
                                                             ( TmPrimBinOp PrimILe
@@ -326,65 +326,65 @@
                         )
                         ( TmReturn
                             ( TmThunk
-                                ( TmLam
-                                    ( Param
-                                        { paramName = "e_n"
-                                        , paramType = TpInt
-                                        }
-                                    )
-                                    ( TmLet "c_f0_12"
-                                        ( TmThunk
-                                            ( TmLam
-                                                ( Param
-                                                    { paramName = "aa_0_0"
-                                                    , paramType = TpDouble
-                                                    }
-                                                )
-                                                ( TmReturn
-                                                    ( TmThunk
-                                                        ( TmLam
-                                                            ( Param
-                                                                { paramName = "aa_1_0"
-                                                                , paramType = TpInt
-                                                                }
-                                                            )
+                                ( TmLet "c_f0_12"
+                                    ( TmThunk
+                                        ( TmLam
+                                            ( Param
+                                                { paramName = "aa_0_0"
+                                                , paramType = TpDouble
+                                                }
+                                            )
+                                            ( TmReturn
+                                                ( TmThunk
+                                                    ( TmLam
+                                                        ( Param
+                                                            { paramName = "aa_1_0"
+                                                            , paramType = TpInt
+                                                            }
+                                                        )
+                                                        ( TmApp
                                                             ( TmApp
-                                                                ( TmApp
-                                                                    ( TmForce
-                                                                        ( TmGlobal "e_pow" )
-                                                                    )
-                                                                    ( TmVar "aa_0_0" )
+                                                                ( TmForce
+                                                                    ( TmGlobal "e_pow" )
                                                                 )
-                                                                ( TmVar "aa_1_0" )
+                                                                ( TmVar "aa_0_0" )
                                                             )
+                                                            ( TmVar "aa_1_0" )
                                                         )
                                                     )
                                                 )
                                             )
                                         )
-                                        ( TmLet "c_f0_13"
-                                            ( TmThunk
-                                                ( TmLam
-                                                    ( Param
-                                                        { paramName = "aa_0_1"
-                                                        , paramType = TpInt
-                                                        }
-                                                    )
-                                                    ( TmApp
-                                                        ( TmForce
-                                                            ( TmGlobal "e_fact" )
-                                                        )
-                                                        ( TmVar "aa_0_1" )
-                                                    )
+                                    )
+                                    ( TmLet "c_f0_13"
+                                        ( TmThunk
+                                            ( TmLam
+                                                ( Param
+                                                    { paramName = "aa_0_1"
+                                                    , paramType = TpInt
+                                                    }
                                                 )
-                                            )
-                                            ( TmTo
                                                 ( TmApp
                                                     ( TmForce
-                                                        ( TmVar "c_f0_12" )
+                                                        ( TmGlobal "e_fact" )
                                                     )
-                                                    ( TmVar "e_x" )
-                                                ) "c_f1_12"
+                                                    ( TmVar "aa_0_1" )
+                                                )
+                                            )
+                                        )
+                                        ( TmTo
+                                            ( TmApp
+                                                ( TmForce
+                                                    ( TmVar "c_f0_12" )
+                                                )
+                                                ( TmVar "e_x" )
+                                            ) "c_f1_12"
+                                            ( TmLam
+                                                ( Param
+                                                    { paramName = "e_n"
+                                                    , paramType = TpInt
+                                                    }
+                                                )
                                                 ( TmTo
                                                     ( TmApp
                                                         ( TmForce
@@ -455,17 +455,41 @@
         ( TmThunk
             ( TmLet "aa_0_0_temp"
                 ( TmThunk
-                    ( TmLam
-                        ( Param
-                            { paramName = "e_x"
-                            , paramType = TpDouble
-                            }
+                    ( TmLet "c_f0_16"
+                        ( TmThunk
+                            ( TmLam
+                                ( Param
+                                    { paramName = "aa_0_0"
+                                    , paramType = TpDouble
+                                    }
+                                )
+                                ( TmReturn
+                                    ( TmThunk
+                                        ( TmLam
+                                            ( Param
+                                                { paramName = "aa_1_0"
+                                                , paramType = TpInt
+                                                }
+                                            )
+                                            ( TmApp
+                                                ( TmApp
+                                                    ( TmForce
+                                                        ( TmGlobal "e_sinEntry" )
+                                                    )
+                                                    ( TmVar "aa_0_0" )
+                                                )
+                                                ( TmVar "aa_1_0" )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
                         )
-                        ( TmLet "c_f0_16"
+                        ( TmLet "c_f0_17"
                             ( TmThunk
                                 ( TmLam
                                     ( Param
-                                        { paramName = "aa_0_0"
+                                        { paramName = "aa_0_1"
                                         , paramType = TpDouble
                                         }
                                     )
@@ -473,7 +497,7 @@
                                         ( TmThunk
                                             ( TmLam
                                                 ( Param
-                                                    { paramName = "aa_1_0"
+                                                    { paramName = "aa_1_1"
                                                     , paramType = TpInt
                                                     }
                                                 )
@@ -482,20 +506,20 @@
                                                         ( TmForce
                                                             ( TmGlobal "e_sinEntry" )
                                                         )
-                                                        ( TmVar "aa_0_0" )
+                                                        ( TmVar "aa_0_1" )
                                                     )
-                                                    ( TmVar "aa_1_0" )
+                                                    ( TmVar "aa_1_1" )
                                                 )
                                             )
                                         )
                                     )
                                 )
                             )
-                            ( TmLet "c_f0_17"
+                            ( TmLet "c_f0_19"
                                 ( TmThunk
                                     ( TmLam
                                         ( Param
-                                            { paramName = "aa_0_1"
+                                            { paramName = "aa_0_2"
                                             , paramType = TpDouble
                                             }
                                         )
@@ -503,7 +527,7 @@
                                             ( TmThunk
                                                 ( TmLam
                                                     ( Param
-                                                        { paramName = "aa_1_1"
+                                                        { paramName = "aa_1_2"
                                                         , paramType = TpInt
                                                         }
                                                     )
@@ -512,20 +536,20 @@
                                                             ( TmForce
                                                                 ( TmGlobal "e_sinEntry" )
                                                             )
-                                                            ( TmVar "aa_0_1" )
+                                                            ( TmVar "aa_0_2" )
                                                         )
-                                                        ( TmVar "aa_1_1" )
+                                                        ( TmVar "aa_1_2" )
                                                     )
                                                 )
                                             )
                                         )
                                     )
                                 )
-                                ( TmLet "c_f0_19"
+                                ( TmLet "c_f0_21"
                                     ( TmThunk
                                         ( TmLam
                                             ( Param
-                                                { paramName = "aa_0_2"
+                                                { paramName = "aa_0_3"
                                                 , paramType = TpDouble
                                                 }
                                             )
@@ -533,7 +557,7 @@
                                                 ( TmThunk
                                                     ( TmLam
                                                         ( Param
-                                                            { paramName = "aa_1_2"
+                                                            { paramName = "aa_1_3"
                                                             , paramType = TpInt
                                                             }
                                                         )
@@ -542,20 +566,20 @@
                                                                 ( TmForce
                                                                     ( TmGlobal "e_sinEntry" )
                                                                 )
-                                                                ( TmVar "aa_0_2" )
+                                                                ( TmVar "aa_0_3" )
                                                             )
-                                                            ( TmVar "aa_1_2" )
+                                                            ( TmVar "aa_1_3" )
                                                         )
                                                     )
                                                 )
                                             )
                                         )
                                     )
-                                    ( TmLet "c_f0_21"
+                                    ( TmLet "c_f0_23"
                                         ( TmThunk
                                             ( TmLam
                                                 ( Param
-                                                    { paramName = "aa_0_3"
+                                                    { paramName = "aa_0_4"
                                                     , paramType = TpDouble
                                                     }
                                                 )
@@ -563,7 +587,7 @@
                                                     ( TmThunk
                                                         ( TmLam
                                                             ( Param
-                                                                { paramName = "aa_1_3"
+                                                                { paramName = "aa_1_4"
                                                                 , paramType = TpInt
                                                                 }
                                                             )
@@ -572,20 +596,20 @@
                                                                     ( TmForce
                                                                         ( TmGlobal "e_sinEntry" )
                                                                     )
-                                                                    ( TmVar "aa_0_3" )
+                                                                    ( TmVar "aa_0_4" )
                                                                 )
-                                                                ( TmVar "aa_1_3" )
+                                                                ( TmVar "aa_1_4" )
                                                             )
                                                         )
                                                     )
                                                 )
                                             )
                                         )
-                                        ( TmLet "c_f0_23"
+                                        ( TmLet "c_f0_25"
                                             ( TmThunk
                                                 ( TmLam
                                                     ( Param
-                                                        { paramName = "aa_0_4"
+                                                        { paramName = "aa_0_5"
                                                         , paramType = TpDouble
                                                         }
                                                     )
@@ -593,7 +617,7 @@
                                                         ( TmThunk
                                                             ( TmLam
                                                                 ( Param
-                                                                    { paramName = "aa_1_4"
+                                                                    { paramName = "aa_1_5"
                                                                     , paramType = TpInt
                                                                     }
                                                                 )
@@ -602,20 +626,20 @@
                                                                         ( TmForce
                                                                             ( TmGlobal "e_sinEntry" )
                                                                         )
-                                                                        ( TmVar "aa_0_4" )
+                                                                        ( TmVar "aa_0_5" )
                                                                     )
-                                                                    ( TmVar "aa_1_4" )
+                                                                    ( TmVar "aa_1_5" )
                                                                 )
                                                             )
                                                         )
                                                     )
                                                 )
                                             )
-                                            ( TmLet "c_f0_25"
+                                            ( TmLet "c_f0_27"
                                                 ( TmThunk
                                                     ( TmLam
                                                         ( Param
-                                                            { paramName = "aa_0_5"
+                                                            { paramName = "aa_0_6"
                                                             , paramType = TpDouble
                                                             }
                                                         )
@@ -623,7 +647,7 @@
                                                             ( TmThunk
                                                                 ( TmLam
                                                                     ( Param
-                                                                        { paramName = "aa_1_5"
+                                                                        { paramName = "aa_1_6"
                                                                         , paramType = TpInt
                                                                         }
                                                                     )
@@ -632,20 +656,20 @@
                                                                             ( TmForce
                                                                                 ( TmGlobal "e_sinEntry" )
                                                                             )
-                                                                            ( TmVar "aa_0_5" )
+                                                                            ( TmVar "aa_0_6" )
                                                                         )
-                                                                        ( TmVar "aa_1_5" )
+                                                                        ( TmVar "aa_1_6" )
                                                                     )
                                                                 )
                                                             )
                                                         )
                                                     )
                                                 )
-                                                ( TmLet "c_f0_27"
+                                                ( TmLet "c_f0_29"
                                                     ( TmThunk
                                                         ( TmLam
                                                             ( Param
-                                                                { paramName = "aa_0_6"
+                                                                { paramName = "aa_0_7"
                                                                 , paramType = TpDouble
                                                                 }
                                                             )
@@ -653,7 +677,7 @@
                                                                 ( TmThunk
                                                                     ( TmLam
                                                                         ( Param
-                                                                            { paramName = "aa_1_6"
+                                                                            { paramName = "aa_1_7"
                                                                             , paramType = TpInt
                                                                             }
                                                                         )
@@ -662,44 +686,20 @@
                                                                                 ( TmForce
                                                                                     ( TmGlobal "e_sinEntry" )
                                                                                 )
-                                                                                ( TmVar "aa_0_6" )
+                                                                                ( TmVar "aa_0_7" )
                                                                             )
-                                                                            ( TmVar "aa_1_6" )
+                                                                            ( TmVar "aa_1_7" )
                                                                         )
                                                                     )
                                                                 )
                                                             )
                                                         )
                                                     )
-                                                    ( TmLet "c_f0_29"
-                                                        ( TmThunk
-                                                            ( TmLam
-                                                                ( Param
-                                                                    { paramName = "aa_0_7"
-                                                                    , paramType = TpDouble
-                                                                    }
-                                                                )
-                                                                ( TmReturn
-                                                                    ( TmThunk
-                                                                        ( TmLam
-                                                                            ( Param
-                                                                                { paramName = "aa_1_7"
-                                                                                , paramType = TpInt
-                                                                                }
-                                                                            )
-                                                                            ( TmApp
-                                                                                ( TmApp
-                                                                                    ( TmForce
-                                                                                        ( TmGlobal "e_sinEntry" )
-                                                                                    )
-                                                                                    ( TmVar "aa_0_7" )
-                                                                                )
-                                                                                ( TmVar "aa_1_7" )
-                                                                            )
-                                                                        )
-                                                                    )
-                                                                )
-                                                            )
+                                                    ( TmLam
+                                                        ( Param
+                                                            { paramName = "e_x"
+                                                            , paramType = TpDouble
+                                                            }
                                                         )
                                                         ( TmTo
                                                             ( TmApp

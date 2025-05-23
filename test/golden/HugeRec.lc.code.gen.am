@@ -68,9 +68,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_2"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_e_x" )
-        , IAssign
+        [ IAssign
             ( AIdent "var_c_f0_5" )
             ( VaThunk "sys_thunk_1"
                 [ ALocalEnv 1 ]
@@ -86,6 +84,8 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_c_3" )
+        , IPop
+            ( AIdent "var_e_x" )
         , IPrintInt
             ( VaAddr
                 ( AIdent "var_e_x" )

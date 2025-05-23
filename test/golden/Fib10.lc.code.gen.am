@@ -106,7 +106,12 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_4"
     , thunkCode =
-        [ IScope
+        [ IAssign
+            ( AIdent "var_c_f0_6" )
+            ( VaThunk "sys_thunk_3"
+                [ ALocalEnv 2 ]
+            )
+        , IScope
         , IPush
             ( VaAddr
                 ( ALocalEnv 1 )
@@ -121,11 +126,6 @@
             ( AIdent "var_c_c_1" )
         , IPop
             ( AIdent "var_e_y" )
-        , IAssign
-            ( AIdent "var_c_f0_6" )
-            ( VaThunk "sys_thunk_3"
-                [ ALocalEnv 2 ]
-            )
         , ICondJump
             ( VaAddr
                 ( AIdent "var_c_c_1" )
@@ -555,11 +555,11 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_19"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_e_n" )
-        , IAssign
+        [ IAssign
             ( AIdent "var_c_f0_8" )
             ( VaThunk "sys_thunk_18" [] )
+        , IPop
+            ( AIdent "var_e_n" )
         , IScope
         , IPush
             ( VaAddr
