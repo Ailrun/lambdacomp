@@ -20,6 +20,7 @@ import Data.Maybe                 (mapMaybe, maybeToList)
 import Data.Tuple                 (swap)
 import Data.Vector                (Vector)
 import Data.Vector                qualified as Vector
+import System.Exit                (ExitCode (ExitFailure, ExitSuccess))
 import System.IO                  (Handle, hPrint)
 
 import LambdaComp.AM.Syntax
@@ -32,9 +33,13 @@ data Item where
   ItThunk  :: !Ident -> !(Vector Item) -> Item
   deriving stock Show
 
-topEval :: Handle -> [CodeSection] -> IO Item
-topEval out cs = returnReg <$> runMachine evalData evalState
+topEval :: Handle -> [CodeSection] -> IO ExitCode
+topEval out cs = toExitCode . returnReg <$> runMachine evalData evalState
   where
+    toExitCode (ItInt 0) = ExitSuccess
+    toExitCode (ItInt n) = ExitFailure n
+    toExitCode _         = error "Compiler bug: TypeError in AM evaluation!"
+
     evalData = foldr insertCodeSection (Map.empty, ([], out)) cs
     evalState =
       EvalState

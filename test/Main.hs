@@ -3,9 +3,11 @@ module Main (main) where
 import Control.Monad        (void)
 import Data.ByteString.Lazy qualified as LBS
 import Data.Int             (Int64)
+import Data.Maybe           (fromMaybe)
+import GHC.IO.Exception     (ExitCode (ExitFailure))
 import System.Directory     (makeAbsolute)
 import System.FilePath      (takeFileName, (<.>), (</>))
-import System.IO            (Handle, hClose)
+import System.IO            (Handle, hClose, hPrint)
 import System.IO.Temp       (withSystemTempFile)
 import System.Timeout       (timeout)
 import Test.Tasty
@@ -94,8 +96,9 @@ amExecutionTests allExamples =
   $ executionOfExample "am" (makeAMOptions Run) <$> allExamples
 
 executionOfExample :: String -> (FilePath -> Options) -> String -> TestTree
-executionOfExample tag = goldenOf (Just 10000) ("execution" <.> tag <.> "out") $ \handle ->
-  timeout 300000 . mainFuncWithOptions handle
+executionOfExample tag = goldenOf (Just 10000) ("execution" <.> tag <.> "out") $ \handle opt -> do
+  exitCode <- timeoutWithExitCode 300000 $ mainFuncWithOptions handle opt
+  hPrint handle exitCode
 
 goldenOf :: Maybe Int64 -> String -> (Handle -> Options -> IO a) -> (FilePath -> Options) -> String -> TestTree
 goldenOf maySize tag f optionBuilder s =
@@ -125,3 +128,8 @@ getExampleDir = makeAbsolute "examples"
 
 gitDiff :: FilePath -> FilePath -> [String]
 gitDiff ref new = ["git", "diff", ref, new]
+
+timeoutWithExitCode :: Int -> IO ExitCode -> IO ExitCode
+timeoutWithExitCode n = fmap (fromMaybe timeOutExitCode) . timeout n
+  where
+    timeOutExitCode = ExitFailure 124

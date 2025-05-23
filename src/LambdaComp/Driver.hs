@@ -60,7 +60,7 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
         DirectCBackend -> do
           cCode <- getCCode
           runWithFp (const $ genAndExeCExe outH cCode) mayFp
-        AMBackend      -> getAMTm >>= lift . topEval outH >>= pHPrintNoColor outH
+        AMBackend      -> getAMTm >>= exitCodeToExceptT . topEval outH
 
 handleElabError :: Handle -> Either ElaborationError a -> ExceptT Int IO a
 handleElabError outH (Left elabErr) = lift (hPutStrLn outH "Elab") >> pHPrintNoColor outH elabErr >> throwError 1
