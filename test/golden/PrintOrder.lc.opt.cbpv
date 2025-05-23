@@ -39,34 +39,17 @@
     }
 , TopTmDef
     { tmDefName = "e_main"
-    , tmDefBody = TmLet "c_f0_2"
-        ( TmThunk
-            ( TmLam
-                ( Param
-                    { paramName = "aa_0_0"
-                    , paramType = TpInt
-                    }
-                )
-                ( TmApp
-                    ( TmForce
-                        ( TmGlobal "e_f" )
-                    )
-                    ( TmVar "aa_0_0" )
-                )
+    , tmDefBody = TmTo
+        ( TmApp
+            ( TmForce
+                ( TmGlobal "e_f" )
             )
-        )
-        ( TmTo
-            ( TmApp
-                ( TmForce
-                    ( TmVar "c_f0_2" )
-                )
-                ( TmInt 3 )
-            ) "c_v_3"
-            ( TmPrintInt
-                ( TmVar "c_v_3" )
-                ( TmReturn
-                    ( TmInt 0 )
-                )
+            ( TmInt 3 )
+        ) "c_v_3"
+        ( TmPrintInt
+            ( TmVar "c_v_3" )
+            ( TmReturn
+                ( TmInt 0 )
             )
         )
     }

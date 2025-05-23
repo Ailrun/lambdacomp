@@ -4,7 +4,6 @@ module LambdaComp.CBPV.Optimization.DeadBindingElimination
 
 import Control.Applicative      (liftA3)
 import Control.Monad.Writer.CPS (MonadWriter (tell), Writer, censor, listens, runWriter)
-import Data.Functor             ((<&>))
 import Data.Set                 (Set)
 import Data.Set                 qualified as Set
 
@@ -33,7 +32,7 @@ deadLetElimination (TmTo tm0 x tm1)         = liftA3 TmTo (deadLetElimination tm
 deadLetElimination (TmLet x tm0 tm1)        = do
   (tm1', withX) <- without x $ listens (x `Set.member`) $ deadLetElimination tm1
   if withX
-    then TmLet x <$> deadLetElimination tm0 <&> ($ tm1')
+    then flip (TmLet x) tm1' <$> deadLetElimination tm0
     else pure tm1'
 deadLetElimination (TmPrimBinOp op tm0 tm1) = liftA2 (TmPrimBinOp op) (deadLetElimination tm0) (deadLetElimination tm1)
 deadLetElimination (TmPrimUnOp op tm)       = TmPrimUnOp op <$> deadLetElimination tm

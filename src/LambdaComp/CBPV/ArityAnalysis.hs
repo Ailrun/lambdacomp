@@ -6,6 +6,7 @@ import Control.Applicative            (liftA3)
 import Control.Monad.FreshName        (FreshName, MonadFreshName, freshNamesOf, runFreshName)
 import Control.Monad.Reader           (MonadReader (ask, local), ReaderT (runReaderT), asks)
 import Control.Monad.State.Strict     (StateT, evalStateT, gets, modify')
+import Control.Monad.Trans            (MonadTrans (lift))
 import Control.Monad.Trans.Writer.CPS (runWriterT)
 import Control.Monad.Writer.CPS       (MonadWriter (tell), WriterT, censor, listens)
 import Data.Bifunctor                 (Bifunctor (bimap, first, second))
@@ -50,27 +51,27 @@ runArityAnalysis :: Program -> Program
 runArityAnalysis p
   | Right ctx <- runProgramInfer p = runFreshName $ do
       (downP, ctx') <- runWriterT . (`evalStateT` (ctx, Arity Map.empty)) . fmap reverse . mapM goDown $ reverse p
-      (`runReaderT` ctx') . mapM goUp $ downP
+      mapM goUp downP `runArityAnalysisUp` ctx'
   | otherwise                      = error "Ill-typed program!"
   where
     goUp :: Top -> ArityAnalysisUp Top
-    goUp = asks . runArityAnalysisUp . arityAnalysisInTopUp
+    goUp = arityAnalysisInTopUp
 
     goDown :: Top -> StateT (Context, Arity) (WriterT Context FreshName) Top
     goDown top = do
       let name = tmDefName top
       (topTp, ar) <- gets (bimap (Map.! name) (readArityWithDefault 0 name))
       modify' $ first (Map.delete name)
-      let (top', ars) = arityAnalysisInTopDown topTp top `runArityAnalysisDown` ar
+      (top', ars) <- lift . lift $ arityAnalysisInTopDown topTp top `runArityAnalysisDown` ar
       modify' $ second (<> ars)
       tell (Map.singleton name $ flattenNTpFun ar topTp)
       pure top'
 
-runArityAnalysisDown :: ArityAnalysisDown a -> ArgLen -> (a, Arity)
-runArityAnalysisDown g ar = runFreshName $ runWriterT $ g `runReaderT` ar
+runArityAnalysisDown :: ArityAnalysisDown a -> ArgLen -> FreshName (a, Arity)
+runArityAnalysisDown g ar = runWriterT $ g `runReaderT` ar
 
-runArityAnalysisUp :: ArityAnalysisUp a -> Context -> a
-runArityAnalysisUp g ctx = runFreshName $ g `runReaderT` ctx
+runArityAnalysisUp :: ArityAnalysisUp a -> Context -> FreshName a
+runArityAnalysisUp = runReaderT
 
 arityAnalysisInTopDown :: Tp Val -> Top -> ArityAnalysisDown Top
 arityAnalysisInTopDown topTp TopTmDef {..} = do

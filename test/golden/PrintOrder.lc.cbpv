@@ -64,7 +64,7 @@
                     ( TmThunk
                         ( TmLam
                             ( Param
-                                { paramName = "aa_0_0"
+                                { paramName = "aa_0_1"
                                 , paramType = TpInt
                                 }
                             )
@@ -72,7 +72,7 @@
                                 ( TmForce
                                     ( TmGlobal "e_f" )
                                 )
-                                ( TmVar "aa_0_0" )
+                                ( TmVar "aa_0_1" )
                             )
                         )
                     )

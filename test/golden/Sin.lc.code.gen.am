@@ -1,42 +1,39 @@
 [ TmDefCodeSection
     { tmDefCode =
         [ ISetReturn
-            ( VaThunk "sys_thunk_8" [] )
+            ( VaThunk "sys_thunk_1" [] )
         , IDefine "top_e_pow"
         ]
     }
 , TmDefCodeSection
     { tmDefCode =
         [ ISetReturn
-            ( VaThunk "sys_thunk_14" [] )
+            ( VaThunk "sys_thunk_3" [] )
         , IDefine "top_e_fact"
         ]
     }
 , TmDefCodeSection
     { tmDefCode =
         [ ISetReturn
-            ( VaThunk "sys_thunk_20" [] )
+            ( VaThunk "sys_thunk_4" [] )
         , IDefine "top_e_sinEntry"
         ]
     }
 , TmDefCodeSection
     { tmDefCode =
         [ ISetReturn
-            ( VaThunk "sys_thunk_38" [] )
+            ( VaThunk "sys_thunk_5" [] )
         , IDefine "top_e_sin"
         ]
     }
 , TmDefCodeSection
     { tmDefCode =
-        [ IAssign
-            ( AIdent "var_c_f0_31" )
-            ( VaThunk "sys_thunk_39" [] )
-        , IScope
+        [ IScope
         , IPush
             ( VaDouble 0.5 )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f0_31" )
+                ( AIdent "top_e_sin" )
             )
         , IEndScope
         , IReceive
@@ -54,52 +51,13 @@
     { thunkCodeSectionName = "sys_thunk_0"
     , thunkCode =
         [ IPop
-            ( AIdent "var_aa_1_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_0" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( ALocalEnv 1 )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 2
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_1"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_0" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_0"
-                [ AIdent "var_aa_0_0"
-                , ALocalEnv 0
-                ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_2"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_f0_3" )
-            ( VaThunk "sys_thunk_1"
-                [ ALocalEnv 0 ]
-            )
+            ( AIdent "var_aa_0_4" )
         , IPop
-            ( AIdent "var_e_n" )
+            ( AIdent "var_aa_1_4" )
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_e_n" )
+                ( AIdent "var_aa_1_4" )
             )
         , IPush
             ( VaInt 0 )
@@ -113,11 +71,11 @@
             ) 2
         , ISetReturn
             ( VaDouble 1.0 )
-        , IJump 19
+        , IJump 15
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_e_n" )
+                ( AIdent "var_aa_1_4" )
             )
         , IPush
             ( VaInt 1 )
@@ -128,30 +86,22 @@
         , IScope
         , IPush
             ( VaAddr
-                ( ALocalEnv 1 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_3" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_3" )
-        , IScope
-        , IPush
-            ( VaAddr
                 ( AIdent "var_c_a1_3" )
             )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_4" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_3" )
+                ( ALocalEnv 0 )
             )
         , IEndScope
         , IReceive
             ( AIdent "var_c_inp1_4" )
         , IPush
             ( VaAddr
-                ( ALocalEnv 1 )
+                ( AIdent "var_aa_0_4" )
             )
         , IPush
             ( VaAddr
@@ -160,90 +110,25 @@
         , IPrimBinOp PrimDMul
         , IExit
         ]
-    , thunkEnvSize = 2
+    , thunkEnvSize = 1
     }
 , ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_3"
+    { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
         [ IPop
-            ( AIdent "var_e_x" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_2"
-                [ ALocalEnv 0
-                , AIdent "var_e_x"
-                ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_4"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_r_5" )
-            ( VaThunk "sys_thunk_3"
-                [ ALocalEnv 0 ]
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_r_5" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_5"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_aa_0_0_temp" )
-            ( VaThunk "sys_thunk_4"
-                [ ALocalEnv 0 ]
-            )
+            ( AIdent "var_aa_0_5" )
         , IPop
-            ( AIdent "var_aa_0_0" )
-        , IScope
+            ( AIdent "var_aa_1_5" )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_0_0_temp" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_aa_1_0_temp" )
-        , IPop
-            ( AIdent "var_aa_1_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_1_0_temp" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_6"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_1" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_1" )
+                ( AIdent "var_aa_1_5" )
             )
         , IPush
             ( VaAddr
-                ( ALocalEnv 0 )
+                ( AIdent "var_aa_0_5" )
             )
         , IRecAssign
-            ( AIdent "var_e_pow" ) "sys_thunk_5"
+            ( AIdent "var_e_pow" ) "sys_thunk_0"
             [ AIdent "var_e_pow" ]
         , ICall
             ( VaAddr
@@ -251,86 +136,17 @@
             )
         , IExit
         ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_7"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_1" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_6"
-                [ AIdent "var_aa_0_1" ]
-            )
-        , IExit
-        ]
     , thunkEnvSize = 0
     }
 , ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_8"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_aa_0_1_temp" )
-            ( VaThunk "sys_thunk_7" [] )
-        , IPop
-            ( AIdent "var_aa_0_1" )
-        , IScope
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_1" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_0_1_temp" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_aa_1_1_temp" )
-        , IPop
-            ( AIdent "var_aa_1_1" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_1" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_1_1_temp" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_9"
+    { thunkCodeSectionName = "sys_thunk_2"
     , thunkCode =
         [ IPop
-            ( AIdent "var_aa_0_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_10"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_f0_9" )
-            ( VaThunk "sys_thunk_9"
-                [ ALocalEnv 0 ]
-            )
-        , IPop
-            ( AIdent "var_e_x" )
+            ( AIdent "var_aa_0_2" )
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_e_x" )
+                ( AIdent "var_aa_0_2" )
             )
         , IPush
             ( VaInt 0 )
@@ -348,7 +164,7 @@
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_e_x" )
+                ( AIdent "var_aa_0_2" )
             )
         , IPush
             ( VaInt 1 )
@@ -363,14 +179,14 @@
             )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f0_9" )
+                ( ALocalEnv 0 )
             )
         , IEndScope
         , IReceive
             ( AIdent "var_c_inp1_10" )
         , IPush
             ( VaAddr
-                ( AIdent "var_e_x" )
+                ( AIdent "var_aa_0_2" )
             )
         , IPush
             ( VaAddr
@@ -382,54 +198,16 @@
     , thunkEnvSize = 1
     }
 , ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_11"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_r_11" )
-            ( VaThunk "sys_thunk_10"
-                [ ALocalEnv 0 ]
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_r_11" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_12"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_aa_0_0_temp" )
-            ( VaThunk "sys_thunk_11"
-                [ ALocalEnv 0 ]
-            )
-        , IPop
-            ( AIdent "var_aa_0_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_0_0_temp" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_13"
+    { thunkCodeSectionName = "sys_thunk_3"
     , thunkCode =
         [ IPop
-            ( AIdent "var_aa_0_1" )
+            ( AIdent "var_aa_0_3" )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_1" )
+                ( AIdent "var_aa_0_3" )
             )
         , IRecAssign
-            ( AIdent "var_e_fact" ) "sys_thunk_12"
+            ( AIdent "var_e_fact" ) "sys_thunk_2"
             [ AIdent "var_e_fact" ]
         , ICall
             ( VaAddr
@@ -440,107 +218,24 @@
     , thunkEnvSize = 0
     }
 , ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_14"
+    { thunkCodeSectionName = "sys_thunk_4"
     , thunkCode =
-        [ IAssign
-            ( AIdent "var_aa_0_1_temp" )
-            ( VaThunk "sys_thunk_13" [] )
-        , IPop
+        [ IPop
             ( AIdent "var_aa_0_1" )
+        , IPop
+            ( AIdent "var_aa_1_1" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_1_1" )
+            )
         , IPush
             ( VaAddr
                 ( AIdent "var_aa_0_1" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_0_1_temp" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_15"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_0" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
             )
         , ICall
             ( VaAddr
                 ( AIdent "top_e_pow" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_16"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_0" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_15"
-                [ AIdent "var_aa_0_0" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_17"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_1" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_1" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_fact" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_18"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_f0_12" )
-            ( VaThunk "sys_thunk_16" [] )
-        , IAssign
-            ( AIdent "var_c_f0_13" )
-            ( VaThunk "sys_thunk_17" [] )
-        , IScope
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_12" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_12" )
-        , IPop
-            ( AIdent "var_e_n" )
-        , IScope
-        , IPush
-            ( VaAddr
-                ( AIdent "var_e_n" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f1_12" )
             )
         , IEndScope
         , IReceive
@@ -548,11 +243,11 @@
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_e_n" )
+                ( AIdent "var_aa_1_1" )
             )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f0_13" )
+                ( AIdent "top_e_fact" )
             )
         , IEndScope
         , IReceive
@@ -577,396 +272,37 @@
         , IPrimBinOp PrimDDiv
         , IExit
         ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_19"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_e_x" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_18"
-                [ AIdent "var_e_x" ]
-            )
-        , IExit
-        ]
     , thunkEnvSize = 0
     }
 , ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_20"
+    { thunkCodeSectionName = "sys_thunk_5"
     , thunkCode =
-        [ IAssign
-            ( AIdent "var_aa_0_0_temp" )
-            ( VaThunk "sys_thunk_19" [] )
-        , IPop
+        [ IPop
             ( AIdent "var_aa_0_0" )
         , IScope
+        , IPush
+            ( VaInt 1 )
         , IPush
             ( VaAddr
                 ( AIdent "var_aa_0_0" )
             )
         , ICall
             ( VaAddr
-                ( AIdent "var_aa_0_0_temp" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_aa_1_0_temp" )
-        , IPop
-            ( AIdent "var_aa_1_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_1_0_temp" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_21"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_0" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
                 ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_22"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_0" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_21"
-                [ AIdent "var_aa_0_0" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_23"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_1" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_1" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_24"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_1" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_23"
-                [ AIdent "var_aa_0_1" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_25"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_2" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_2" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_26"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_2" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_25"
-                [ AIdent "var_aa_0_2" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_27"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_3" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_3" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_28"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_3" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_27"
-                [ AIdent "var_aa_0_3" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_29"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_4" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_4" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_30"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_4" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_29"
-                [ AIdent "var_aa_0_4" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_31"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_5" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_5" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_32"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_5" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_31"
-                [ AIdent "var_aa_0_5" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_33"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_6" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_6" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_34"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_6" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_33"
-                [ AIdent "var_aa_0_6" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_35"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_1_7" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_7" )
-            )
-        , IPush
-            ( VaAddr
-                ( ALocalEnv 0 )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sinEntry" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 1
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_36"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_7" )
-        , ISetReturn
-            ( VaThunk "sys_thunk_35"
-                [ AIdent "var_aa_0_7" ]
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_37"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_c_f0_16" )
-            ( VaThunk "sys_thunk_22" [] )
-        , IAssign
-            ( AIdent "var_c_f0_17" )
-            ( VaThunk "sys_thunk_24" [] )
-        , IAssign
-            ( AIdent "var_c_f0_19" )
-            ( VaThunk "sys_thunk_26" [] )
-        , IAssign
-            ( AIdent "var_c_f0_21" )
-            ( VaThunk "sys_thunk_28" [] )
-        , IAssign
-            ( AIdent "var_c_f0_23" )
-            ( VaThunk "sys_thunk_30" [] )
-        , IAssign
-            ( AIdent "var_c_f0_25" )
-            ( VaThunk "sys_thunk_32" [] )
-        , IAssign
-            ( AIdent "var_c_f0_27" )
-            ( VaThunk "sys_thunk_34" [] )
-        , IAssign
-            ( AIdent "var_c_f0_29" )
-            ( VaThunk "sys_thunk_36" [] )
-        , IPop
-            ( AIdent "var_e_x" )
-        , IScope
-        , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_16" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_16" )
-        , IScope
-        , IPush
-            ( VaInt 1 )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f1_16" )
             )
         , IEndScope
         , IReceive
             ( AIdent "var_c_inp0_18" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_17" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_17" )
-        , IScope
-        , IPush
             ( VaInt 3 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_17" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -986,22 +322,14 @@
             ( AIdent "var_c_inp0_20" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_19" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_19" )
-        , IScope
-        , IPush
             ( VaInt 5 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_19" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -1021,22 +349,14 @@
             ( AIdent "var_c_inp0_22" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_21" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_21" )
-        , IScope
-        , IPush
             ( VaInt 7 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_21" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -1056,22 +376,14 @@
             ( AIdent "var_c_inp0_24" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_23" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_23" )
-        , IScope
-        , IPush
             ( VaInt 9 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_23" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -1091,22 +403,14 @@
             ( AIdent "var_c_inp0_26" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_25" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_25" )
-        , IScope
-        , IPush
             ( VaInt 11 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_25" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -1126,22 +430,14 @@
             ( AIdent "var_c_inp0_28" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_27" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_27" )
-        , IScope
-        , IPush
             ( VaInt 13 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_27" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -1161,22 +457,14 @@
             ( AIdent "var_c_inp0_30" )
         , IScope
         , IPush
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_c_f0_29" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_f1_29" )
-        , IScope
-        , IPush
             ( VaInt 15 )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_0" )
+            )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_29" )
+                ( AIdent "top_e_sinEntry" )
             )
         , IEndScope
         , IReceive
@@ -1190,43 +478,6 @@
                 ( AIdent "var_c_inp1_30" )
             )
         , IPrimBinOp PrimDSub
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_38"
-    , thunkCode =
-        [ IAssign
-            ( AIdent "var_aa_0_0_temp" )
-            ( VaThunk "sys_thunk_37" [] )
-        , IPop
-            ( AIdent "var_aa_0_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_0_0_temp" )
-            )
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_39"
-    , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
-        , ICall
-            ( VaAddr
-                ( AIdent "top_e_sin" )
-            )
         , IExit
         ]
     , thunkEnvSize = 0
