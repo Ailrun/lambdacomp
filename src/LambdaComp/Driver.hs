@@ -4,7 +4,7 @@ module LambdaComp.Driver
 
 import Paths_lambdacomp (getDataDir)
 
-import Control.Exception    (bracketOnError)
+import Control.Exception    (SomeException, bracketOnError, catch)
 import Control.Monad.Except (ExceptT (ExceptT, runExceptT), MonadError (throwError))
 import Control.Monad.Trans  (MonadTrans (lift))
 import Data.Functor         ((<&>))
@@ -18,6 +18,7 @@ import System.Process       (CreateProcess (..), StdStream (..), cleanupProcess,
 import Text.Pretty.Simple   (pHPrintNoColor)
 
 import LambdaComp.AM.Eval                       (topEval)
+import LambdaComp.CBPV.ArityAnalysis            (runArityAnalysis)
 import LambdaComp.CBPV.Optimization.Local       qualified as CBPV
 import LambdaComp.CBPV.ToAM                     (runToAM)
 import LambdaComp.CBPV.ToC                      (runToC)
@@ -39,7 +40,9 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
       getElOptTmTc   = getElOptTm >>= \p -> p <$ handleElTcError outH (El.runProgramInfer p)
       getCBPVTm      = runToCBPV <$> getElOptTmTc
       getCBPVTmTc    = getCBPVTm >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
-      getCBPVOptTm   = CBPV.runLocalOptDefault <$> getCBPVTmTc
+      getCBPVTmAA    = runArityAnalysis <$> getCBPVTmTc
+      getCBPVTmAATc  = getCBPVTmAA >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
+      getCBPVOptTm   = CBPV.runLocalOptDefault <$> getCBPVTmAATc
       getCBPVOptTmTc = getCBPVOptTm >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
       getCCode       = runToC <$> getCBPVOptTmTc
       getAMTm        = runToAM <$> getCBPVOptTmTc
@@ -47,8 +50,8 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
     UntilAST            -> getTm >>= pHPrintNoColor outH
     UntilElaboration    -> getElTmTc >>= pHPrintNoColor outH
     UntilElaborationOpt -> getElOptTmTc >>= pHPrintNoColor outH
-    UntilCBPV           -> getCBPVTm >>= pHPrintNoColor outH
-    UntilCBPVOpt        -> getCBPVOptTm >>= pHPrintNoColor outH
+    UntilCBPV           -> getCBPVTmAATc >>= pHPrintNoColor outH
+    UntilCBPVOpt        -> getCBPVOptTmTc >>= pHPrintNoColor outH
     UntilC              -> getCCode >>= (\cCode -> runWithFp (\real -> lift . if real then (`writeFile` cCode) else const $ hPutStr outH cCode) mayFp)
     UntilExe            -> getCCode >>= (\cCode -> runWithFp (const $ genCExe outH cCode) mayFp)
     UntilAM             -> getAMTm >>= pHPrintNoColor outH
@@ -60,16 +63,16 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
         AMBackend      -> getAMTm >>= lift . topEval outH >>= pHPrintNoColor outH
 
 handleElabError :: Handle -> Either ElaborationError a -> ExceptT Int IO a
-handleElabError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
+handleElabError outH (Left elabErr) = lift (hPutStrLn outH "Elab") >> pHPrintNoColor outH elabErr >> throwError 1
 handleElabError _    (Right prog)   = pure prog
 
 handleElTcError :: Handle -> Either El.TypeError a -> ExceptT Int IO a
-handleElTcError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
+handleElTcError outH (Left elTcErr) = lift (hPutStrLn outH "ElTc") >> pHPrintNoColor outH elTcErr >> throwError 1
 handleElTcError _    (Right prog)   = pure prog
 
 handleCBPVTcError :: Handle -> Either CBPV.TypeError a -> ExceptT Int IO a
-handleCBPVTcError outH (Left elabErr) = pHPrintNoColor outH elabErr >> throwError 1
-handleCBPVTcError _    (Right prog)   = pure prog
+handleCBPVTcError outH (Left cbpvTcErr) = lift (hPutStrLn outH "CBPVTc") >> pHPrintNoColor outH cbpvTcErr >> throwError 1
+handleCBPVTcError _    (Right prog)     = pure prog
 
 runWithFp :: (Bool -> FilePath -> ExceptT Int IO a) -> Maybe FilePath -> ExceptT Int IO a
 runWithFp f (Just fp) = lift (makeAbsolute fp) >>= f True
@@ -89,7 +92,7 @@ genAndExeCExe outH cCode fp = do
   exitCodeToExceptT $ bracketOnError
     (createProcess_ "genAndExeCExe" (proc fp []) { std_out = UseHandle outH })
     cleanupProcess
-    (\(_, _, _, p) -> waitForProcess p)
+    (\(_, _, _, p) -> waitForProcess p `catch` (\(_ :: SomeException) -> pure ExitSuccess))
 
 genCExe :: Handle -> String -> FilePath -> ExceptT Int IO ()
 genCExe outH cCode fp = do
@@ -101,7 +104,7 @@ genCExe outH cCode fp = do
     exitCodeToExceptT $ bracketOnError
       (createProcess_ "genCExe" (proc "gcc" ["-O2", "-I", dataDir, "-o", fp, tempCfp]) { std_out = UseHandle outH })
       cleanupProcess
-      (\(_, _, _, p) -> waitForProcess p)
+      (\(_, _, _, p) -> waitForProcess p `catch` (\(_ :: SomeException) -> pure ExitSuccess))
 
 exitCodeToExceptT :: Functor m => m ExitCode -> ExceptT Int m ()
 exitCodeToExceptT a = ExceptT $ a <&> \case

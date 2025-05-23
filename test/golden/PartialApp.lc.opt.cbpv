@@ -2,38 +2,85 @@
     { tmDefName = "e_f"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmLam
-                ( Param
-                    { paramName = "e_x"
-                    , paramType = TpInt
-                    }
+            ( TmLet "aa_0_0_temp"
+                ( TmThunk
+                    ( TmLam
+                        ( Param
+                            { paramName = "e_x"
+                            , paramType = TpInt
+                            }
+                        )
+                        ( TmReturn
+                            ( TmThunk
+                                ( TmLam
+                                    ( Param
+                                        { paramName = "e_y"
+                                        , paramType = TpInt
+                                        }
+                                    )
+                                    ( TmReturn
+                                        ( TmThunk
+                                            ( TmTo
+                                                ( TmPrimBinOp PrimIAdd
+                                                    ( TmVar "e_x" )
+                                                    ( TmVar "e_y" )
+                                                ) "c_inp0_1"
+                                                ( TmLam
+                                                    ( Param
+                                                        { paramName = "e_z"
+                                                        , paramType = TpInt
+                                                        }
+                                                    )
+                                                    ( TmPrimBinOp PrimIAdd
+                                                        ( TmVar "c_inp0_1" )
+                                                        ( TmVar "e_z" )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
                 )
-                ( TmReturn
-                    ( TmThunk
+                ( TmLam
+                    ( Param
+                        { paramName = "aa_0_0"
+                        , paramType = TpInt
+                        }
+                    )
+                    ( TmTo
+                        ( TmApp
+                            ( TmForce
+                                ( TmVar "aa_0_0_temp" )
+                            )
+                            ( TmVar "aa_0_0" )
+                        ) "aa_1_0_temp"
                         ( TmLam
                             ( Param
-                                { paramName = "e_y"
+                                { paramName = "aa_1_0"
                                 , paramType = TpInt
                                 }
                             )
-                            ( TmReturn
-                                ( TmThunk
-                                    ( TmTo
-                                        ( TmPrimBinOp PrimIAdd
-                                            ( TmVar "e_x" )
-                                            ( TmVar "e_y" )
-                                        ) "c_inp0_1"
-                                        ( TmLam
-                                            ( Param
-                                                { paramName = "e_z"
-                                                , paramType = TpInt
-                                                }
-                                            )
-                                            ( TmPrimBinOp PrimIAdd
-                                                ( TmVar "c_inp0_1" )
-                                                ( TmVar "e_z" )
-                                            )
+                            ( TmTo
+                                ( TmApp
+                                    ( TmForce
+                                        ( TmVar "aa_1_0_temp" )
+                                    )
+                                    ( TmVar "aa_1_0" )
+                                ) "aa_2_0_temp"
+                                ( TmLam
+                                    ( Param
+                                        { paramName = "aa_2_0"
+                                        , paramType = TpInt
+                                        }
+                                    )
+                                    ( TmApp
+                                        ( TmForce
+                                            ( TmVar "aa_2_0_temp" )
                                         )
+                                        ( TmVar "aa_2_0" )
                                     )
                                 )
                             )
@@ -45,32 +92,142 @@
     }
 , TopTmDef
     { tmDefName = "e_g"
-    , tmDefBody = TmApp
-        ( TmForce
-            ( TmGlobal "e_f" )
+    , tmDefBody = TmReturn
+        ( TmThunk
+            ( TmLet "c_f0_2"
+                ( TmThunk
+                    ( TmLam
+                        ( Param
+                            { paramName = "aa_0_0"
+                            , paramType = TpInt
+                            }
+                        )
+                        ( TmReturn
+                            ( TmThunk
+                                ( TmLam
+                                    ( Param
+                                        { paramName = "aa_1_0"
+                                        , paramType = TpInt
+                                        }
+                                    )
+                                    ( TmReturn
+                                        ( TmThunk
+                                            ( TmLam
+                                                ( Param
+                                                    { paramName = "aa_2_0"
+                                                    , paramType = TpInt
+                                                    }
+                                                )
+                                                ( TmApp
+                                                    ( TmApp
+                                                        ( TmApp
+                                                            ( TmForce
+                                                                ( TmGlobal "e_f" )
+                                                            )
+                                                            ( TmVar "aa_0_0" )
+                                                        )
+                                                        ( TmVar "aa_1_0" )
+                                                    )
+                                                    ( TmVar "aa_2_0" )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+                ( TmTo
+                    ( TmApp
+                        ( TmForce
+                            ( TmVar "c_f0_2" )
+                        )
+                        ( TmInt 3 )
+                    ) "aa_0_0_temp"
+                    ( TmLam
+                        ( Param
+                            { paramName = "aa_0_0"
+                            , paramType = TpInt
+                            }
+                        )
+                        ( TmTo
+                            ( TmApp
+                                ( TmForce
+                                    ( TmVar "aa_0_0_temp" )
+                                )
+                                ( TmVar "aa_0_0" )
+                            ) "aa_1_0_temp"
+                            ( TmLam
+                                ( Param
+                                    { paramName = "aa_1_0"
+                                    , paramType = TpInt
+                                    }
+                                )
+                                ( TmApp
+                                    ( TmForce
+                                        ( TmVar "aa_1_0_temp" )
+                                    )
+                                    ( TmVar "aa_1_0" )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         )
-        ( TmInt 3 )
     }
 , TopTmDef
     { tmDefName = "e_main"
-    , tmDefBody = TmTo
-        ( TmApp
-            ( TmForce
-                ( TmGlobal "e_g" )
+    , tmDefBody = TmLet "c_f0_3"
+        ( TmThunk
+            ( TmLam
+                ( Param
+                    { paramName = "aa_0_0"
+                    , paramType = TpInt
+                    }
+                )
+                ( TmReturn
+                    ( TmThunk
+                        ( TmLam
+                            ( Param
+                                { paramName = "aa_1_0"
+                                , paramType = TpInt
+                                }
+                            )
+                            ( TmApp
+                                ( TmApp
+                                    ( TmForce
+                                        ( TmGlobal "e_g" )
+                                    )
+                                    ( TmVar "aa_0_0" )
+                                )
+                                ( TmVar "aa_1_0" )
+                            )
+                        )
+                    )
+                )
             )
-            ( TmInt 2 )
-        ) "c_f1_3"
+        )
         ( TmTo
             ( TmApp
                 ( TmForce
-                    ( TmVar "c_f1_3" )
+                    ( TmVar "c_f0_3" )
                 )
-                ( TmInt 5 )
-            ) "c_v_4"
-            ( TmPrintInt
-                ( TmVar "c_v_4" )
-                ( TmReturn
-                    ( TmInt 0 )
+                ( TmInt 2 )
+            ) "c_f1_3"
+            ( TmTo
+                ( TmApp
+                    ( TmForce
+                        ( TmVar "c_f1_3" )
+                    )
+                    ( TmInt 5 )
+                ) "c_v_4"
+                ( TmPrintInt
+                    ( TmVar "c_v_4" )
+                    ( TmReturn
+                        ( TmInt 0 )
+                    )
                 )
             )
         )

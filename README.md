@@ -26,7 +26,7 @@ a primitive compiler from CBV $\lambda$-calculus to abstract machine (AM) for CB
 - [x] Call-By-Value $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Name $\lambda$-calculus-To-CBPV pass
 - [ ] Call-By-Need $\lambda$-calculus-To-CBPV pass
-- [ ] Arity analysis
+- [x] Arity analysis
 - [x] Type-checker for CBPV
 - [x] Local CBPV optimization pass
 - [ ] Tail call optimization pass (or lowering pass)

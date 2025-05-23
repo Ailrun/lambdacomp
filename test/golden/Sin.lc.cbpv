@@ -2,113 +2,231 @@
     { tmDefName = "e_pow"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmRec
+            ( TmLam
                 ( Param
-                    { paramName = "e_pow"
-                    , paramType = TpUp
-                        ( TpDouble :->: TpDown
-                            ( TpUp ( TpInt :->: TpDown TpDouble ) )
-                        )
+                    { paramName = "aa_0_1"
+                    , paramType = TpDouble
                     }
                 )
-                ( TmTo
-                    ( TmReturn
-                        ( TmThunk
-                            ( TmLam
-                                ( Param
-                                    { paramName = "e_x"
-                                    , paramType = TpDouble
-                                    }
-                                )
-                                ( TmReturn
-                                    ( TmThunk
-                                        ( TmLam
-                                            ( Param
-                                                { paramName = "e_n"
-                                                , paramType = TpInt
-                                                }
-                                            )
-                                            ( TmTo
-                                                ( TmTo
-                                                    ( TmReturn
-                                                        ( TmVar "e_n" )
-                                                    ) "c_inp0_0"
-                                                    ( TmTo
-                                                        ( TmReturn
-                                                            ( TmInt 0 )
-                                                        ) "c_inp1_0"
-                                                        ( TmPrimBinOp PrimILe
-                                                            ( TmVar "c_inp0_0" )
-                                                            ( TmVar "c_inp1_0" )
-                                                        )
+                ( TmLam
+                    ( Param
+                        { paramName = "aa_1_1"
+                        , paramType = TpInt
+                        }
+                    )
+                    ( TmTo
+                        ( TmTo
+                            ( TmReturn
+                                ( TmThunk
+                                    ( TmLam
+                                        ( Param
+                                            { paramName = "aa_0_1"
+                                            , paramType = TpDouble
+                                            }
+                                        )
+                                        ( TmReturn
+                                            ( TmThunk
+                                                ( TmLam
+                                                    ( Param
+                                                        { paramName = "aa_1_1"
+                                                        , paramType = TpInt
+                                                        }
                                                     )
-                                                ) "c_c_1"
-                                                ( TmIf
-                                                    ( TmVar "c_c_1" )
-                                                    ( TmReturn
-                                                        ( TmDouble 1.0 )
-                                                    )
-                                                    ( TmTo
-                                                        ( TmReturn
-                                                            ( TmVar "e_x" )
-                                                        ) "c_inp0_4"
-                                                        ( TmTo
-                                                            ( TmTo
-                                                                ( TmReturn
-                                                                    ( TmVar "e_x" )
-                                                                ) "c_a0_3"
-                                                                ( TmTo
-                                                                    ( TmTo
-                                                                        ( TmReturn
-                                                                            ( TmVar "e_n" )
-                                                                        ) "c_inp0_2"
-                                                                        ( TmTo
-                                                                            ( TmReturn
-                                                                                ( TmInt 1 )
-                                                                            ) "c_inp1_2"
-                                                                            ( TmPrimBinOp PrimISub
-                                                                                ( TmVar "c_inp0_2" )
-                                                                                ( TmVar "c_inp1_2" )
-                                                                            )
+                                                    ( TmApp
+                                                        ( TmApp
+                                                            ( TmRec
+                                                                ( Param
+                                                                    { paramName = "e_pow"
+                                                                    , paramType = TpUp
+                                                                        ( TpDouble :->: ( TpInt :->: TpDown TpDouble ) )
+                                                                    }
+                                                                )
+                                                                ( TmLam
+                                                                    ( Param
+                                                                        { paramName = "aa_0_0"
+                                                                        , paramType = TpDouble
+                                                                        }
+                                                                    )
+                                                                    ( TmLam
+                                                                        ( Param
+                                                                            { paramName = "aa_1_0"
+                                                                            , paramType = TpInt
+                                                                            }
                                                                         )
-                                                                    ) "c_a1_3"
-                                                                    ( TmTo
                                                                         ( TmTo
-                                                                            ( TmReturn
-                                                                                ( TmVar "e_pow" )
-                                                                            ) "c_f0_3"
+                                                                            ( TmTo
+                                                                                ( TmReturn
+                                                                                    ( TmThunk
+                                                                                        ( TmTo
+                                                                                            ( TmReturn
+                                                                                                ( TmThunk
+                                                                                                    ( TmLam
+                                                                                                        ( Param
+                                                                                                            { paramName = "e_x"
+                                                                                                            , paramType = TpDouble
+                                                                                                            }
+                                                                                                        )
+                                                                                                        ( TmReturn
+                                                                                                            ( TmThunk
+                                                                                                                ( TmLam
+                                                                                                                    ( Param
+                                                                                                                        { paramName = "e_n"
+                                                                                                                        , paramType = TpInt
+                                                                                                                        }
+                                                                                                                    )
+                                                                                                                    ( TmTo
+                                                                                                                        ( TmTo
+                                                                                                                            ( TmReturn
+                                                                                                                                ( TmVar "e_n" )
+                                                                                                                            ) "c_inp0_0"
+                                                                                                                            ( TmTo
+                                                                                                                                ( TmReturn
+                                                                                                                                    ( TmInt 0 )
+                                                                                                                                ) "c_inp1_0"
+                                                                                                                                ( TmPrimBinOp PrimILe
+                                                                                                                                    ( TmVar "c_inp0_0" )
+                                                                                                                                    ( TmVar "c_inp1_0" )
+                                                                                                                                )
+                                                                                                                            )
+                                                                                                                        ) "c_c_1"
+                                                                                                                        ( TmIf
+                                                                                                                            ( TmVar "c_c_1" )
+                                                                                                                            ( TmReturn
+                                                                                                                                ( TmDouble 1.0 )
+                                                                                                                            )
+                                                                                                                            ( TmTo
+                                                                                                                                ( TmReturn
+                                                                                                                                    ( TmVar "e_x" )
+                                                                                                                                ) "c_inp0_4"
+                                                                                                                                ( TmTo
+                                                                                                                                    ( TmTo
+                                                                                                                                        ( TmReturn
+                                                                                                                                            ( TmVar "e_x" )
+                                                                                                                                        ) "c_a0_3"
+                                                                                                                                        ( TmTo
+                                                                                                                                            ( TmTo
+                                                                                                                                                ( TmReturn
+                                                                                                                                                    ( TmVar "e_n" )
+                                                                                                                                                ) "c_inp0_2"
+                                                                                                                                                ( TmTo
+                                                                                                                                                    ( TmReturn
+                                                                                                                                                        ( TmInt 1 )
+                                                                                                                                                    ) "c_inp1_2"
+                                                                                                                                                    ( TmPrimBinOp PrimISub
+                                                                                                                                                        ( TmVar "c_inp0_2" )
+                                                                                                                                                        ( TmVar "c_inp1_2" )
+                                                                                                                                                    )
+                                                                                                                                                )
+                                                                                                                                            ) "c_a1_3"
+                                                                                                                                            ( TmTo
+                                                                                                                                                ( TmTo
+                                                                                                                                                    ( TmReturn
+                                                                                                                                                        ( TmThunk
+                                                                                                                                                            ( TmLam
+                                                                                                                                                                ( Param
+                                                                                                                                                                    { paramName = "aa_0_0"
+                                                                                                                                                                    , paramType = TpDouble
+                                                                                                                                                                    }
+                                                                                                                                                                )
+                                                                                                                                                                ( TmReturn
+                                                                                                                                                                    ( TmThunk
+                                                                                                                                                                        ( TmLam
+                                                                                                                                                                            ( Param
+                                                                                                                                                                                { paramName = "aa_1_0"
+                                                                                                                                                                                , paramType = TpInt
+                                                                                                                                                                                }
+                                                                                                                                                                            )
+                                                                                                                                                                            ( TmApp
+                                                                                                                                                                                ( TmApp
+                                                                                                                                                                                    ( TmForce
+                                                                                                                                                                                        ( TmVar "e_pow" )
+                                                                                                                                                                                    )
+                                                                                                                                                                                    ( TmVar "aa_0_0" )
+                                                                                                                                                                                )
+                                                                                                                                                                                ( TmVar "aa_1_0" )
+                                                                                                                                                                            )
+                                                                                                                                                                        )
+                                                                                                                                                                    )
+                                                                                                                                                                )
+                                                                                                                                                            )
+                                                                                                                                                        )
+                                                                                                                                                    ) "c_f0_3"
+                                                                                                                                                    ( TmApp
+                                                                                                                                                        ( TmForce
+                                                                                                                                                            ( TmVar "c_f0_3" )
+                                                                                                                                                        )
+                                                                                                                                                        ( TmVar "c_a0_3" )
+                                                                                                                                                    )
+                                                                                                                                                ) "c_f1_3"
+                                                                                                                                                ( TmApp
+                                                                                                                                                    ( TmForce
+                                                                                                                                                        ( TmVar "c_f1_3" )
+                                                                                                                                                    )
+                                                                                                                                                    ( TmVar "c_a1_3" )
+                                                                                                                                                )
+                                                                                                                                            )
+                                                                                                                                        )
+                                                                                                                                    ) "c_inp1_4"
+                                                                                                                                    ( TmPrimBinOp PrimDMul
+                                                                                                                                        ( TmVar "c_inp0_4" )
+                                                                                                                                        ( TmVar "c_inp1_4" )
+                                                                                                                                    )
+                                                                                                                                )
+                                                                                                                            )
+                                                                                                                        )
+                                                                                                                    )
+                                                                                                                )
+                                                                                                            )
+                                                                                                        )
+                                                                                                    )
+                                                                                                )
+                                                                                            ) "c_r_5"
+                                                                                            ( TmForce
+                                                                                                ( TmVar "c_r_5" )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                ) "aa_0_0_temp"
+                                                                                ( TmApp
+                                                                                    ( TmForce
+                                                                                        ( TmVar "aa_0_0_temp" )
+                                                                                    )
+                                                                                    ( TmVar "aa_0_0" )
+                                                                                )
+                                                                            ) "aa_1_0_temp"
                                                                             ( TmApp
                                                                                 ( TmForce
-                                                                                    ( TmVar "c_f0_3" )
+                                                                                    ( TmVar "aa_1_0_temp" )
                                                                                 )
-                                                                                ( TmVar "c_a0_3" )
+                                                                                ( TmVar "aa_1_0" )
                                                                             )
-                                                                        ) "c_f1_3"
-                                                                        ( TmApp
-                                                                            ( TmForce
-                                                                                ( TmVar "c_f1_3" )
-                                                                            )
-                                                                            ( TmVar "c_a1_3" )
                                                                         )
                                                                     )
                                                                 )
-                                                            ) "c_inp1_4"
-                                                            ( TmPrimBinOp PrimDMul
-                                                                ( TmVar "c_inp0_4" )
-                                                                ( TmVar "c_inp1_4" )
                                                             )
+                                                            ( TmVar "aa_0_1" )
                                                         )
+                                                        ( TmVar "aa_1_1" )
                                                     )
                                                 )
                                             )
                                         )
                                     )
                                 )
+                            ) "aa_0_1_temp"
+                            ( TmApp
+                                ( TmForce
+                                    ( TmVar "aa_0_1_temp" )
+                                )
+                                ( TmVar "aa_0_1" )
                             )
+                        ) "aa_1_1_temp"
+                        ( TmApp
+                            ( TmForce
+                                ( TmVar "aa_1_1_temp" )
+                            )
+                            ( TmVar "aa_1_1" )
                         )
-                    ) "c_r_5"
-                    ( TmForce
-                        ( TmVar "c_r_5" )
                     )
                 )
             )
@@ -118,10 +236,10 @@
     { tmDefName = "e_fact"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmRec
+            ( TmLam
                 ( Param
-                    { paramName = "e_fact"
-                    , paramType = TpUp ( TpInt :->: TpDown TpInt )
+                    { paramName = "aa_0_1"
+                    , paramType = TpInt
                     }
                 )
                 ( TmTo
@@ -129,75 +247,137 @@
                         ( TmThunk
                             ( TmLam
                                 ( Param
-                                    { paramName = "e_x"
+                                    { paramName = "aa_0_1"
                                     , paramType = TpInt
                                     }
                                 )
-                                ( TmTo
-                                    ( TmTo
-                                        ( TmReturn
-                                            ( TmVar "e_x" )
-                                        ) "c_inp0_6"
-                                        ( TmTo
-                                            ( TmReturn
-                                                ( TmInt 0 )
-                                            ) "c_inp1_6"
-                                            ( TmPrimBinOp PrimILe
-                                                ( TmVar "c_inp0_6" )
-                                                ( TmVar "c_inp1_6" )
+                                ( TmApp
+                                    ( TmRec
+                                        ( Param
+                                            { paramName = "e_fact"
+                                            , paramType = TpUp ( TpInt :->: TpDown TpInt )
+                                            }
+                                        )
+                                        ( TmLam
+                                            ( Param
+                                                { paramName = "aa_0_0"
+                                                , paramType = TpInt
+                                                }
                                             )
-                                        )
-                                    ) "c_c_7"
-                                    ( TmIf
-                                        ( TmVar "c_c_7" )
-                                        ( TmReturn
-                                            ( TmInt 1 )
-                                        )
-                                        ( TmTo
-                                            ( TmReturn
-                                                ( TmVar "e_x" )
-                                            ) "c_inp0_10"
                                             ( TmTo
-                                                ( TmTo
-                                                    ( TmTo
-                                                        ( TmReturn
-                                                            ( TmVar "e_x" )
-                                                        ) "c_inp0_8"
+                                                ( TmReturn
+                                                    ( TmThunk
                                                         ( TmTo
                                                             ( TmReturn
-                                                                ( TmInt 1 )
-                                                            ) "c_inp1_8"
-                                                            ( TmPrimBinOp PrimISub
-                                                                ( TmVar "c_inp0_8" )
-                                                                ( TmVar "c_inp1_8" )
-                                                            )
-                                                        )
-                                                    ) "c_a0_9"
-                                                    ( TmTo
-                                                        ( TmReturn
-                                                            ( TmVar "e_fact" )
-                                                        ) "c_f0_9"
-                                                        ( TmApp
+                                                                ( TmThunk
+                                                                    ( TmLam
+                                                                        ( Param
+                                                                            { paramName = "e_x"
+                                                                            , paramType = TpInt
+                                                                            }
+                                                                        )
+                                                                        ( TmTo
+                                                                            ( TmTo
+                                                                                ( TmReturn
+                                                                                    ( TmVar "e_x" )
+                                                                                ) "c_inp0_6"
+                                                                                ( TmTo
+                                                                                    ( TmReturn
+                                                                                        ( TmInt 0 )
+                                                                                    ) "c_inp1_6"
+                                                                                    ( TmPrimBinOp PrimILe
+                                                                                        ( TmVar "c_inp0_6" )
+                                                                                        ( TmVar "c_inp1_6" )
+                                                                                    )
+                                                                                )
+                                                                            ) "c_c_7"
+                                                                            ( TmIf
+                                                                                ( TmVar "c_c_7" )
+                                                                                ( TmReturn
+                                                                                    ( TmInt 1 )
+                                                                                )
+                                                                                ( TmTo
+                                                                                    ( TmReturn
+                                                                                        ( TmVar "e_x" )
+                                                                                    ) "c_inp0_10"
+                                                                                    ( TmTo
+                                                                                        ( TmTo
+                                                                                            ( TmTo
+                                                                                                ( TmReturn
+                                                                                                    ( TmVar "e_x" )
+                                                                                                ) "c_inp0_8"
+                                                                                                ( TmTo
+                                                                                                    ( TmReturn
+                                                                                                        ( TmInt 1 )
+                                                                                                    ) "c_inp1_8"
+                                                                                                    ( TmPrimBinOp PrimISub
+                                                                                                        ( TmVar "c_inp0_8" )
+                                                                                                        ( TmVar "c_inp1_8" )
+                                                                                                    )
+                                                                                                )
+                                                                                            ) "c_a0_9"
+                                                                                            ( TmTo
+                                                                                                ( TmReturn
+                                                                                                    ( TmThunk
+                                                                                                        ( TmLam
+                                                                                                            ( Param
+                                                                                                                { paramName = "aa_0_0"
+                                                                                                                , paramType = TpInt
+                                                                                                                }
+                                                                                                            )
+                                                                                                            ( TmApp
+                                                                                                                ( TmForce
+                                                                                                                    ( TmVar "e_fact" )
+                                                                                                                )
+                                                                                                                ( TmVar "aa_0_0" )
+                                                                                                            )
+                                                                                                        )
+                                                                                                    )
+                                                                                                ) "c_f0_9"
+                                                                                                ( TmApp
+                                                                                                    ( TmForce
+                                                                                                        ( TmVar "c_f0_9" )
+                                                                                                    )
+                                                                                                    ( TmVar "c_a0_9" )
+                                                                                                )
+                                                                                            )
+                                                                                        ) "c_inp1_10"
+                                                                                        ( TmPrimBinOp PrimIMul
+                                                                                            ( TmVar "c_inp0_10" )
+                                                                                            ( TmVar "c_inp1_10" )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            ) "c_r_11"
                                                             ( TmForce
-                                                                ( TmVar "c_f0_9" )
+                                                                ( TmVar "c_r_11" )
                                                             )
-                                                            ( TmVar "c_a0_9" )
                                                         )
                                                     )
-                                                ) "c_inp1_10"
-                                                ( TmPrimBinOp PrimIMul
-                                                    ( TmVar "c_inp0_10" )
-                                                    ( TmVar "c_inp1_10" )
+                                                ) "aa_0_0_temp"
+                                                ( TmApp
+                                                    ( TmForce
+                                                        ( TmVar "aa_0_0_temp" )
+                                                    )
+                                                    ( TmVar "aa_0_0" )
                                                 )
                                             )
                                         )
                                     )
+                                    ( TmVar "aa_0_1" )
                                 )
                             )
                         )
-                    ) "c_r_11"
-                    ( TmForce
-                        ( TmVar "c_r_11" )
+                    ) "aa_0_1_temp"
+                    ( TmApp
+                        ( TmForce
+                            ( TmVar "aa_0_1_temp" )
+                        )
+                        ( TmVar "aa_0_1" )
                     )
                 )
             )
@@ -209,76 +389,152 @@
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "e_x"
+                    { paramName = "aa_0_0"
                     , paramType = TpDouble
                     }
                 )
-                ( TmReturn
-                    ( TmThunk
-                        ( TmLam
-                            ( Param
-                                { paramName = "e_n"
-                                , paramType = TpInt
-                                }
-                            )
-                            ( TmTo
-                                ( TmTo
-                                    ( TmReturn
-                                        ( TmVar "e_x" )
-                                    ) "c_a0_12"
-                                    ( TmTo
+                ( TmLam
+                    ( Param
+                        { paramName = "aa_1_0"
+                        , paramType = TpInt
+                        }
+                    )
+                    ( TmTo
+                        ( TmTo
+                            ( TmReturn
+                                ( TmThunk
+                                    ( TmLam
+                                        ( Param
+                                            { paramName = "e_x"
+                                            , paramType = TpDouble
+                                            }
+                                        )
                                         ( TmReturn
-                                            ( TmVar "e_n" )
-                                        ) "c_a1_12"
-                                        ( TmTo
-                                            ( TmTo
-                                                ( TmReturn
-                                                    ( TmGlobal "e_pow" )
-                                                ) "c_f0_12"
-                                                ( TmApp
-                                                    ( TmForce
-                                                        ( TmVar "c_f0_12" )
+                                            ( TmThunk
+                                                ( TmLam
+                                                    ( Param
+                                                        { paramName = "e_n"
+                                                        , paramType = TpInt
+                                                        }
                                                     )
-                                                    ( TmVar "c_a0_12" )
+                                                    ( TmTo
+                                                        ( TmTo
+                                                            ( TmReturn
+                                                                ( TmVar "e_x" )
+                                                            ) "c_a0_12"
+                                                            ( TmTo
+                                                                ( TmReturn
+                                                                    ( TmVar "e_n" )
+                                                                ) "c_a1_12"
+                                                                ( TmTo
+                                                                    ( TmTo
+                                                                        ( TmReturn
+                                                                            ( TmThunk
+                                                                                ( TmLam
+                                                                                    ( Param
+                                                                                        { paramName = "aa_0_0"
+                                                                                        , paramType = TpDouble
+                                                                                        }
+                                                                                    )
+                                                                                    ( TmReturn
+                                                                                        ( TmThunk
+                                                                                            ( TmLam
+                                                                                                ( Param
+                                                                                                    { paramName = "aa_1_0"
+                                                                                                    , paramType = TpInt
+                                                                                                    }
+                                                                                                )
+                                                                                                ( TmApp
+                                                                                                    ( TmApp
+                                                                                                        ( TmForce
+                                                                                                            ( TmGlobal "e_pow" )
+                                                                                                        )
+                                                                                                        ( TmVar "aa_0_0" )
+                                                                                                    )
+                                                                                                    ( TmVar "aa_1_0" )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        ) "c_f0_12"
+                                                                        ( TmApp
+                                                                            ( TmForce
+                                                                                ( TmVar "c_f0_12" )
+                                                                            )
+                                                                            ( TmVar "c_a0_12" )
+                                                                        )
+                                                                    ) "c_f1_12"
+                                                                    ( TmApp
+                                                                        ( TmForce
+                                                                            ( TmVar "c_f1_12" )
+                                                                        )
+                                                                        ( TmVar "c_a1_12" )
+                                                                    )
+                                                                )
+                                                            )
+                                                        ) "c_inp0_15"
+                                                        ( TmTo
+                                                            ( TmTo
+                                                                ( TmTo
+                                                                    ( TmReturn
+                                                                        ( TmVar "e_n" )
+                                                                    ) "c_a0_13"
+                                                                    ( TmTo
+                                                                        ( TmReturn
+                                                                            ( TmThunk
+                                                                                ( TmLam
+                                                                                    ( Param
+                                                                                        { paramName = "aa_0_1"
+                                                                                        , paramType = TpInt
+                                                                                        }
+                                                                                    )
+                                                                                    ( TmApp
+                                                                                        ( TmForce
+                                                                                            ( TmGlobal "e_fact" )
+                                                                                        )
+                                                                                        ( TmVar "aa_0_1" )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        ) "c_f0_13"
+                                                                        ( TmApp
+                                                                            ( TmForce
+                                                                                ( TmVar "c_f0_13" )
+                                                                            )
+                                                                            ( TmVar "c_a0_13" )
+                                                                        )
+                                                                    )
+                                                                ) "c_inp_14"
+                                                                ( TmPrimUnOp PrimIToD
+                                                                    ( TmVar "c_inp_14" )
+                                                                )
+                                                            ) "c_inp1_15"
+                                                            ( TmPrimBinOp PrimDDiv
+                                                                ( TmVar "c_inp0_15" )
+                                                                ( TmVar "c_inp1_15" )
+                                                            )
+                                                        )
+                                                    )
                                                 )
-                                            ) "c_f1_12"
-                                            ( TmApp
-                                                ( TmForce
-                                                    ( TmVar "c_f1_12" )
-                                                )
-                                                ( TmVar "c_a1_12" )
                                             )
                                         )
-                                    )
-                                ) "c_inp0_15"
-                                ( TmTo
-                                    ( TmTo
-                                        ( TmTo
-                                            ( TmReturn
-                                                ( TmVar "e_n" )
-                                            ) "c_a0_13"
-                                            ( TmTo
-                                                ( TmReturn
-                                                    ( TmGlobal "e_fact" )
-                                                ) "c_f0_13"
-                                                ( TmApp
-                                                    ( TmForce
-                                                        ( TmVar "c_f0_13" )
-                                                    )
-                                                    ( TmVar "c_a0_13" )
-                                                )
-                                            )
-                                        ) "c_inp_14"
-                                        ( TmPrimUnOp PrimIToD
-                                            ( TmVar "c_inp_14" )
-                                        )
-                                    ) "c_inp1_15"
-                                    ( TmPrimBinOp PrimDDiv
-                                        ( TmVar "c_inp0_15" )
-                                        ( TmVar "c_inp1_15" )
                                     )
                                 )
+                            ) "aa_0_0_temp"
+                            ( TmApp
+                                ( TmForce
+                                    ( TmVar "aa_0_0_temp" )
+                                )
+                                ( TmVar "aa_0_0" )
                             )
+                        ) "aa_1_0_temp"
+                        ( TmApp
+                            ( TmForce
+                                ( TmVar "aa_1_0_temp" )
+                            )
+                            ( TmVar "aa_1_0" )
                         )
                     )
                 )
@@ -291,296 +547,539 @@
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "e_x"
+                    { paramName = "aa_0_0"
                     , paramType = TpDouble
                     }
                 )
                 ( TmTo
-                    ( TmTo
-                        ( TmTo
-                            ( TmTo
+                    ( TmReturn
+                        ( TmThunk
+                            ( TmLam
+                                ( Param
+                                    { paramName = "e_x"
+                                    , paramType = TpDouble
+                                    }
+                                )
                                 ( TmTo
                                     ( TmTo
                                         ( TmTo
                                             ( TmTo
-                                                ( TmReturn
-                                                    ( TmVar "e_x" )
-                                                ) "c_a0_16"
                                                 ( TmTo
-                                                    ( TmReturn
-                                                        ( TmInt 1 )
-                                                    ) "c_a1_16"
+                                                    ( TmTo
+                                                        ( TmTo
+                                                            ( TmTo
+                                                                ( TmReturn
+                                                                    ( TmVar "e_x" )
+                                                                ) "c_a0_16"
+                                                                ( TmTo
+                                                                    ( TmReturn
+                                                                        ( TmInt 1 )
+                                                                    ) "c_a1_16"
+                                                                    ( TmTo
+                                                                        ( TmTo
+                                                                            ( TmReturn
+                                                                                ( TmThunk
+                                                                                    ( TmLam
+                                                                                        ( Param
+                                                                                            { paramName = "aa_0_0"
+                                                                                            , paramType = TpDouble
+                                                                                            }
+                                                                                        )
+                                                                                        ( TmReturn
+                                                                                            ( TmThunk
+                                                                                                ( TmLam
+                                                                                                    ( Param
+                                                                                                        { paramName = "aa_1_0"
+                                                                                                        , paramType = TpInt
+                                                                                                        }
+                                                                                                    )
+                                                                                                    ( TmApp
+                                                                                                        ( TmApp
+                                                                                                            ( TmForce
+                                                                                                                ( TmGlobal "e_sinEntry" )
+                                                                                                            )
+                                                                                                            ( TmVar "aa_0_0" )
+                                                                                                        )
+                                                                                                        ( TmVar "aa_1_0" )
+                                                                                                    )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            ) "c_f0_16"
+                                                                            ( TmApp
+                                                                                ( TmForce
+                                                                                    ( TmVar "c_f0_16" )
+                                                                                )
+                                                                                ( TmVar "c_a0_16" )
+                                                                            )
+                                                                        ) "c_f1_16"
+                                                                        ( TmApp
+                                                                            ( TmForce
+                                                                                ( TmVar "c_f1_16" )
+                                                                            )
+                                                                            ( TmVar "c_a1_16" )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            ) "c_inp0_18"
+                                                            ( TmTo
+                                                                ( TmTo
+                                                                    ( TmReturn
+                                                                        ( TmVar "e_x" )
+                                                                    ) "c_a0_17"
+                                                                    ( TmTo
+                                                                        ( TmReturn
+                                                                            ( TmInt 3 )
+                                                                        ) "c_a1_17"
+                                                                        ( TmTo
+                                                                            ( TmTo
+                                                                                ( TmReturn
+                                                                                    ( TmThunk
+                                                                                        ( TmLam
+                                                                                            ( Param
+                                                                                                { paramName = "aa_0_1"
+                                                                                                , paramType = TpDouble
+                                                                                                }
+                                                                                            )
+                                                                                            ( TmReturn
+                                                                                                ( TmThunk
+                                                                                                    ( TmLam
+                                                                                                        ( Param
+                                                                                                            { paramName = "aa_1_1"
+                                                                                                            , paramType = TpInt
+                                                                                                            }
+                                                                                                        )
+                                                                                                        ( TmApp
+                                                                                                            ( TmApp
+                                                                                                                ( TmForce
+                                                                                                                    ( TmGlobal "e_sinEntry" )
+                                                                                                                )
+                                                                                                                ( TmVar "aa_0_1" )
+                                                                                                            )
+                                                                                                            ( TmVar "aa_1_1" )
+                                                                                                        )
+                                                                                                    )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                ) "c_f0_17"
+                                                                                ( TmApp
+                                                                                    ( TmForce
+                                                                                        ( TmVar "c_f0_17" )
+                                                                                    )
+                                                                                    ( TmVar "c_a0_17" )
+                                                                                )
+                                                                            ) "c_f1_17"
+                                                                            ( TmApp
+                                                                                ( TmForce
+                                                                                    ( TmVar "c_f1_17" )
+                                                                                )
+                                                                                ( TmVar "c_a1_17" )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ) "c_inp1_18"
+                                                                ( TmPrimBinOp PrimDSub
+                                                                    ( TmVar "c_inp0_18" )
+                                                                    ( TmVar "c_inp1_18" )
+                                                                )
+                                                            )
+                                                        ) "c_inp0_20"
+                                                        ( TmTo
+                                                            ( TmTo
+                                                                ( TmReturn
+                                                                    ( TmVar "e_x" )
+                                                                ) "c_a0_19"
+                                                                ( TmTo
+                                                                    ( TmReturn
+                                                                        ( TmInt 5 )
+                                                                    ) "c_a1_19"
+                                                                    ( TmTo
+                                                                        ( TmTo
+                                                                            ( TmReturn
+                                                                                ( TmThunk
+                                                                                    ( TmLam
+                                                                                        ( Param
+                                                                                            { paramName = "aa_0_2"
+                                                                                            , paramType = TpDouble
+                                                                                            }
+                                                                                        )
+                                                                                        ( TmReturn
+                                                                                            ( TmThunk
+                                                                                                ( TmLam
+                                                                                                    ( Param
+                                                                                                        { paramName = "aa_1_2"
+                                                                                                        , paramType = TpInt
+                                                                                                        }
+                                                                                                    )
+                                                                                                    ( TmApp
+                                                                                                        ( TmApp
+                                                                                                            ( TmForce
+                                                                                                                ( TmGlobal "e_sinEntry" )
+                                                                                                            )
+                                                                                                            ( TmVar "aa_0_2" )
+                                                                                                        )
+                                                                                                        ( TmVar "aa_1_2" )
+                                                                                                    )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            ) "c_f0_19"
+                                                                            ( TmApp
+                                                                                ( TmForce
+                                                                                    ( TmVar "c_f0_19" )
+                                                                                )
+                                                                                ( TmVar "c_a0_19" )
+                                                                            )
+                                                                        ) "c_f1_19"
+                                                                        ( TmApp
+                                                                            ( TmForce
+                                                                                ( TmVar "c_f1_19" )
+                                                                            )
+                                                                            ( TmVar "c_a1_19" )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            ) "c_inp1_20"
+                                                            ( TmPrimBinOp PrimDAdd
+                                                                ( TmVar "c_inp0_20" )
+                                                                ( TmVar "c_inp1_20" )
+                                                            )
+                                                        )
+                                                    ) "c_inp0_22"
                                                     ( TmTo
                                                         ( TmTo
                                                             ( TmReturn
-                                                                ( TmGlobal "e_sinEntry" )
-                                                            ) "c_f0_16"
-                                                            ( TmApp
-                                                                ( TmForce
-                                                                    ( TmVar "c_f0_16" )
+                                                                ( TmVar "e_x" )
+                                                            ) "c_a0_21"
+                                                            ( TmTo
+                                                                ( TmReturn
+                                                                    ( TmInt 7 )
+                                                                ) "c_a1_21"
+                                                                ( TmTo
+                                                                    ( TmTo
+                                                                        ( TmReturn
+                                                                            ( TmThunk
+                                                                                ( TmLam
+                                                                                    ( Param
+                                                                                        { paramName = "aa_0_3"
+                                                                                        , paramType = TpDouble
+                                                                                        }
+                                                                                    )
+                                                                                    ( TmReturn
+                                                                                        ( TmThunk
+                                                                                            ( TmLam
+                                                                                                ( Param
+                                                                                                    { paramName = "aa_1_3"
+                                                                                                    , paramType = TpInt
+                                                                                                    }
+                                                                                                )
+                                                                                                ( TmApp
+                                                                                                    ( TmApp
+                                                                                                        ( TmForce
+                                                                                                            ( TmGlobal "e_sinEntry" )
+                                                                                                        )
+                                                                                                        ( TmVar "aa_0_3" )
+                                                                                                    )
+                                                                                                    ( TmVar "aa_1_3" )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        ) "c_f0_21"
+                                                                        ( TmApp
+                                                                            ( TmForce
+                                                                                ( TmVar "c_f0_21" )
+                                                                            )
+                                                                            ( TmVar "c_a0_21" )
+                                                                        )
+                                                                    ) "c_f1_21"
+                                                                    ( TmApp
+                                                                        ( TmForce
+                                                                            ( TmVar "c_f1_21" )
+                                                                        )
+                                                                        ( TmVar "c_a1_21" )
+                                                                    )
                                                                 )
-                                                                ( TmVar "c_a0_16" )
                                                             )
-                                                        ) "c_f1_16"
-                                                        ( TmApp
-                                                            ( TmForce
-                                                                ( TmVar "c_f1_16" )
-                                                            )
-                                                            ( TmVar "c_a1_16" )
+                                                        ) "c_inp1_22"
+                                                        ( TmPrimBinOp PrimDSub
+                                                            ( TmVar "c_inp0_22" )
+                                                            ( TmVar "c_inp1_22" )
                                                         )
                                                     )
+                                                ) "c_inp0_24"
+                                                ( TmTo
+                                                    ( TmTo
+                                                        ( TmReturn
+                                                            ( TmVar "e_x" )
+                                                        ) "c_a0_23"
+                                                        ( TmTo
+                                                            ( TmReturn
+                                                                ( TmInt 9 )
+                                                            ) "c_a1_23"
+                                                            ( TmTo
+                                                                ( TmTo
+                                                                    ( TmReturn
+                                                                        ( TmThunk
+                                                                            ( TmLam
+                                                                                ( Param
+                                                                                    { paramName = "aa_0_4"
+                                                                                    , paramType = TpDouble
+                                                                                    }
+                                                                                )
+                                                                                ( TmReturn
+                                                                                    ( TmThunk
+                                                                                        ( TmLam
+                                                                                            ( Param
+                                                                                                { paramName = "aa_1_4"
+                                                                                                , paramType = TpInt
+                                                                                                }
+                                                                                            )
+                                                                                            ( TmApp
+                                                                                                ( TmApp
+                                                                                                    ( TmForce
+                                                                                                        ( TmGlobal "e_sinEntry" )
+                                                                                                    )
+                                                                                                    ( TmVar "aa_0_4" )
+                                                                                                )
+                                                                                                ( TmVar "aa_1_4" )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    ) "c_f0_23"
+                                                                    ( TmApp
+                                                                        ( TmForce
+                                                                            ( TmVar "c_f0_23" )
+                                                                        )
+                                                                        ( TmVar "c_a0_23" )
+                                                                    )
+                                                                ) "c_f1_23"
+                                                                ( TmApp
+                                                                    ( TmForce
+                                                                        ( TmVar "c_f1_23" )
+                                                                    )
+                                                                    ( TmVar "c_a1_23" )
+                                                                )
+                                                            )
+                                                        )
+                                                    ) "c_inp1_24"
+                                                    ( TmPrimBinOp PrimDAdd
+                                                        ( TmVar "c_inp0_24" )
+                                                        ( TmVar "c_inp1_24" )
+                                                    )
                                                 )
-                                            ) "c_inp0_18"
+                                            ) "c_inp0_26"
                                             ( TmTo
                                                 ( TmTo
                                                     ( TmReturn
                                                         ( TmVar "e_x" )
-                                                    ) "c_a0_17"
+                                                    ) "c_a0_25"
                                                     ( TmTo
                                                         ( TmReturn
-                                                            ( TmInt 3 )
-                                                        ) "c_a1_17"
+                                                            ( TmInt 11 )
+                                                        ) "c_a1_25"
                                                         ( TmTo
                                                             ( TmTo
                                                                 ( TmReturn
-                                                                    ( TmGlobal "e_sinEntry" )
-                                                                ) "c_f0_17"
+                                                                    ( TmThunk
+                                                                        ( TmLam
+                                                                            ( Param
+                                                                                { paramName = "aa_0_5"
+                                                                                , paramType = TpDouble
+                                                                                }
+                                                                            )
+                                                                            ( TmReturn
+                                                                                ( TmThunk
+                                                                                    ( TmLam
+                                                                                        ( Param
+                                                                                            { paramName = "aa_1_5"
+                                                                                            , paramType = TpInt
+                                                                                            }
+                                                                                        )
+                                                                                        ( TmApp
+                                                                                            ( TmApp
+                                                                                                ( TmForce
+                                                                                                    ( TmGlobal "e_sinEntry" )
+                                                                                                )
+                                                                                                ( TmVar "aa_0_5" )
+                                                                                            )
+                                                                                            ( TmVar "aa_1_5" )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                ) "c_f0_25"
                                                                 ( TmApp
                                                                     ( TmForce
-                                                                        ( TmVar "c_f0_17" )
+                                                                        ( TmVar "c_f0_25" )
                                                                     )
-                                                                    ( TmVar "c_a0_17" )
+                                                                    ( TmVar "c_a0_25" )
                                                                 )
-                                                            ) "c_f1_17"
+                                                            ) "c_f1_25"
                                                             ( TmApp
                                                                 ( TmForce
-                                                                    ( TmVar "c_f1_17" )
+                                                                    ( TmVar "c_f1_25" )
                                                                 )
-                                                                ( TmVar "c_a1_17" )
+                                                                ( TmVar "c_a1_25" )
                                                             )
                                                         )
                                                     )
-                                                ) "c_inp1_18"
+                                                ) "c_inp1_26"
                                                 ( TmPrimBinOp PrimDSub
-                                                    ( TmVar "c_inp0_18" )
-                                                    ( TmVar "c_inp1_18" )
+                                                    ( TmVar "c_inp0_26" )
+                                                    ( TmVar "c_inp1_26" )
                                                 )
                                             )
-                                        ) "c_inp0_20"
+                                        ) "c_inp0_28"
                                         ( TmTo
                                             ( TmTo
                                                 ( TmReturn
                                                     ( TmVar "e_x" )
-                                                ) "c_a0_19"
+                                                ) "c_a0_27"
                                                 ( TmTo
                                                     ( TmReturn
-                                                        ( TmInt 5 )
-                                                    ) "c_a1_19"
+                                                        ( TmInt 13 )
+                                                    ) "c_a1_27"
                                                     ( TmTo
                                                         ( TmTo
                                                             ( TmReturn
-                                                                ( TmGlobal "e_sinEntry" )
-                                                            ) "c_f0_19"
+                                                                ( TmThunk
+                                                                    ( TmLam
+                                                                        ( Param
+                                                                            { paramName = "aa_0_6"
+                                                                            , paramType = TpDouble
+                                                                            }
+                                                                        )
+                                                                        ( TmReturn
+                                                                            ( TmThunk
+                                                                                ( TmLam
+                                                                                    ( Param
+                                                                                        { paramName = "aa_1_6"
+                                                                                        , paramType = TpInt
+                                                                                        }
+                                                                                    )
+                                                                                    ( TmApp
+                                                                                        ( TmApp
+                                                                                            ( TmForce
+                                                                                                ( TmGlobal "e_sinEntry" )
+                                                                                            )
+                                                                                            ( TmVar "aa_0_6" )
+                                                                                        )
+                                                                                        ( TmVar "aa_1_6" )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            ) "c_f0_27"
                                                             ( TmApp
                                                                 ( TmForce
-                                                                    ( TmVar "c_f0_19" )
+                                                                    ( TmVar "c_f0_27" )
                                                                 )
-                                                                ( TmVar "c_a0_19" )
+                                                                ( TmVar "c_a0_27" )
                                                             )
-                                                        ) "c_f1_19"
+                                                        ) "c_f1_27"
                                                         ( TmApp
                                                             ( TmForce
-                                                                ( TmVar "c_f1_19" )
+                                                                ( TmVar "c_f1_27" )
                                                             )
-                                                            ( TmVar "c_a1_19" )
+                                                            ( TmVar "c_a1_27" )
                                                         )
                                                     )
                                                 )
-                                            ) "c_inp1_20"
+                                            ) "c_inp1_28"
                                             ( TmPrimBinOp PrimDAdd
-                                                ( TmVar "c_inp0_20" )
-                                                ( TmVar "c_inp1_20" )
+                                                ( TmVar "c_inp0_28" )
+                                                ( TmVar "c_inp1_28" )
                                             )
                                         )
-                                    ) "c_inp0_22"
+                                    ) "c_inp0_30"
                                     ( TmTo
                                         ( TmTo
                                             ( TmReturn
                                                 ( TmVar "e_x" )
-                                            ) "c_a0_21"
+                                            ) "c_a0_29"
                                             ( TmTo
                                                 ( TmReturn
-                                                    ( TmInt 7 )
-                                                ) "c_a1_21"
+                                                    ( TmInt 15 )
+                                                ) "c_a1_29"
                                                 ( TmTo
                                                     ( TmTo
                                                         ( TmReturn
-                                                            ( TmGlobal "e_sinEntry" )
-                                                        ) "c_f0_21"
+                                                            ( TmThunk
+                                                                ( TmLam
+                                                                    ( Param
+                                                                        { paramName = "aa_0_7"
+                                                                        , paramType = TpDouble
+                                                                        }
+                                                                    )
+                                                                    ( TmReturn
+                                                                        ( TmThunk
+                                                                            ( TmLam
+                                                                                ( Param
+                                                                                    { paramName = "aa_1_7"
+                                                                                    , paramType = TpInt
+                                                                                    }
+                                                                                )
+                                                                                ( TmApp
+                                                                                    ( TmApp
+                                                                                        ( TmForce
+                                                                                            ( TmGlobal "e_sinEntry" )
+                                                                                        )
+                                                                                        ( TmVar "aa_0_7" )
+                                                                                    )
+                                                                                    ( TmVar "aa_1_7" )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        ) "c_f0_29"
                                                         ( TmApp
                                                             ( TmForce
-                                                                ( TmVar "c_f0_21" )
+                                                                ( TmVar "c_f0_29" )
                                                             )
-                                                            ( TmVar "c_a0_21" )
+                                                            ( TmVar "c_a0_29" )
                                                         )
-                                                    ) "c_f1_21"
+                                                    ) "c_f1_29"
                                                     ( TmApp
                                                         ( TmForce
-                                                            ( TmVar "c_f1_21" )
+                                                            ( TmVar "c_f1_29" )
                                                         )
-                                                        ( TmVar "c_a1_21" )
+                                                        ( TmVar "c_a1_29" )
                                                     )
                                                 )
                                             )
-                                        ) "c_inp1_22"
+                                        ) "c_inp1_30"
                                         ( TmPrimBinOp PrimDSub
-                                            ( TmVar "c_inp0_22" )
-                                            ( TmVar "c_inp1_22" )
+                                            ( TmVar "c_inp0_30" )
+                                            ( TmVar "c_inp1_30" )
                                         )
                                     )
-                                ) "c_inp0_24"
-                                ( TmTo
-                                    ( TmTo
-                                        ( TmReturn
-                                            ( TmVar "e_x" )
-                                        ) "c_a0_23"
-                                        ( TmTo
-                                            ( TmReturn
-                                                ( TmInt 9 )
-                                            ) "c_a1_23"
-                                            ( TmTo
-                                                ( TmTo
-                                                    ( TmReturn
-                                                        ( TmGlobal "e_sinEntry" )
-                                                    ) "c_f0_23"
-                                                    ( TmApp
-                                                        ( TmForce
-                                                            ( TmVar "c_f0_23" )
-                                                        )
-                                                        ( TmVar "c_a0_23" )
-                                                    )
-                                                ) "c_f1_23"
-                                                ( TmApp
-                                                    ( TmForce
-                                                        ( TmVar "c_f1_23" )
-                                                    )
-                                                    ( TmVar "c_a1_23" )
-                                                )
-                                            )
-                                        )
-                                    ) "c_inp1_24"
-                                    ( TmPrimBinOp PrimDAdd
-                                        ( TmVar "c_inp0_24" )
-                                        ( TmVar "c_inp1_24" )
-                                    )
-                                )
-                            ) "c_inp0_26"
-                            ( TmTo
-                                ( TmTo
-                                    ( TmReturn
-                                        ( TmVar "e_x" )
-                                    ) "c_a0_25"
-                                    ( TmTo
-                                        ( TmReturn
-                                            ( TmInt 11 )
-                                        ) "c_a1_25"
-                                        ( TmTo
-                                            ( TmTo
-                                                ( TmReturn
-                                                    ( TmGlobal "e_sinEntry" )
-                                                ) "c_f0_25"
-                                                ( TmApp
-                                                    ( TmForce
-                                                        ( TmVar "c_f0_25" )
-                                                    )
-                                                    ( TmVar "c_a0_25" )
-                                                )
-                                            ) "c_f1_25"
-                                            ( TmApp
-                                                ( TmForce
-                                                    ( TmVar "c_f1_25" )
-                                                )
-                                                ( TmVar "c_a1_25" )
-                                            )
-                                        )
-                                    )
-                                ) "c_inp1_26"
-                                ( TmPrimBinOp PrimDSub
-                                    ( TmVar "c_inp0_26" )
-                                    ( TmVar "c_inp1_26" )
                                 )
                             )
-                        ) "c_inp0_28"
-                        ( TmTo
-                            ( TmTo
-                                ( TmReturn
-                                    ( TmVar "e_x" )
-                                ) "c_a0_27"
-                                ( TmTo
-                                    ( TmReturn
-                                        ( TmInt 13 )
-                                    ) "c_a1_27"
-                                    ( TmTo
-                                        ( TmTo
-                                            ( TmReturn
-                                                ( TmGlobal "e_sinEntry" )
-                                            ) "c_f0_27"
-                                            ( TmApp
-                                                ( TmForce
-                                                    ( TmVar "c_f0_27" )
-                                                )
-                                                ( TmVar "c_a0_27" )
-                                            )
-                                        ) "c_f1_27"
-                                        ( TmApp
-                                            ( TmForce
-                                                ( TmVar "c_f1_27" )
-                                            )
-                                            ( TmVar "c_a1_27" )
-                                        )
-                                    )
-                                )
-                            ) "c_inp1_28"
-                            ( TmPrimBinOp PrimDAdd
-                                ( TmVar "c_inp0_28" )
-                                ( TmVar "c_inp1_28" )
-                            )
+                        )
+                    ) "aa_0_0_temp"
+                    ( TmApp
+                        ( TmForce
+                            ( TmVar "aa_0_0_temp" )
                         )
-                    ) "c_inp0_30"
-                    ( TmTo
-                        ( TmTo
-                            ( TmReturn
-                                ( TmVar "e_x" )
-                            ) "c_a0_29"
-                            ( TmTo
-                                ( TmReturn
-                                    ( TmInt 15 )
-                                ) "c_a1_29"
-                                ( TmTo
-                                    ( TmTo
-                                        ( TmReturn
-                                            ( TmGlobal "e_sinEntry" )
-                                        ) "c_f0_29"
-                                        ( TmApp
-                                            ( TmForce
-                                                ( TmVar "c_f0_29" )
-                                            )
-                                            ( TmVar "c_a0_29" )
-                                        )
-                                    ) "c_f1_29"
-                                    ( TmApp
-                                        ( TmForce
-                                            ( TmVar "c_f1_29" )
-                                        )
-                                        ( TmVar "c_a1_29" )
-                                    )
-                                )
-                            )
-                        ) "c_inp1_30"
-                        ( TmPrimBinOp PrimDSub
-                            ( TmVar "c_inp0_30" )
-                            ( TmVar "c_inp1_30" )
-                        )
+                        ( TmVar "aa_0_0" )
                     )
                 )
             )
@@ -595,7 +1094,21 @@
             ) "c_a0_31"
             ( TmTo
                 ( TmReturn
-                    ( TmGlobal "e_sin" )
+                    ( TmThunk
+                        ( TmLam
+                            ( Param
+                                { paramName = "aa_0_0"
+                                , paramType = TpDouble
+                                }
+                            )
+                            ( TmApp
+                                ( TmForce
+                                    ( TmGlobal "e_sin" )
+                                )
+                                ( TmVar "aa_0_0" )
+                            )
+                        )
+                    )
                 ) "c_f0_31"
                 ( TmApp
                     ( TmForce

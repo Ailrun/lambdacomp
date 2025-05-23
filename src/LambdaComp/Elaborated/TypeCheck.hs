@@ -2,12 +2,19 @@ module LambdaComp.Elaborated.TypeCheck
   ( runProgramInfer
 
   , Context
+  , TypeCheckInfo(..)
+  , TypeCheckT
+  , runGlobalTypeCheckT
+  , runTypeCheckT
+  , askTypeCheckInfo
+  , asksTypeCheckInfo
+
   , TypeError
   ) where
 
 import Control.Monad        (foldM, unless, when, zipWithM_)
 import Control.Monad.Except (MonadError (throwError))
-import Control.Monad.Reader (ReaderT (runReaderT), asks, local)
+import Control.Monad.Reader (MonadReader (ask), ReaderT (runReaderT), asks, local)
 import Data.Bifunctor       (Bifunctor (first))
 import Data.Foldable        (foldr')
 import Data.Map             (Map)
@@ -22,21 +29,23 @@ data TypeCheckInfo
     { topDefs :: Context
     , localCtx :: Context
     }
-type TypeCheck = ReaderT TypeCheckInfo (Either TypeError)
+type TypeCheckT = ReaderT TypeCheckInfo
+type TypeErrorC = MonadError TypeError
 
-runProgramInfer :: Program -> Either TypeError Context
+runProgramInfer :: (TypeErrorC m) => Program -> m Context
 runProgramInfer p = do
   ctx <- foldM go Map.empty p
   let lastDef = tmDefName (last p)
   when (ctx Map.! lastDef /= TpInt) $ throwError $ NonIntLastTopDecl lastDef
   pure ctx
   where
-    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runReaderT` TypeCheckInfo ctx Map.empty
+    go :: (TypeErrorC m) => Context -> Top -> m (Map Ident Tp)
+    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runGlobalTypeCheckT` ctx
 
-topInfer :: Top -> TypeCheck Tp
+topInfer :: (TypeErrorC m) => Top -> TypeCheckT m Tp
 topInfer = infer . tmDefBody
 
-check :: Tm -> Tp -> TypeCheck ()
+check :: (TypeErrorC m) => Tm -> Tp -> TypeCheckT m ()
 check TmUnit                   = \case
   TpUnit    -> pure ()
   tp        -> throwError $ InvalidConsType tp [TpUnit]
@@ -57,9 +66,9 @@ check tm                       = \tp -> do
   when (tp /= tp') $
     throwError $ TypeMismatch tp tp'
 
-infer :: Tm -> TypeCheck Tp
-infer (TmVar x)                = asks (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
-infer (TmGlobal x)             = asks (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
+infer :: (TypeErrorC m) => Tm -> TypeCheckT m Tp
+infer (TmVar x)                = asksTypeCheckInfo (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
+infer (TmGlobal x)             = asksTypeCheckInfo (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
 infer TmUnit                   = pure TpUnit
 infer TmTrue                   = pure TpBool
 infer TmFalse                  = pure TpBool
@@ -126,6 +135,18 @@ insertParamToContext Param {..} = Map.insert paramName paramType
 
 primOpTypeBase :: PrimOpTypeBase Tp
 primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
+
+runGlobalTypeCheckT :: TypeCheckT m a -> Context -> m a
+runGlobalTypeCheckT tc = runTypeCheckT tc . flip TypeCheckInfo Map.empty
+
+runTypeCheckT :: TypeCheckT m a -> TypeCheckInfo -> m a
+runTypeCheckT = runReaderT
+
+askTypeCheckInfo :: (Monad m) => TypeCheckT m TypeCheckInfo
+askTypeCheckInfo = ask
+
+asksTypeCheckInfo :: (Monad m) => (TypeCheckInfo -> a) -> TypeCheckT m a
+asksTypeCheckInfo = asks
 
 data TypeError where
   NonIntLastTopDecl  :: Ident -> TypeError

@@ -76,6 +76,7 @@ library
     Control.Monad.FreshName.Class
     LambdaComp.AM.Eval
     LambdaComp.AM.Syntax
+    LambdaComp.CBPV.ArityAnalysis
     LambdaComp.CBPV.Optimization.BindingConversion
     LambdaComp.CBPV.Optimization.DeadBindingElimination
     LambdaComp.CBPV.Optimization.InlineBinding
