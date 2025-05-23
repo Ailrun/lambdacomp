@@ -1,0 +1,13 @@
+recFib : Int -> Int -> Int -> Int -> Int;;
+recFib = \n -> \l -> \x -> \y ->
+  if n < l
+  then 0
+  else printInt l before
+       printInt x before
+       recFib n (l + 1) y (x + y)
+;;
+
+fib = \(n : Int) -> recFib n 0 0 1
+;;
+
+main = fib 100
