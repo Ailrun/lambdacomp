@@ -1,0 +1,12 @@
+e_f =
+  return
+    (thunk
+       (\ (aa_0_1 : Int) (aa_1_1 : Int) ->
+          (aa_0_1 + aa_1_1) to c_inp0_1 -> \ (e_z : Int) -> c_inp0_1 + e_z))
+;;
+e_g = return (thunk ((force #e_f) 3))
+;;
+e_main =
+  (force #e_g) 2 5 to c_v_4 ->
+  (force #e_g) 4 1 to c_v_6 ->
+  printInt c_v_4 before printInt c_v_6 before return 0

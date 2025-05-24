@@ -1,0 +1,102 @@
+[ TmDefCodeSection
+    { tmDefCode =
+        [ ISetReturn
+            ( VaThunk "sys_thunk_0" [] )
+        , IDefine "top_e_f"
+        ]
+    }
+, TmDefCodeSection
+    { tmDefCode =
+        [ ISetReturn
+            ( VaThunk "sys_thunk_1" [] )
+        , IDefine "top_e_g"
+        ]
+    }
+, TmDefCodeSection
+    { tmDefCode =
+        [ IScope
+        , IPush
+            ( VaInt 5 )
+        , IPush
+            ( VaInt 2 )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_e_g" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_v_4" )
+        , IScope
+        , IPush
+            ( VaInt 1 )
+        , IPush
+            ( VaInt 4 )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_e_g" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_v_6" )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_4" )
+            )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_6" )
+            )
+        , ISetReturn
+            ( VaInt 0 )
+        , IDefine "top_e_main"
+        ]
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_0"
+    , thunkCode =
+        [ IPop
+            ( AIdent "var_aa_0_1" )
+        , IPop
+            ( AIdent "var_aa_1_1" )
+        , IScope
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_0_1" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_aa_1_1" )
+            )
+        , IPrimBinOp PrimIAdd
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_inp0_1" )
+        , IPop
+            ( AIdent "var_e_z" )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_c_inp0_1" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_e_z" )
+            )
+        , IPrimBinOp PrimIAdd
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_1"
+    , thunkCode =
+        [ IPush
+            ( VaInt 3 )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_e_f" )
+            )
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+]
