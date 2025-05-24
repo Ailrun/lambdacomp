@@ -74,7 +74,7 @@ handleElTcError outH (Left elTcErr) = lift (hPutStrLn outH "ElTc") >> pHPrintNoC
 handleElTcError _    (Right prog)   = pure prog
 
 handleCBPVTcError :: Handle -> Either CBPV.TypeError a -> ExceptT Int IO a
-handleCBPVTcError outH (Left cbpvTcErr) = lift (hPutStrLn outH "CBPVTc") >> pHPrintNoColor outH cbpvTcErr >> throwError 1
+handleCBPVTcError outH (Left cbpvTcErr) = lift (hPutStrLn outH "CBPVTc") >> lift (hPutDoc outH $ pretty cbpvTcErr) >> throwError 1
 handleCBPVTcError _    (Right prog)     = pure prog
 
 runWithFp :: (Bool -> FilePath -> ExceptT Int IO a) -> Maybe FilePath -> ExceptT Int IO a
