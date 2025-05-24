@@ -1,128 +1,19 @@
-[ TopTmDef
-    { tmDefName = "e_recFib"
-    , tmDefBody = TmReturn
-        ( TmThunk
-            ( TmRec
-                ( Param
-                    { paramName = "e_recFib"
-                    , paramType = TpUp
-                        ( TpInt :->:
-                            ( TpInt :->:
-                                ( TpInt :->: ( TpInt :->: TpDown TpInt ) )
-                            )
-                        )
-                    }
-                )
-                ( TmLam
-                    ( Param
-                        { paramName = "aa_0_1"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmLam
-                        ( Param
-                            { paramName = "aa_1_1"
-                            , paramType = TpInt
-                            }
-                        )
-                        ( TmTo
-                            ( TmPrimBinOp PrimILt
-                                ( TmVar "aa_0_1" )
-                                ( TmVar "aa_1_1" )
-                            ) "c_c_1"
-                            ( TmLam
-                                ( Param
-                                    { paramName = "aa_2_1"
-                                    , paramType = TpInt
-                                    }
-                                )
-                                ( TmLam
-                                    ( Param
-                                        { paramName = "e_y"
-                                        , paramType = TpInt
-                                        }
-                                    )
-                                    ( TmIf
-                                        ( TmVar "c_c_1" )
-                                        ( TmReturn
-                                            ( TmInt 0 )
-                                        )
-                                        ( TmTo
-                                            ( TmPrimBinOp PrimIAdd
-                                                ( TmVar "aa_1_1" )
-                                                ( TmInt 1 )
-                                            ) "c_a1_6"
-                                            ( TmTo
-                                                ( TmPrimBinOp PrimIAdd
-                                                    ( TmVar "aa_2_1" )
-                                                    ( TmVar "e_y" )
-                                                ) "c_a3_6"
-                                                ( TmPrintInt
-                                                    ( TmVar "aa_1_1" )
-                                                    ( TmPrintInt
-                                                        ( TmVar "aa_2_1" )
-                                                        ( TmApp
-                                                            ( TmApp
-                                                                ( TmApp
-                                                                    ( TmApp
-                                                                        ( TmForce
-                                                                            ( TmVar "e_recFib" )
-                                                                        )
-                                                                        ( TmVar "aa_0_1" )
-                                                                    )
-                                                                    ( TmVar "c_a1_6" )
-                                                                )
-                                                                ( TmVar "e_y" )
-                                                            )
-                                                            ( TmVar "c_a3_6" )
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_fib"
-    , tmDefBody = TmReturn
-        ( TmThunk
-            ( TmLam
-                ( Param
-                    { paramName = "e_n"
-                    , paramType = TpInt
-                    }
-                )
-                ( TmApp
-                    ( TmApp
-                        ( TmApp
-                            ( TmApp
-                                ( TmForce
-                                    ( TmGlobal "e_recFib" )
-                                )
-                                ( TmVar "e_n" )
-                            )
-                            ( TmInt 0 )
-                        )
-                        ( TmInt 0 )
-                    )
-                    ( TmInt 1 )
-                )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmApp
-        ( TmForce
-            ( TmGlobal "e_fib" )
-        )
-        ( TmInt 100 )
-    }
-]
+e_recFib =
+  return
+    (thunk
+       (rec (e_recFib : Up (Int -> Int -> Int -> Int -> Down Int)) ->
+          \ (aa_0_1 : Int) (aa_1_1 : Int) ->
+            (aa_0_1 < aa_1_1) to c_c_1 ->
+            \ (aa_2_1 : Int) (e_y : Int) ->
+              if c_c_1
+              then return 0
+              else
+              (aa_1_1 + 1) to c_a1_6 ->
+              (aa_2_1 + e_y) to c_a3_6 ->
+              printInt aa_1_1 before
+              printInt aa_2_1 before
+              (force e_recFib) aa_0_1 c_a1_6 e_y c_a3_6))
+;;
+e_fib = return (thunk (\ (e_n : Int) -> (force #e_recFib) e_n 0 0 1))
+;;
+e_main = (force #e_fib) 100

@@ -1,9 +1,1 @@
-[ TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmPrintInt
-        ( TmInt 1 )
-        ( TmReturn
-            ( TmInt 1 )
-        )
-    }
-]
+e_main = printInt 1 before return 1

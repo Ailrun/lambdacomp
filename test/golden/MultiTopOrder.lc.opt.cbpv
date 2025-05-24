@@ -1,49 +1,5 @@
-[ TopTmDef
-    { tmDefName = "e_g"
-    , tmDefBody = TmPrintInt
-        ( TmInt 5 )
-        ( TmReturn
-            ( TmThunk
-                ( TmLam
-                    ( Param
-                        { paramName = "e_x"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmPrimBinOp PrimIAdd
-                        ( TmVar "e_x" )
-                        ( TmInt 3 )
-                    )
-                )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_f"
-    , tmDefBody = TmPrintInt
-        ( TmInt 4 )
-        ( TmReturn
-            ( TmThunk
-                ( TmLam
-                    ( Param
-                        { paramName = "e_x"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmPrimBinOp PrimIAdd
-                        ( TmVar "e_x" )
-                        ( TmInt 1 )
-                    )
-                )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmPrintInt
-        ( TmInt 3 )
-        ( TmReturn
-            ( TmInt 0 )
-        )
-    }
-]
+e_g = printInt 5 before return (thunk (\ (e_x : Int) -> e_x + 3))
+;;
+e_f = printInt 4 before return (thunk (\ (e_x : Int) -> e_x + 1))
+;;
+e_main = printInt 3 before return 0

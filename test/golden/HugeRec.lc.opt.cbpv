@@ -1,73 +1,14 @@
-[ TopTmDef
-    { tmDefName = "e_recF"
-    , tmDefBody = TmReturn
-        ( TmThunk
-            ( TmRec
-                ( Param
-                    { paramName = "e_recF"
-                    , paramType = TpUp
-                        ( TpInt :->: ( TpInt :->: TpDown TpInt ) )
-                    }
-                )
-                ( TmLam
-                    ( Param
-                        { paramName = "aa_0_0"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmTo
-                        ( TmPrimBinOp PrimIGt
-                            ( TmVar "aa_0_0" )
-                            ( TmInt 0 )
-                        ) "c_c_3"
-                        ( TmLam
-                            ( Param
-                                { paramName = "e_x"
-                                , paramType = TpInt
-                                }
-                            )
-                            ( TmPrintInt
-                                ( TmVar "e_x" )
-                                ( TmPrintInt
-                                    ( TmInt 2 )
-                                    ( TmIf
-                                        ( TmVar "c_c_3" )
-                                        ( TmTo
-                                            ( TmPrimBinOp PrimISub
-                                                ( TmVar "aa_0_0" )
-                                                ( TmInt 1 )
-                                            ) "c_a0_5"
-                                            ( TmApp
-                                                ( TmApp
-                                                    ( TmForce
-                                                        ( TmVar "e_recF" )
-                                                    )
-                                                    ( TmVar "c_a0_5" )
-                                                )
-                                                ( TmVar "e_x" )
-                                            )
-                                        )
-                                        ( TmReturn
-                                            ( TmInt 0 )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmApp
-        ( TmApp
-            ( TmForce
-                ( TmGlobal "e_recF" )
-            )
-            ( TmInt 1000000 )
-        )
-        ( TmInt 3 )
-    }
-]
+e_recF =
+  return
+    (thunk
+       (rec (e_recF : Up (Int -> Int -> Down Int)) ->
+          \ (aa_0_0 : Int) ->
+            (aa_0_0 > 0) to c_c_3 ->
+            \ (e_x : Int) ->
+              printInt e_x before
+              printInt 2 before
+              if c_c_3
+              then (aa_0_0 - 1) to c_a0_5 -> (force e_recF) c_a0_5 e_x
+              else return 0))
+;;
+e_main = (force #e_recF) 1000000 3

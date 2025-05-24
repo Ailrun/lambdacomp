@@ -2,11 +2,12 @@ module LambdaComp.Ident
   ( module LambdaComp.Ident
   ) where
 
-import Data.String (IsString)
-import Data.Text   (Text)
+import Data.String   (IsString)
+import Data.Text     (Text)
+import Prettyprinter (Pretty)
 
 newtype Ident = Ident Text
-  deriving newtype (Eq, Ord, Show, Read, IsString, Semigroup)
+  deriving newtype (Eq, Ord, Show, Read, IsString, Semigroup, Pretty)
 
 -- Variables obtained by elaboration
 toExtVar :: Ident -> Ident

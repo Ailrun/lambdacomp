@@ -1,69 +1,9 @@
-[ TopTmDef
-    { tmDefName = "e_f"
-    , tmDefBody = TmReturn
-        ( TmThunk
-            ( TmLam
-                ( Param
-                    { paramName = "aa_0_1"
-                    , paramType = TpInt
-                    }
-                )
-                ( TmLam
-                    ( Param
-                        { paramName = "aa_1_1"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmTo
-                        ( TmPrimBinOp PrimIAdd
-                            ( TmVar "aa_0_1" )
-                            ( TmVar "aa_1_1" )
-                        ) "c_inp0_1"
-                        ( TmLam
-                            ( Param
-                                { paramName = "e_z"
-                                , paramType = TpInt
-                                }
-                            )
-                            ( TmPrimBinOp PrimIAdd
-                                ( TmVar "c_inp0_1" )
-                                ( TmVar "e_z" )
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_g"
-    , tmDefBody = TmReturn
-        ( TmThunk
-            ( TmApp
-                ( TmForce
-                    ( TmGlobal "e_f" )
-                )
-                ( TmInt 3 )
-            )
-        )
-    }
-, TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmTo
-        ( TmApp
-            ( TmApp
-                ( TmForce
-                    ( TmGlobal "e_g" )
-                )
-                ( TmInt 2 )
-            )
-            ( TmInt 5 )
-        ) "c_v_4"
-        ( TmPrintInt
-            ( TmVar "c_v_4" )
-            ( TmReturn
-                ( TmInt 0 )
-            )
-        )
-    }
-]
+e_f =
+  return
+    (thunk
+       (\ (aa_0_1 : Int) (aa_1_1 : Int) ->
+          (aa_0_1 + aa_1_1) to c_inp0_1 -> \ (e_z : Int) -> c_inp0_1 + e_z))
+;;
+e_g = return (thunk ((force #e_f) 3))
+;;
+e_main = (force #e_g) 2 5 to c_v_4 -> printInt c_v_4 before return 0

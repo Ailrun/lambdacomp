@@ -9,7 +9,7 @@ module LambdaComp.CBPV.TypeCheck
   , askTypeCheckInfo
   , asksTypeCheckInfo
 
-  , TypeError
+  , TypeError(..)
   ) where
 
 import Control.Monad        (foldM, when)
@@ -18,7 +18,6 @@ import Control.Monad.Reader (MonadReader (ask, local), ReaderT (runReaderT), ask
 import Data.Map             (Map)
 import Data.Map             qualified as Map
 import Data.Text            (Text)
-import Data.Text            qualified as T
 
 import LambdaComp.CBPV.Syntax
 import LambdaComp.PrimOp      (PrimOpTypeBase (..), getPrimOpType)
@@ -47,7 +46,7 @@ topInfer top = do
   tp <- withError (OfTop (tmDefName top)) . infer . tmDefBody $ top
   case tp of
     TpDown tp' -> pure tp'
-    _          -> throwError $ NonDownType "top" tp
+    _          -> throwError $ NonDownType "top-level definition" tp
 
 check :: (TypeErrorC m) => Tm c -> Tp c -> TypeCheckT m ()
 check TmUnit                   = \case
@@ -70,19 +69,19 @@ check (TmThunk tm)             = \case
   tp      -> throwError $ NonUpType tp
 check (TmReturn tm)            = \case
   TpDown tp -> check tm tp
-  tp        -> throwError $ NonDownType "TmReturn Check" tp
+  tp        -> throwError $ NonDownType "Return" tp
 check (TmTo tm0 x tm1)         = \tp -> do
   tp0 <- infer tm0
   case tp0 of
     TpDown tp0' -> local (insertEntryToInfo x tp0') $ check tm1 tp
-    _           -> throwError $ NonDownType "TmToCheck" tp0
+    _           -> throwError $ NonDownType "To" tp0
 check (TmLet x tm0 tm1)        = \tp -> do
   tp0 <- infer tm0
   local (insertEntryToInfo x tp0) $ check tm1 tp
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
-    throwError $ TypeMismatch "infer to check" tp tp'
+    throwError $ TypeMismatch "An inferable expression" tp tp'
 
 infer :: (TypeErrorC m) => Tm c -> TypeCheckT m (Tp c)
 infer (TmVar x)                = asksTypeCheckInfo (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
@@ -119,7 +118,7 @@ infer (TmTo tm0 x tm1)         = do
   tp0 <- infer tm0
   case tp0 of
     TpDown tp0' -> local (insertEntryToInfo x tp0') $ infer tm1
-    _           -> throwError $ NonDownType ("TmTo" <> T.show tm0) tp0
+    _           -> throwError $ NonDownType "To" tp0
 infer (TmLet x tm0 tm1)        = do
   tp0 <- infer tm0
   local (insertEntryToInfo x tp0) $ infer tm1

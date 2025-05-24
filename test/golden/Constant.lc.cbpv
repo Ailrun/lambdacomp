@@ -1,14 +1,1 @@
-[ TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmTo
-        ( TmReturn
-            ( TmInt 5 )
-        ) "c_v_0"
-        ( TmPrintInt
-            ( TmVar "c_v_0" )
-            ( TmReturn
-                ( TmInt 0 )
-            )
-        )
-    }
-]
+e_main = (return 5) to c_v_0 -> printInt c_v_0 before return 0

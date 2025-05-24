@@ -23,12 +23,15 @@ import LambdaComp.CBPV.Optimization.Local       qualified as CBPV
 import LambdaComp.CBPV.ToAM                     (runToAM)
 import LambdaComp.CBPV.ToC                      (runToC)
 import LambdaComp.CBPV.TypeCheck                qualified as CBPV
+import LambdaComp.CBPV.PrettyPrinter            ()
 import LambdaComp.Driver.Argument
 import LambdaComp.Elaborated.CBV.ToCBPV         (runToCBPV)
 import LambdaComp.Elaborated.Optimization.Local qualified as El
 import LambdaComp.Elaborated.TypeCheck          qualified as El
 import LambdaComp.External.Parser               (runProgramParser)
 import LambdaComp.External.ToElaborated         (ElaborationError, runToElaborated)
+import Prettyprinter.Render.Text (hPutDoc)
+import Prettyprinter (Pretty(pretty))
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
 mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH) . exceptTToExitCode $ do
@@ -50,8 +53,8 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
     UntilAST            -> getTm >>= pHPrintNoColor outH
     UntilElaboration    -> getElTmTc >>= pHPrintNoColor outH
     UntilElaborationOpt -> getElOptTmTc >>= pHPrintNoColor outH
-    UntilCBPV           -> getCBPVTmAATc >>= pHPrintNoColor outH
-    UntilCBPVOpt        -> getCBPVOptTmTc >>= pHPrintNoColor outH
+    UntilCBPV           -> getCBPVTmAATc >>= lift . hPutDoc outH . pretty
+    UntilCBPVOpt        -> getCBPVOptTmTc >>= lift . hPutDoc outH . pretty
     UntilC              -> getCCode >>= (\cCode -> runWithFp (\real -> lift . if real then (`writeFile` cCode) else const $ hPutStr outH cCode) mayFp)
     UntilExe            -> getCCode >>= (\cCode -> runWithFp (const $ genCExe outH cCode) mayFp)
     UntilAM             -> getAMTm >>= pHPrintNoColor outH

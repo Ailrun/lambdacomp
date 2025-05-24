@@ -1,54 +1,8 @@
-[ TopTmDef
-    { tmDefName = "e_main"
-    , tmDefBody = TmTo
-        ( TmTo ( TmReturn TmTrue ) "c_a0_0"
-            ( TmTo
-                ( TmReturn
-                    ( TmThunk
-                        ( TmLam
-                            ( Param
-                                { paramName = "e_x"
-                                , paramType = TpBool
-                                }
-                            )
-                            ( TmReturn
-                                ( TmVar "e_x" )
-                            )
-                        )
-                    )
-                ) "c_f0_0"
-                ( TmApp
-                    ( TmForce
-                        ( TmVar "c_f0_0" )
-                    )
-                    ( TmVar "c_a0_0" )
-                )
-            )
-        ) "c_c_1"
-        ( TmIf
-            ( TmVar "c_c_1" )
-            ( TmTo
-                ( TmReturn
-                    ( TmInt 1 )
-                ) "c_v_2"
-                ( TmPrintInt
-                    ( TmVar "c_v_2" )
-                    ( TmReturn
-                        ( TmInt 1 )
-                    )
-                )
-            )
-            ( TmTo
-                ( TmReturn
-                    ( TmInt 0 )
-                ) "c_v_3"
-                ( TmPrintInt
-                    ( TmVar "c_v_3" )
-                    ( TmReturn
-                        ( TmInt 0 )
-                    )
-                )
-            )
-        )
-    }
-]
+e_main =
+  ((return True) to c_a0_0 ->
+   (return (thunk (\ (e_x : Bool) -> return e_x))) to c_f0_0 ->
+   (force c_f0_0) c_a0_0)
+  to c_c_1 ->
+  if c_c_1
+  then (return 1) to c_v_2 -> printInt c_v_2 before return 1
+  else (return 0) to c_v_3 -> printInt c_v_3 before return 0
