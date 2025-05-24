@@ -56,14 +56,14 @@
         , IReceive
             ( AIdent "var_c_inp0_1" )
         , IPop
-            ( AIdent "var_aa_2_1" )
+            ( AIdent "var_e_z" )
         , IPush
             ( VaAddr
                 ( AIdent "var_c_inp0_1" )
             )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_2_1" )
+                ( AIdent "var_e_z" )
             )
         , IPrimBinOp PrimIAdd
         , IExit
@@ -73,19 +73,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_0" )
-        , IPop
-            ( AIdent "var_aa_1_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_0" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
-        , IPush
+        [ IPush
             ( VaInt 3 )
         , ICall
             ( VaAddr

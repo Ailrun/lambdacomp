@@ -35,10 +35,10 @@
         , IReceive
             ( AIdent "var_c_c_3" )
         , IPop
-            ( AIdent "var_aa_1_0" )
+            ( AIdent "var_e_x" )
         , IPrintInt
             ( VaAddr
-                ( AIdent "var_aa_1_0" )
+                ( AIdent "var_e_x" )
             )
         , IPrintInt
             ( VaInt 2 )
@@ -59,7 +59,7 @@
             ( AIdent "var_c_a0_5" )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_1_0" )
+                ( AIdent "var_e_x" )
             )
         , IPush
             ( VaAddr
@@ -79,19 +79,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_1" )
-        , IPop
-            ( AIdent "var_aa_1_1" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_1" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_1" )
-            )
-        , IRecAssign
+        [ IRecAssign
             ( AIdent "var_e_recF" ) "sys_thunk_0"
             [ AIdent "var_e_recF" ]
         , ICall

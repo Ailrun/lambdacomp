@@ -53,12 +53,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_aa_0_0_temp" )
-        , IPop
-            ( AIdent "var_aa_0_0" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_0" )
-            )
         , ICall
             ( VaAddr
                 ( AIdent "var_aa_0_0_temp" )

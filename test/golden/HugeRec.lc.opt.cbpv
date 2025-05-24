@@ -2,78 +2,58 @@
     { tmDefName = "e_recF"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmLam
+            ( TmRec
                 ( Param
-                    { paramName = "aa_0_1"
-                    , paramType = TpInt
+                    { paramName = "e_recF"
+                    , paramType = TpUp
+                        ( TpInt :->: ( TpInt :->: TpDown TpInt ) )
                     }
                 )
                 ( TmLam
                     ( Param
-                        { paramName = "aa_1_1"
+                        { paramName = "aa_0_0"
                         , paramType = TpInt
                         }
                     )
-                    ( TmApp
-                        ( TmApp
-                            ( TmRec
-                                ( Param
-                                    { paramName = "e_recF"
-                                    , paramType = TpUp
-                                        ( TpInt :->: ( TpInt :->: TpDown TpInt ) )
-                                    }
-                                )
-                                ( TmLam
-                                    ( Param
-                                        { paramName = "aa_0_0"
-                                        , paramType = TpInt
-                                        }
-                                    )
-                                    ( TmTo
-                                        ( TmPrimBinOp PrimIGt
-                                            ( TmVar "aa_0_0" )
-                                            ( TmInt 0 )
-                                        ) "c_c_3"
-                                        ( TmLam
-                                            ( Param
-                                                { paramName = "aa_1_0"
-                                                , paramType = TpInt
-                                                }
-                                            )
-                                            ( TmPrintInt
-                                                ( TmVar "aa_1_0" )
-                                                ( TmPrintInt
-                                                    ( TmInt 2 )
-                                                    ( TmIf
-                                                        ( TmVar "c_c_3" )
-                                                        ( TmTo
-                                                            ( TmPrimBinOp PrimISub
-                                                                ( TmVar "aa_0_0" )
-                                                                ( TmInt 1 )
-                                                            ) "c_a0_5"
-                                                            ( TmApp
-                                                                ( TmApp
-                                                                    ( TmForce
-                                                                        ( TmVar "e_recF" )
-                                                                    )
-                                                                    ( TmVar "c_a0_5" )
-                                                                )
-                                                                ( TmVar "aa_1_0" )
-                                                            )
-                                                        )
-                                                        ( TmReturn
-                                                            ( TmInt 0 )
-                                                        )
+                    ( TmTo
+                        ( TmPrimBinOp PrimIGt
+                            ( TmVar "aa_0_0" )
+                            ( TmInt 0 )
+                        ) "c_c_3"
+                        ( TmLam
+                            ( Param
+                                { paramName = "e_x"
+                                , paramType = TpInt
+                                }
+                            )
+                            ( TmPrintInt
+                                ( TmVar "e_x" )
+                                ( TmPrintInt
+                                    ( TmInt 2 )
+                                    ( TmIf
+                                        ( TmVar "c_c_3" )
+                                        ( TmTo
+                                            ( TmPrimBinOp PrimISub
+                                                ( TmVar "aa_0_0" )
+                                                ( TmInt 1 )
+                                            ) "c_a0_5"
+                                            ( TmApp
+                                                ( TmApp
+                                                    ( TmForce
+                                                        ( TmVar "e_recF" )
                                                     )
+                                                    ( TmVar "c_a0_5" )
                                                 )
+                                                ( TmVar "e_x" )
                                             )
+                                        )
+                                        ( TmReturn
+                                            ( TmInt 0 )
                                         )
                                     )
                                 )
                             )
-                            ( TmVar "aa_0_1" )
                         )
-                        ( TmVar "aa_1_1" )
                     )
                 )
             )

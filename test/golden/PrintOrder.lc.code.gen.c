@@ -18,21 +18,19 @@ const item sys_arg1_0 = {.int_item = 3};
 
 void sys_thunk_4(item *const _, item *const ret)
 {
-/* TmTo (TmPrintInt (TmInt 5) (TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmInt 3)))))) "aa_0_0_temp" (TmLam (Param {paramName = "aa_0_0", paramType = TpInt}) (TmApp (TmForce (TmVar "aa_0_0_temp")) (TmVar "aa_0_0"))) */
+/* TmTo (TmPrintInt (TmInt 5) (TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmInt 3)))))) "aa_0_0_temp" (TmForce (TmVar "aa_0_0_temp")) */
 const item sys_msg_2 = {.int_item = 5};
 printf("%d\n", sys_msg_2.int_item);
 (*ret).thunk_item.code = sys_thunk_1;
 (*ret).thunk_item.env = NULL;
 const item var_aa_0_0_temp = (*ret);
-const item var_aa_0_0 = (global_stack.items[--global_stack.top]);
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
 const item sys_t_3 = var_aa_0_0_temp;
 sys_t_3.thunk_item.code(sys_t_3.thunk_item.env, ret);
 }
 
 void sys_thunk_5(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmTo (TmPrintInt (TmInt 5) (TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmInt 3)))))) "aa_0_0_temp" (TmLam (Param {paramName = "aa_0_0", paramType = TpInt}) (TmApp (TmForce (TmVar "aa_0_0_temp")) (TmVar "aa_0_0"))))) */
+/* TmReturn (TmThunk (TmTo (TmPrintInt (TmInt 5) (TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmInt 3)))))) "aa_0_0_temp" (TmForce (TmVar "aa_0_0_temp")))) */
 (*ret).thunk_item.code = sys_thunk_4;
 (*ret).thunk_item.env = NULL;
 }
@@ -56,7 +54,7 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmReturn (TmThunk (TmTo (TmPrintInt (TmInt 5) (TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmInt 3)))))) "aa_0_0_temp" (TmLam (Param {paramName = "aa_0_0", paramType = TpInt}) (TmApp (TmForce (TmVar "aa_0_0_temp")) (TmVar "aa_0_0"))))) */
+/* TmReturn (TmThunk (TmTo (TmPrintInt (TmInt 5) (TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmInt 3)))))) "aa_0_0_temp" (TmForce (TmVar "aa_0_0_temp")))) */
 const item sys_t_6 = {.thunk_item = {.code = sys_thunk_5, .env = NULL}};
 sys_t_6.thunk_item.code(sys_t_6.thunk_item.env, ret);
 top_e_f = (*ret);

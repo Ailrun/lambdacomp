@@ -46,7 +46,7 @@
         , IPop
             ( AIdent "var_aa_2_1" )
         , IPop
-            ( AIdent "var_aa_3_1" )
+            ( AIdent "var_e_y" )
         , ICondJump
             ( VaAddr
                 ( AIdent "var_c_c_1" )
@@ -72,7 +72,7 @@
             )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_3_1" )
+                ( AIdent "var_e_y" )
             )
         , IPrimBinOp PrimIAdd
         , IEndScope
@@ -92,7 +92,7 @@
             )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_3_1" )
+                ( AIdent "var_e_y" )
             )
         , IPush
             ( VaAddr
@@ -113,31 +113,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_2" )
-        , IPop
-            ( AIdent "var_aa_1_2" )
-        , IPop
-            ( AIdent "var_aa_2_2" )
-        , IPop
-            ( AIdent "var_aa_3_2" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_3_2" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_2_2" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_2" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_2" )
-            )
-        , IRecAssign
+        [ IRecAssign
             ( AIdent "var_e_recFib" ) "sys_thunk_0"
             [ AIdent "var_e_recFib" ]
         , ICall
@@ -152,7 +128,7 @@
     { thunkCodeSectionName = "sys_thunk_2"
     , thunkCode =
         [ IPop
-            ( AIdent "var_aa_0_0" )
+            ( AIdent "var_e_n" )
         , IPush
             ( VaInt 1 )
         , IPush
@@ -161,7 +137,7 @@
             ( VaInt 0 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_n" )
             )
         , ICall
             ( VaAddr

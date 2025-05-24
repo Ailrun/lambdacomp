@@ -21,18 +21,8 @@
                         )
                     )
                 ) "aa_0_0_temp"
-                ( TmLam
-                    ( Param
-                        { paramName = "aa_0_0"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmApp
-                        ( TmForce
-                            ( TmVar "aa_0_0_temp" )
-                        )
-                        ( TmVar "aa_0_0" )
-                    )
+                ( TmForce
+                    ( TmVar "aa_0_0_temp" )
                 )
             )
         )

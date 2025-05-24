@@ -19,10 +19,10 @@ item top_e_main;
 
 void sys_thunk_5(item *const env, item *const ret)
 {
-/* TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_4", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_1_4") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_1_4") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4"))))))) */
+/* TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_n") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_n") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4"))))))) */
 const item var_aa_0_4 = (global_stack.items[--global_stack.top]);
-const item var_aa_1_4 = (global_stack.items[--global_stack.top]);
-const item sys_arg0_0 = var_aa_1_4;
+const item var_e_n = (global_stack.items[--global_stack.top]);
+const item sys_arg0_0 = var_e_n;
 const item sys_arg1_0 = {.int_item = 0};
 (*ret).int_item = sys_arg0_0.int_item <= sys_arg1_0.int_item;
 const item var_c_c_1 = (*ret);
@@ -33,7 +33,7 @@ if (sys_c_4.int_item)
 }
 else
 {
-const item sys_arg0_1 = var_aa_1_4;
+const item sys_arg0_1 = var_e_n;
 const item sys_arg1_1 = {.int_item = 1};
 (*ret).int_item = sys_arg0_1.int_item - sys_arg1_1.int_item;
 const item var_c_a1_3 = (*ret);
@@ -51,11 +51,7 @@ const item sys_arg1_3 = var_c_inp1_4;
 
 void sys_thunk_6(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "aa_0_5", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_5", paramType = TpInt}) (TmApp (TmApp (TmRec (Param {paramName = "e_pow", paramType = TpUp (TpDouble :->: (TpInt :->: TpDown TpDouble))}) (TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_4", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_1_4") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_1_4") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4"))))))))) (TmVar "aa_0_5")) (TmVar "aa_1_5"))) */
-const item var_aa_0_5 = (global_stack.items[--global_stack.top]);
-const item var_aa_1_5 = (global_stack.items[--global_stack.top]);
-(global_stack.items[global_stack.top++]) = var_aa_1_5;
-(global_stack.items[global_stack.top++]) = var_aa_0_5;
+/* TmRec (Param {paramName = "e_pow", paramType = TpUp (TpDouble :->: (TpInt :->: TpDown TpDouble))}) (TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_n") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_n") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4")))))))) */
 const item var_e_pow = {.thunk_item = {.code = sys_thunk_5, .env = (item *) malloc(1 * sizeof(item))}};
 (var_e_pow.thunk_item.env[0]) = var_e_pow;
 var_e_pow.thunk_item.code(var_e_pow.thunk_item.env, ret);
@@ -63,7 +59,7 @@ var_e_pow.thunk_item.code(var_e_pow.thunk_item.env, ret);
 
 void sys_thunk_7(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_5", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_5", paramType = TpInt}) (TmApp (TmApp (TmRec (Param {paramName = "e_pow", paramType = TpUp (TpDouble :->: (TpInt :->: TpDown TpDouble))}) (TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_4", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_1_4") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_1_4") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4"))))))))) (TmVar "aa_0_5")) (TmVar "aa_1_5"))))) */
+/* TmReturn (TmThunk (TmRec (Param {paramName = "e_pow", paramType = TpUp (TpDouble :->: (TpInt :->: TpDown TpDouble))}) (TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_n") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_n") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4")))))))))) */
 (*ret).thunk_item.code = sys_thunk_6;
 (*ret).thunk_item.env = NULL;
 }
@@ -71,9 +67,9 @@ void sys_thunk_7(item *const _, item *const ret)
 
 void sys_thunk_14(item *const env, item *const ret)
 {
-/* TmLam (Param {paramName = "aa_0_2", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_0_2") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_0_2") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "aa_0_2") (TmVar "c_inp1_10")))))) */
-const item var_aa_0_2 = (global_stack.items[--global_stack.top]);
-const item sys_arg0_9 = var_aa_0_2;
+/* TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_x") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_x") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "e_x") (TmVar "c_inp1_10")))))) */
+const item var_e_x = (global_stack.items[--global_stack.top]);
+const item sys_arg0_9 = var_e_x;
 const item sys_arg1_9 = {.int_item = 0};
 (*ret).int_item = sys_arg0_9.int_item <= sys_arg1_9.int_item;
 const item var_c_c_7 = (*ret);
@@ -84,7 +80,7 @@ if (sys_c_13.int_item)
 }
 else
 {
-const item sys_arg0_10 = var_aa_0_2;
+const item sys_arg0_10 = var_e_x;
 const item sys_arg1_10 = {.int_item = 1};
 (*ret).int_item = sys_arg0_10.int_item - sys_arg1_10.int_item;
 const item var_c_a0_9 = (*ret);
@@ -92,7 +88,7 @@ const item var_c_a0_9 = (*ret);
 const item sys_t_11 = (env[0]);
 sys_t_11.thunk_item.code(sys_t_11.thunk_item.env, ret);
 const item var_c_inp1_10 = (*ret);
-const item sys_arg0_12 = var_aa_0_2;
+const item sys_arg0_12 = var_e_x;
 const item sys_arg1_12 = var_c_inp1_10;
 (*ret).int_item = sys_arg0_12.int_item * sys_arg1_12.int_item;
 }
@@ -101,9 +97,7 @@ const item sys_arg1_12 = var_c_inp1_10;
 
 void sys_thunk_15(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "aa_0_3", paramType = TpInt}) (TmApp (TmRec (Param {paramName = "e_fact", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmLam (Param {paramName = "aa_0_2", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_0_2") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_0_2") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "aa_0_2") (TmVar "c_inp1_10")))))))) (TmVar "aa_0_3")) */
-const item var_aa_0_3 = (global_stack.items[--global_stack.top]);
-(global_stack.items[global_stack.top++]) = var_aa_0_3;
+/* TmRec (Param {paramName = "e_fact", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_x") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_x") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "e_x") (TmVar "c_inp1_10"))))))) */
 const item var_e_fact = {.thunk_item = {.code = sys_thunk_14, .env = (item *) malloc(1 * sizeof(item))}};
 (var_e_fact.thunk_item.env[0]) = var_e_fact;
 var_e_fact.thunk_item.code(var_e_fact.thunk_item.env, ret);
@@ -111,7 +105,7 @@ var_e_fact.thunk_item.code(var_e_fact.thunk_item.env, ret);
 
 void sys_thunk_16(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_3", paramType = TpInt}) (TmApp (TmRec (Param {paramName = "e_fact", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmLam (Param {paramName = "aa_0_2", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_0_2") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_0_2") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "aa_0_2") (TmVar "c_inp1_10")))))))) (TmVar "aa_0_3")))) */
+/* TmReturn (TmThunk (TmRec (Param {paramName = "e_fact", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_x") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_x") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "e_x") (TmVar "c_inp1_10"))))))))) */
 (*ret).thunk_item.code = sys_thunk_15;
 (*ret).thunk_item.env = NULL;
 }
@@ -119,15 +113,15 @@ void sys_thunk_16(item *const _, item *const ret)
 
 void sys_thunk_22(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "aa_0_1", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_1", paramType = TpInt}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_pow")) (TmVar "aa_0_1")) (TmVar "aa_1_1")) "c_inp0_15" (TmTo (TmApp (TmForce (TmGlobal "e_fact")) (TmVar "aa_1_1")) "c_inp_14" (TmTo (TmPrimUnOp PrimIToD (TmVar "c_inp_14")) "c_inp1_15" (TmPrimBinOp PrimDDiv (TmVar "c_inp0_15") (TmVar "c_inp1_15")))))) */
+/* TmLam (Param {paramName = "aa_0_1", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_pow")) (TmVar "aa_0_1")) (TmVar "e_n")) "c_inp0_15" (TmTo (TmApp (TmForce (TmGlobal "e_fact")) (TmVar "e_n")) "c_inp_14" (TmTo (TmPrimUnOp PrimIToD (TmVar "c_inp_14")) "c_inp1_15" (TmPrimBinOp PrimDDiv (TmVar "c_inp0_15") (TmVar "c_inp1_15")))))) */
 const item var_aa_0_1 = (global_stack.items[--global_stack.top]);
-const item var_aa_1_1 = (global_stack.items[--global_stack.top]);
-(global_stack.items[global_stack.top++]) = var_aa_1_1;
+const item var_e_n = (global_stack.items[--global_stack.top]);
+(global_stack.items[global_stack.top++]) = var_e_n;
 (global_stack.items[global_stack.top++]) = var_aa_0_1;
 const item sys_t_18 = top_e_pow;
 sys_t_18.thunk_item.code(sys_t_18.thunk_item.env, ret);
 const item var_c_inp0_15 = (*ret);
-(global_stack.items[global_stack.top++]) = var_aa_1_1;
+(global_stack.items[global_stack.top++]) = var_e_n;
 const item sys_t_19 = top_e_fact;
 sys_t_19.thunk_item.code(sys_t_19.thunk_item.env, ret);
 const item var_c_inp_14 = (*ret);
@@ -141,7 +135,7 @@ const item sys_arg1_21 = var_c_inp1_15;
 
 void sys_thunk_23(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_1", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_1", paramType = TpInt}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_pow")) (TmVar "aa_0_1")) (TmVar "aa_1_1")) "c_inp0_15" (TmTo (TmApp (TmForce (TmGlobal "e_fact")) (TmVar "aa_1_1")) "c_inp_14" (TmTo (TmPrimUnOp PrimIToD (TmVar "c_inp_14")) "c_inp1_15" (TmPrimBinOp PrimDDiv (TmVar "c_inp0_15") (TmVar "c_inp1_15")))))))) */
+/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_1", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_pow")) (TmVar "aa_0_1")) (TmVar "e_n")) "c_inp0_15" (TmTo (TmApp (TmForce (TmGlobal "e_fact")) (TmVar "e_n")) "c_inp_14" (TmTo (TmPrimUnOp PrimIToD (TmVar "c_inp_14")) "c_inp1_15" (TmPrimBinOp PrimDDiv (TmVar "c_inp0_15") (TmVar "c_inp1_15")))))))) */
 (*ret).thunk_item.code = sys_thunk_22;
 (*ret).thunk_item.env = NULL;
 }
@@ -149,15 +143,15 @@ void sys_thunk_23(item *const _, item *const ret)
 
 void sys_thunk_40(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "aa_0_0", paramType = TpDouble}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 1)) "c_inp0_18" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 3)) "c_inp1_18" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_18") (TmVar "c_inp1_18")) "c_inp0_20" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 5)) "c_inp1_20" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_20") (TmVar "c_inp1_20")) "c_inp0_22" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 7)) "c_inp1_22" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_22") (TmVar "c_inp1_22")) "c_inp0_24" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 9)) "c_inp1_24" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_24") (TmVar "c_inp1_24")) "c_inp0_26" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 11)) "c_inp1_26" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_26") (TmVar "c_inp1_26")) "c_inp0_28" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 13)) "c_inp1_28" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_28") (TmVar "c_inp1_28")) "c_inp0_30" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 15)) "c_inp1_30" (TmPrimBinOp PrimDSub (TmVar "c_inp0_30") (TmVar "c_inp1_30")))))))))))))))) */
-const item var_aa_0_0 = (global_stack.items[--global_stack.top]);
+/* TmLam (Param {paramName = "e_x", paramType = TpDouble}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 1)) "c_inp0_18" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 3)) "c_inp1_18" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_18") (TmVar "c_inp1_18")) "c_inp0_20" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 5)) "c_inp1_20" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_20") (TmVar "c_inp1_20")) "c_inp0_22" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 7)) "c_inp1_22" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_22") (TmVar "c_inp1_22")) "c_inp0_24" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 9)) "c_inp1_24" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_24") (TmVar "c_inp1_24")) "c_inp0_26" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 11)) "c_inp1_26" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_26") (TmVar "c_inp1_26")) "c_inp0_28" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 13)) "c_inp1_28" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_28") (TmVar "c_inp1_28")) "c_inp0_30" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 15)) "c_inp1_30" (TmPrimBinOp PrimDSub (TmVar "c_inp0_30") (TmVar "c_inp1_30")))))))))))))))) */
+const item var_e_x = (global_stack.items[--global_stack.top]);
 (global_stack.items[global_stack.top++]).int_item = 1;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_25 = top_e_sinEntry;
 sys_t_25.thunk_item.code(sys_t_25.thunk_item.env, ret);
 const item var_c_inp0_18 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 3;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_26 = top_e_sinEntry;
 sys_t_26.thunk_item.code(sys_t_26.thunk_item.env, ret);
 const item var_c_inp1_18 = (*ret);
@@ -166,7 +160,7 @@ const item sys_arg1_27 = var_c_inp1_18;
 (*ret).double_item = sys_arg0_27.double_item - sys_arg1_27.double_item;
 const item var_c_inp0_20 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 5;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_28 = top_e_sinEntry;
 sys_t_28.thunk_item.code(sys_t_28.thunk_item.env, ret);
 const item var_c_inp1_20 = (*ret);
@@ -175,7 +169,7 @@ const item sys_arg1_29 = var_c_inp1_20;
 (*ret).double_item = sys_arg0_29.double_item + sys_arg1_29.double_item;
 const item var_c_inp0_22 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 7;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_30 = top_e_sinEntry;
 sys_t_30.thunk_item.code(sys_t_30.thunk_item.env, ret);
 const item var_c_inp1_22 = (*ret);
@@ -184,7 +178,7 @@ const item sys_arg1_31 = var_c_inp1_22;
 (*ret).double_item = sys_arg0_31.double_item - sys_arg1_31.double_item;
 const item var_c_inp0_24 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 9;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_32 = top_e_sinEntry;
 sys_t_32.thunk_item.code(sys_t_32.thunk_item.env, ret);
 const item var_c_inp1_24 = (*ret);
@@ -193,7 +187,7 @@ const item sys_arg1_33 = var_c_inp1_24;
 (*ret).double_item = sys_arg0_33.double_item + sys_arg1_33.double_item;
 const item var_c_inp0_26 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 11;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_34 = top_e_sinEntry;
 sys_t_34.thunk_item.code(sys_t_34.thunk_item.env, ret);
 const item var_c_inp1_26 = (*ret);
@@ -202,7 +196,7 @@ const item sys_arg1_35 = var_c_inp1_26;
 (*ret).double_item = sys_arg0_35.double_item - sys_arg1_35.double_item;
 const item var_c_inp0_28 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 13;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_36 = top_e_sinEntry;
 sys_t_36.thunk_item.code(sys_t_36.thunk_item.env, ret);
 const item var_c_inp1_28 = (*ret);
@@ -211,7 +205,7 @@ const item sys_arg1_37 = var_c_inp1_28;
 (*ret).double_item = sys_arg0_37.double_item + sys_arg1_37.double_item;
 const item var_c_inp0_30 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 15;
-(global_stack.items[global_stack.top++]) = var_aa_0_0;
+(global_stack.items[global_stack.top++]) = var_e_x;
 const item sys_t_38 = top_e_sinEntry;
 sys_t_38.thunk_item.code(sys_t_38.thunk_item.env, ret);
 const item var_c_inp1_30 = (*ret);
@@ -222,7 +216,7 @@ const item sys_arg1_39 = var_c_inp1_30;
 
 void sys_thunk_41(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_0", paramType = TpDouble}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 1)) "c_inp0_18" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 3)) "c_inp1_18" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_18") (TmVar "c_inp1_18")) "c_inp0_20" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 5)) "c_inp1_20" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_20") (TmVar "c_inp1_20")) "c_inp0_22" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 7)) "c_inp1_22" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_22") (TmVar "c_inp1_22")) "c_inp0_24" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 9)) "c_inp1_24" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_24") (TmVar "c_inp1_24")) "c_inp0_26" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 11)) "c_inp1_26" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_26") (TmVar "c_inp1_26")) "c_inp0_28" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 13)) "c_inp1_28" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_28") (TmVar "c_inp1_28")) "c_inp0_30" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 15)) "c_inp1_30" (TmPrimBinOp PrimDSub (TmVar "c_inp0_30") (TmVar "c_inp1_30")))))))))))))))))) */
+/* TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpDouble}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 1)) "c_inp0_18" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 3)) "c_inp1_18" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_18") (TmVar "c_inp1_18")) "c_inp0_20" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 5)) "c_inp1_20" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_20") (TmVar "c_inp1_20")) "c_inp0_22" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 7)) "c_inp1_22" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_22") (TmVar "c_inp1_22")) "c_inp0_24" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 9)) "c_inp1_24" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_24") (TmVar "c_inp1_24")) "c_inp0_26" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 11)) "c_inp1_26" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_26") (TmVar "c_inp1_26")) "c_inp0_28" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 13)) "c_inp1_28" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_28") (TmVar "c_inp1_28")) "c_inp0_30" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 15)) "c_inp1_30" (TmPrimBinOp PrimDSub (TmVar "c_inp0_30") (TmVar "c_inp1_30")))))))))))))))))) */
 (*ret).thunk_item.code = sys_thunk_40;
 (*ret).thunk_item.env = NULL;
 }
@@ -246,19 +240,19 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_5", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_5", paramType = TpInt}) (TmApp (TmApp (TmRec (Param {paramName = "e_pow", paramType = TpUp (TpDouble :->: (TpInt :->: TpDown TpDouble))}) (TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_4", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_1_4") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_1_4") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4"))))))))) (TmVar "aa_0_5")) (TmVar "aa_1_5"))))) */
+/* TmReturn (TmThunk (TmRec (Param {paramName = "e_pow", paramType = TpUp (TpDouble :->: (TpInt :->: TpDown TpDouble))}) (TmLam (Param {paramName = "aa_0_4", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_n") (TmInt 0)) "c_c_1" (TmIf (TmVar "c_c_1") (TmReturn (TmDouble 1.0)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_n") (TmInt 1)) "c_a1_3" (TmTo (TmApp (TmApp (TmForce (TmVar "e_pow")) (TmVar "aa_0_4")) (TmVar "c_a1_3")) "c_inp1_4" (TmPrimBinOp PrimDMul (TmVar "aa_0_4") (TmVar "c_inp1_4")))))))))) */
 const item sys_t_8 = {.thunk_item = {.code = sys_thunk_7, .env = NULL}};
 sys_t_8.thunk_item.code(sys_t_8.thunk_item.env, ret);
 top_e_pow = (*ret);
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_3", paramType = TpInt}) (TmApp (TmRec (Param {paramName = "e_fact", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmLam (Param {paramName = "aa_0_2", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "aa_0_2") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "aa_0_2") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "aa_0_2") (TmVar "c_inp1_10")))))))) (TmVar "aa_0_3")))) */
+/* TmReturn (TmThunk (TmRec (Param {paramName = "e_fact", paramType = TpUp (TpInt :->: TpDown TpInt)}) (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmTo (TmPrimBinOp PrimILe (TmVar "e_x") (TmInt 0)) "c_c_7" (TmIf (TmVar "c_c_7") (TmReturn (TmInt 1)) (TmTo (TmPrimBinOp PrimISub (TmVar "e_x") (TmInt 1)) "c_a0_9" (TmTo (TmApp (TmForce (TmVar "e_fact")) (TmVar "c_a0_9")) "c_inp1_10" (TmPrimBinOp PrimIMul (TmVar "e_x") (TmVar "c_inp1_10"))))))))) */
 const item sys_t_17 = {.thunk_item = {.code = sys_thunk_16, .env = NULL}};
 sys_t_17.thunk_item.code(sys_t_17.thunk_item.env, ret);
 top_e_fact = (*ret);
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_1", paramType = TpDouble}) (TmLam (Param {paramName = "aa_1_1", paramType = TpInt}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_pow")) (TmVar "aa_0_1")) (TmVar "aa_1_1")) "c_inp0_15" (TmTo (TmApp (TmForce (TmGlobal "e_fact")) (TmVar "aa_1_1")) "c_inp_14" (TmTo (TmPrimUnOp PrimIToD (TmVar "c_inp_14")) "c_inp1_15" (TmPrimBinOp PrimDDiv (TmVar "c_inp0_15") (TmVar "c_inp1_15")))))))) */
+/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_1", paramType = TpDouble}) (TmLam (Param {paramName = "e_n", paramType = TpInt}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_pow")) (TmVar "aa_0_1")) (TmVar "e_n")) "c_inp0_15" (TmTo (TmApp (TmForce (TmGlobal "e_fact")) (TmVar "e_n")) "c_inp_14" (TmTo (TmPrimUnOp PrimIToD (TmVar "c_inp_14")) "c_inp1_15" (TmPrimBinOp PrimDDiv (TmVar "c_inp0_15") (TmVar "c_inp1_15")))))))) */
 const item sys_t_24 = {.thunk_item = {.code = sys_thunk_23, .env = NULL}};
 sys_t_24.thunk_item.code(sys_t_24.thunk_item.env, ret);
 top_e_sinEntry = (*ret);
-/* TmReturn (TmThunk (TmLam (Param {paramName = "aa_0_0", paramType = TpDouble}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 1)) "c_inp0_18" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 3)) "c_inp1_18" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_18") (TmVar "c_inp1_18")) "c_inp0_20" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 5)) "c_inp1_20" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_20") (TmVar "c_inp1_20")) "c_inp0_22" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 7)) "c_inp1_22" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_22") (TmVar "c_inp1_22")) "c_inp0_24" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 9)) "c_inp1_24" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_24") (TmVar "c_inp1_24")) "c_inp0_26" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 11)) "c_inp1_26" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_26") (TmVar "c_inp1_26")) "c_inp0_28" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 13)) "c_inp1_28" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_28") (TmVar "c_inp1_28")) "c_inp0_30" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "aa_0_0")) (TmInt 15)) "c_inp1_30" (TmPrimBinOp PrimDSub (TmVar "c_inp0_30") (TmVar "c_inp1_30")))))))))))))))))) */
+/* TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpDouble}) (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 1)) "c_inp0_18" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 3)) "c_inp1_18" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_18") (TmVar "c_inp1_18")) "c_inp0_20" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 5)) "c_inp1_20" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_20") (TmVar "c_inp1_20")) "c_inp0_22" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 7)) "c_inp1_22" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_22") (TmVar "c_inp1_22")) "c_inp0_24" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 9)) "c_inp1_24" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_24") (TmVar "c_inp1_24")) "c_inp0_26" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 11)) "c_inp1_26" (TmTo (TmPrimBinOp PrimDSub (TmVar "c_inp0_26") (TmVar "c_inp1_26")) "c_inp0_28" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 13)) "c_inp1_28" (TmTo (TmPrimBinOp PrimDAdd (TmVar "c_inp0_28") (TmVar "c_inp1_28")) "c_inp0_30" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_sinEntry")) (TmVar "e_x")) (TmInt 15)) "c_inp1_30" (TmPrimBinOp PrimDSub (TmVar "c_inp0_30") (TmVar "c_inp1_30")))))))))))))))))) */
 const item sys_t_42 = {.thunk_item = {.code = sys_thunk_41, .env = NULL}};
 sys_t_42.thunk_item.code(sys_t_42.thunk_item.env, ret);
 top_e_sin = (*ret);

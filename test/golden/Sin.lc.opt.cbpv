@@ -2,78 +2,58 @@
     { tmDefName = "e_pow"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmLam
+            ( TmRec
                 ( Param
-                    { paramName = "aa_0_5"
-                    , paramType = TpDouble
+                    { paramName = "e_pow"
+                    , paramType = TpUp
+                        ( TpDouble :->: ( TpInt :->: TpDown TpDouble ) )
                     }
                 )
                 ( TmLam
                     ( Param
-                        { paramName = "aa_1_5"
-                        , paramType = TpInt
+                        { paramName = "aa_0_4"
+                        , paramType = TpDouble
                         }
                     )
-                    ( TmApp
-                        ( TmApp
-                            ( TmRec
-                                ( Param
-                                    { paramName = "e_pow"
-                                    , paramType = TpUp
-                                        ( TpDouble :->: ( TpInt :->: TpDown TpDouble ) )
-                                    }
+                    ( TmLam
+                        ( Param
+                            { paramName = "e_n"
+                            , paramType = TpInt
+                            }
+                        )
+                        ( TmTo
+                            ( TmPrimBinOp PrimILe
+                                ( TmVar "e_n" )
+                                ( TmInt 0 )
+                            ) "c_c_1"
+                            ( TmIf
+                                ( TmVar "c_c_1" )
+                                ( TmReturn
+                                    ( TmDouble 1.0 )
                                 )
-                                ( TmLam
-                                    ( Param
-                                        { paramName = "aa_0_4"
-                                        , paramType = TpDouble
-                                        }
-                                    )
-                                    ( TmLam
-                                        ( Param
-                                            { paramName = "aa_1_4"
-                                            , paramType = TpInt
-                                            }
-                                        )
-                                        ( TmTo
-                                            ( TmPrimBinOp PrimILe
-                                                ( TmVar "aa_1_4" )
-                                                ( TmInt 0 )
-                                            ) "c_c_1"
-                                            ( TmIf
-                                                ( TmVar "c_c_1" )
-                                                ( TmReturn
-                                                    ( TmDouble 1.0 )
+                                ( TmTo
+                                    ( TmPrimBinOp PrimISub
+                                        ( TmVar "e_n" )
+                                        ( TmInt 1 )
+                                    ) "c_a1_3"
+                                    ( TmTo
+                                        ( TmApp
+                                            ( TmApp
+                                                ( TmForce
+                                                    ( TmVar "e_pow" )
                                                 )
-                                                ( TmTo
-                                                    ( TmPrimBinOp PrimISub
-                                                        ( TmVar "aa_1_4" )
-                                                        ( TmInt 1 )
-                                                    ) "c_a1_3"
-                                                    ( TmTo
-                                                        ( TmApp
-                                                            ( TmApp
-                                                                ( TmForce
-                                                                    ( TmVar "e_pow" )
-                                                                )
-                                                                ( TmVar "aa_0_4" )
-                                                            )
-                                                            ( TmVar "c_a1_3" )
-                                                        ) "c_inp1_4"
-                                                        ( TmPrimBinOp PrimDMul
-                                                            ( TmVar "aa_0_4" )
-                                                            ( TmVar "c_inp1_4" )
-                                                        )
-                                                    )
-                                                )
+                                                ( TmVar "aa_0_4" )
                                             )
+                                            ( TmVar "c_a1_3" )
+                                        ) "c_inp1_4"
+                                        ( TmPrimBinOp PrimDMul
+                                            ( TmVar "aa_0_4" )
+                                            ( TmVar "c_inp1_4" )
                                         )
                                     )
                                 )
                             )
-                            ( TmVar "aa_0_5" )
                         )
-                        ( TmVar "aa_1_5" )
                     )
                 )
             )
@@ -83,58 +63,48 @@
     { tmDefName = "e_fact"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmLam
+            ( TmRec
                 ( Param
-                    { paramName = "aa_0_3"
-                    , paramType = TpInt
+                    { paramName = "e_fact"
+                    , paramType = TpUp ( TpInt :->: TpDown TpInt )
                     }
                 )
-                ( TmApp
-                    ( TmRec
-                        ( Param
-                            { paramName = "e_fact"
-                            , paramType = TpUp ( TpInt :->: TpDown TpInt )
-                            }
-                        )
-                        ( TmLam
-                            ( Param
-                                { paramName = "aa_0_2"
-                                , paramType = TpInt
-                                }
+                ( TmLam
+                    ( Param
+                        { paramName = "e_x"
+                        , paramType = TpInt
+                        }
+                    )
+                    ( TmTo
+                        ( TmPrimBinOp PrimILe
+                            ( TmVar "e_x" )
+                            ( TmInt 0 )
+                        ) "c_c_7"
+                        ( TmIf
+                            ( TmVar "c_c_7" )
+                            ( TmReturn
+                                ( TmInt 1 )
                             )
                             ( TmTo
-                                ( TmPrimBinOp PrimILe
-                                    ( TmVar "aa_0_2" )
-                                    ( TmInt 0 )
-                                ) "c_c_7"
-                                ( TmIf
-                                    ( TmVar "c_c_7" )
-                                    ( TmReturn
-                                        ( TmInt 1 )
-                                    )
-                                    ( TmTo
-                                        ( TmPrimBinOp PrimISub
-                                            ( TmVar "aa_0_2" )
-                                            ( TmInt 1 )
-                                        ) "c_a0_9"
-                                        ( TmTo
-                                            ( TmApp
-                                                ( TmForce
-                                                    ( TmVar "e_fact" )
-                                                )
-                                                ( TmVar "c_a0_9" )
-                                            ) "c_inp1_10"
-                                            ( TmPrimBinOp PrimIMul
-                                                ( TmVar "aa_0_2" )
-                                                ( TmVar "c_inp1_10" )
-                                            )
+                                ( TmPrimBinOp PrimISub
+                                    ( TmVar "e_x" )
+                                    ( TmInt 1 )
+                                ) "c_a0_9"
+                                ( TmTo
+                                    ( TmApp
+                                        ( TmForce
+                                            ( TmVar "e_fact" )
                                         )
+                                        ( TmVar "c_a0_9" )
+                                    ) "c_inp1_10"
+                                    ( TmPrimBinOp PrimIMul
+                                        ( TmVar "e_x" )
+                                        ( TmVar "c_inp1_10" )
                                     )
                                 )
                             )
                         )
                     )
-                    ( TmVar "aa_0_3" )
                 )
             )
         )
@@ -151,7 +121,7 @@
                 )
                 ( TmLam
                     ( Param
-                        { paramName = "aa_1_1"
+                        { paramName = "e_n"
                         , paramType = TpInt
                         }
                     )
@@ -163,14 +133,14 @@
                                 )
                                 ( TmVar "aa_0_1" )
                             )
-                            ( TmVar "aa_1_1" )
+                            ( TmVar "e_n" )
                         ) "c_inp0_15"
                         ( TmTo
                             ( TmApp
                                 ( TmForce
                                     ( TmGlobal "e_fact" )
                                 )
-                                ( TmVar "aa_1_1" )
+                                ( TmVar "e_n" )
                             ) "c_inp_14"
                             ( TmTo
                                 ( TmPrimUnOp PrimIToD
@@ -193,7 +163,7 @@
         ( TmThunk
             ( TmLam
                 ( Param
-                    { paramName = "aa_0_0"
+                    { paramName = "e_x"
                     , paramType = TpDouble
                     }
                 )
@@ -203,7 +173,7 @@
                             ( TmForce
                                 ( TmGlobal "e_sinEntry" )
                             )
-                            ( TmVar "aa_0_0" )
+                            ( TmVar "e_x" )
                         )
                         ( TmInt 1 )
                     ) "c_inp0_18"
@@ -213,7 +183,7 @@
                                 ( TmForce
                                     ( TmGlobal "e_sinEntry" )
                                 )
-                                ( TmVar "aa_0_0" )
+                                ( TmVar "e_x" )
                             )
                             ( TmInt 3 )
                         ) "c_inp1_18"
@@ -228,7 +198,7 @@
                                         ( TmForce
                                             ( TmGlobal "e_sinEntry" )
                                         )
-                                        ( TmVar "aa_0_0" )
+                                        ( TmVar "e_x" )
                                     )
                                     ( TmInt 5 )
                                 ) "c_inp1_20"
@@ -243,7 +213,7 @@
                                                 ( TmForce
                                                     ( TmGlobal "e_sinEntry" )
                                                 )
-                                                ( TmVar "aa_0_0" )
+                                                ( TmVar "e_x" )
                                             )
                                             ( TmInt 7 )
                                         ) "c_inp1_22"
@@ -258,7 +228,7 @@
                                                         ( TmForce
                                                             ( TmGlobal "e_sinEntry" )
                                                         )
-                                                        ( TmVar "aa_0_0" )
+                                                        ( TmVar "e_x" )
                                                     )
                                                     ( TmInt 9 )
                                                 ) "c_inp1_24"
@@ -273,7 +243,7 @@
                                                                 ( TmForce
                                                                     ( TmGlobal "e_sinEntry" )
                                                                 )
-                                                                ( TmVar "aa_0_0" )
+                                                                ( TmVar "e_x" )
                                                             )
                                                             ( TmInt 11 )
                                                         ) "c_inp1_26"
@@ -288,7 +258,7 @@
                                                                         ( TmForce
                                                                             ( TmGlobal "e_sinEntry" )
                                                                         )
-                                                                        ( TmVar "aa_0_0" )
+                                                                        ( TmVar "e_x" )
                                                                     )
                                                                     ( TmInt 13 )
                                                                 ) "c_inp1_28"
@@ -303,7 +273,7 @@
                                                                                 ( TmForce
                                                                                     ( TmGlobal "e_sinEntry" )
                                                                                 )
-                                                                                ( TmVar "aa_0_0" )
+                                                                                ( TmVar "e_x" )
                                                                             )
                                                                             ( TmInt 15 )
                                                                         ) "c_inp1_30"

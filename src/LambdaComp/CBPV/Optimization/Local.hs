@@ -7,6 +7,7 @@ import Control.Monad.Identity (Identity (Identity, runIdentity))
 import LambdaComp.CBPV.Optimization.BetaReduction          (runBetaReduction)
 import LambdaComp.CBPV.Optimization.BindingConversion      (runCommutingTo, runLiftingLet)
 import LambdaComp.CBPV.Optimization.DeadBindingElimination (runDeadLetElimination)
+import LambdaComp.CBPV.Optimization.EtaReduction           (runEtaReduction)
 import LambdaComp.CBPV.Optimization.InlineBinding          (runInlineLinearLet, runInlineSimpleLet)
 import LambdaComp.CBPV.Syntax
 
@@ -17,7 +18,7 @@ runLocalOptDefaultTop :: Top -> Top
 runLocalOptDefaultTop m = m{ tmDefBody = runLocalOptDefaultTm $ tmDefBody m }
 
 runLocalOptDefaultTm :: Tm Com -> Tm Com
-runLocalOptDefaultTm = runIdentity . repeatUntilFix (Identity . runDeadLetElimination . runInlineLinearLet . runInlineSimpleLet . runLiftingLet . runBetaReduction . runCommutingTo)
+runLocalOptDefaultTm = runIdentity . repeatUntilFix (Identity . runDeadLetElimination . runInlineLinearLet . runInlineSimpleLet . runLiftingLet . runEtaReduction . runBetaReduction . runCommutingTo)
 
 repeatUntilFix :: (Monad m, Eq a) => (a -> m a) -> a -> m a
 repeatUntilFix f a = do

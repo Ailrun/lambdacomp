@@ -80,6 +80,7 @@ library
     LambdaComp.CBPV.Optimization.BetaReduction
     LambdaComp.CBPV.Optimization.BindingConversion
     LambdaComp.CBPV.Optimization.DeadBindingElimination
+    LambdaComp.CBPV.Optimization.EtaReduction
     LambdaComp.CBPV.Optimization.InlineBinding
     LambdaComp.CBPV.Optimization.Local
     LambdaComp.CBPV.Syntax

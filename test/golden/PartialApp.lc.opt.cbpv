@@ -21,13 +21,13 @@
                         ) "c_inp0_1"
                         ( TmLam
                             ( Param
-                                { paramName = "aa_2_1"
+                                { paramName = "e_z"
                                 , paramType = TpInt
                                 }
                             )
                             ( TmPrimBinOp PrimIAdd
                                 ( TmVar "c_inp0_1" )
-                                ( TmVar "aa_2_1" )
+                                ( TmVar "e_z" )
                             )
                         )
                     )
@@ -39,31 +39,11 @@
     { tmDefName = "e_g"
     , tmDefBody = TmReturn
         ( TmThunk
-            ( TmLam
-                ( Param
-                    { paramName = "aa_0_0"
-                    , paramType = TpInt
-                    }
+            ( TmApp
+                ( TmForce
+                    ( TmGlobal "e_f" )
                 )
-                ( TmLam
-                    ( Param
-                        { paramName = "aa_1_0"
-                        , paramType = TpInt
-                        }
-                    )
-                    ( TmApp
-                        ( TmApp
-                            ( TmApp
-                                ( TmForce
-                                    ( TmGlobal "e_f" )
-                                )
-                                ( TmInt 3 )
-                            )
-                            ( TmVar "aa_0_0" )
-                        )
-                        ( TmVar "aa_1_0" )
-                    )
-                )
+                ( TmInt 3 )
             )
         )
     }

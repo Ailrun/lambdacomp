@@ -53,11 +53,11 @@
         [ IPop
             ( AIdent "var_aa_0_4" )
         , IPop
-            ( AIdent "var_aa_1_4" )
+            ( AIdent "var_e_n" )
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_1_4" )
+                ( AIdent "var_e_n" )
             )
         , IPush
             ( VaInt 0 )
@@ -75,7 +75,7 @@
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_1_4" )
+                ( AIdent "var_e_n" )
             )
         , IPush
             ( VaInt 1 )
@@ -115,19 +115,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_1"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_5" )
-        , IPop
-            ( AIdent "var_aa_1_5" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_1_5" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_5" )
-            )
-        , IRecAssign
+        [ IRecAssign
             ( AIdent "var_e_pow" ) "sys_thunk_0"
             [ AIdent "var_e_pow" ]
         , ICall
@@ -142,11 +130,11 @@
     { thunkCodeSectionName = "sys_thunk_2"
     , thunkCode =
         [ IPop
-            ( AIdent "var_aa_0_2" )
+            ( AIdent "var_e_x" )
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_2" )
+                ( AIdent "var_e_x" )
             )
         , IPush
             ( VaInt 0 )
@@ -164,7 +152,7 @@
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_2" )
+                ( AIdent "var_e_x" )
             )
         , IPush
             ( VaInt 1 )
@@ -186,7 +174,7 @@
             ( AIdent "var_c_inp1_10" )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_2" )
+                ( AIdent "var_e_x" )
             )
         , IPush
             ( VaAddr
@@ -200,13 +188,7 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_3"
     , thunkCode =
-        [ IPop
-            ( AIdent "var_aa_0_3" )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_0_3" )
-            )
-        , IRecAssign
+        [ IRecAssign
             ( AIdent "var_e_fact" ) "sys_thunk_2"
             [ AIdent "var_e_fact" ]
         , ICall
@@ -223,11 +205,11 @@
         [ IPop
             ( AIdent "var_aa_0_1" )
         , IPop
-            ( AIdent "var_aa_1_1" )
+            ( AIdent "var_e_n" )
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_1_1" )
+                ( AIdent "var_e_n" )
             )
         , IPush
             ( VaAddr
@@ -243,7 +225,7 @@
         , IScope
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_1_1" )
+                ( AIdent "var_e_n" )
             )
         , ICall
             ( VaAddr
@@ -278,13 +260,13 @@
     { thunkCodeSectionName = "sys_thunk_5"
     , thunkCode =
         [ IPop
-            ( AIdent "var_aa_0_0" )
+            ( AIdent "var_e_x" )
         , IScope
         , IPush
             ( VaInt 1 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -298,7 +280,7 @@
             ( VaInt 3 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -325,7 +307,7 @@
             ( VaInt 5 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -352,7 +334,7 @@
             ( VaInt 7 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -379,7 +361,7 @@
             ( VaInt 9 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -406,7 +388,7 @@
             ( VaInt 11 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -433,7 +415,7 @@
             ( VaInt 13 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
@@ -460,7 +442,7 @@
             ( VaInt 15 )
         , IPush
             ( VaAddr
-                ( AIdent "var_aa_0_0" )
+                ( AIdent "var_e_x" )
             )
         , ICall
             ( VaAddr
