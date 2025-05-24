@@ -1,5 +1,5 @@
 {-# LANGUAGE ApplicativeDo #-}
-module LambdaComp.Parser
+module LambdaComp.External.Parser
   ( runProgramParser
   ) where
 

@@ -27,8 +27,8 @@ import LambdaComp.Driver.Argument
 import LambdaComp.Elaborated.CBV.ToCBPV         (runToCBPV)
 import LambdaComp.Elaborated.Optimization.Local qualified as El
 import LambdaComp.Elaborated.TypeCheck          qualified as El
+import LambdaComp.External.Parser               (runProgramParser)
 import LambdaComp.External.ToElaborated         (ElaborationError, runToElaborated)
-import LambdaComp.Parser                        (runProgramParser)
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
 mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH) . exceptTToExitCode $ do
