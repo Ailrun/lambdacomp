@@ -1,0 +1,37 @@
+# LaTeX related files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+
+# Bibliography files
+*.bbl
+*.bbl-SAVE-ERROR
+*.blg
+
+## LaTeXMk files
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# beamer
+*.nav
+*.pre
+*.snm
+*.vrb
+
+# hyperref
+*.brf
+
+# pdfpcnotes
+*.pdfpc
+
+# auto folder when using emacs and auctex
+./auto/*
+*.el
