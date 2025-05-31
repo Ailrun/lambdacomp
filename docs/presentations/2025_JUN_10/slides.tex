@@ -1,0 +1,31 @@
+\documentclass[letterpaper,10pt,aspectratio=169,dvipsnames]{beamer}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{mathpartir}
+\usepackage{tikz}
+\usetikzlibrary{arrows,calc}
+\pgfkeys{/tikz/fulloverlay/.code={\pgfkeysalso{overlay, remember picture, shift=(current page.south west), x=(current page.south east), y=(current page.north west)}}}
+\tikzset{
+  invisible/.style={opacity=0,text opacity=0},
+  visible on/.style={alt={#1{}{invisible}}},
+  alt/.code args={<#1>#2#3}{%
+    \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+  },
+}
+
+\AtBeginDocument{%
+\title[McTT: Building A Correct-By-Construction Proof Checker For Martin-L\"of Type Theory]{McTT}
+\subtitle{Building A Correct-By-Construction Proof Checker For Martin-L\"of Type Theory}
+\author[Junyoung Jang]{\parbox{10em}{\centering Junyoung~Jang\\{}{\scriptsize junyoung.jang@mail.mcgill.ca}\\{}{\scriptsize McGill University}}}
+\date{}
+}
+
+\begin{document}
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+\end{document}
