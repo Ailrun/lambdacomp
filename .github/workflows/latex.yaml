@@ -31,3 +31,8 @@ jobs:
           run: |
             cd docs/presentations/2025_JUN_10
             latexmk slides.tex
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 2025_JUN_10.pdf
+          path: docs/presentations/2025_JUN_10/slides.pdf
+          if-no-files-found: error
