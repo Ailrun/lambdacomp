@@ -4,9 +4,27 @@ on:
   push:
     branches:
     - master
+    paths:
+    - "**"
+    - "!License"
+    - "!.devcontainer/**"
+    - "!docs/**"
+    - "!.github/**"
+    - ".github/workflows/haskell.yaml"
+    - "!**/.gitignore"
+    - "!**/*.md"
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - "**"
+    - "!License"
+    - "!.devcontainer/**"
+    - "!docs/**"
+    - "!.github/**"
+    - ".github/workflows/haskell.yaml"
+    - "!**/.gitignore"
+    - "!**/*.md"
 
 permissions:
   contents: read
