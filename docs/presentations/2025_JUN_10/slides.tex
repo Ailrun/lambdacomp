@@ -1,37 +1,240 @@
+% LTeX: enabled=false
 \documentclass[letterpaper,10pt,aspectratio=169,dvipsnames]{beamer}
 
 \usetheme{mcgill}
+\usefonttheme{serif}
 
+\usepackage[nolist,nohyperlinks]{acronym}
+\begin{acronym}
+  \acro{CBV}{Call-By-Value}
+  \acro{CBN}{Call-By-Name}
+  \acro{CBPV}{Call-By-Push-Value}
+\end{acronym}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{mathpartir}
+\usepackage{noto-mono}
+\usepackage{noto-sans}
+\usepackage{noto-serif}
+\usepackage{stmaryrd}
 \usepackage{tikz}
-\usetikzlibrary{arrows,calc}
-\pgfkeys{/tikz/fulloverlay/.code={\pgfkeysalso{overlay, remember picture, shift=(current page.south west), x=(current page.south east), y=(current page.north west)}}}
-\tikzset{
-  invisible/.style={opacity=0,text opacity=0},
-  visible on/.style={alt={#1{}{invisible}}},
-  alt/.code args={<#1>#2#3}{%
+\usetikzlibrary{arrows,calc,matrix}
+\pgfkeys%
+{%
+  /tikz/fulloverlay/.code=%
+  {%
+    \pgfkeysalso%
+    {%
+      overlay,%
+      remember picture,%
+      shift=(current page.south west),%
+      x=(current page.south east),%
+      y=(current page.north west)%
+    }%
+  }%
+}
+\tikzset%
+{%
+  invisible/.style={opacity=0,text opacity=0},%
+  visible on/.style={alt={#1{}{invisible}}},%
+  alt/.code args=%
+  {<#1>#2#3}%
+  {%
     \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
-  },
+  },%
 }
+\usepackage{xspace}
 
-\AtBeginDocument{%
-\title[\texorpdfstring{\(\lambda\)-comp}{lambdacomp}: A Primitive \texorpdfstring{\(\lambda\)-Calculus}{Lambda Calculus} Compiler Based on CBPV]{\(\lambda\)-comp}
-\subtitle{A Primitive \(\lambda\)-Calculus Compiler Based on CBPV}
-\author[Junyoung Jang]{\parbox{10em}{\centering Junyoung~Jang\\{}{\scriptsize junyoung.jang@mail.mcgill.ca}\\{}{\scriptsize McGill University}}}
-\date{}
+% Helper macros
+\NewDocumentCommand{\binderDot}{}%
+{\ensuremath{\mathbin{.}}}
+
+% Type symbols
+\NewDocumentCommand{\tyIntSymb}{}%
+{{\ensuremath{\mathtt{Int}}}}
+\NewDocumentCommand{\tyBoolSymb}{}%
+{{\ensuremath{\mathtt{Bool}}}}
+\NewDocumentCommand{\tyUpSymb}{}%
+{{\ensuremath{\mathtt{\uparrow}}}}
+\NewDocumentCommand{\tyDownSymb}{}%
+{{\ensuremath{\mathtt{\downarrow}}}}
+\NewDocumentCommand{\tyFunSymb}{}%
+{{\ensuremath{\mathtt{\to}}}}
+
+% Types
+\NewDocumentCommand{\tyInt}{}%
+{{\ensuremath{\tmIntSymb}}}
+\NewDocumentCommand{\tyBool}{}%
+{{\ensuremath{\tmBoolSymb}}}
+\NewDocumentCommand{\tyUp}{m}%
+{{\ensuremath{#1 \tmUpSymb}}}
+\NewDocumentCommand{\tyDown}{m}%
+{{\ensuremath{#1 \tmDownSymb}}}
+\NewDocumentCommand{\tyFun}{m m}%
+{{\ensuremath{#1 \tyFunSymb #2}}}
+
+% Term symbols
+\NewDocumentCommand{\tmTrueSymb}{}%
+{{\ensuremath{\mathtt{true}}}}
+\NewDocumentCommand{\tmFalseSymb}{}%
+{{\ensuremath{\mathtt{false}}}}
+\NewDocumentCommand{\tmThunkSymb}{}%
+{{\ensuremath{\mathtt{thunk}}}}
+\NewDocumentCommand{\tmForceSymb}{}%
+{{\ensuremath{\mathtt{force}}}}
+\NewDocumentCommand{\tmReturnSymb}{}%
+{{\ensuremath{\mathtt{return}}}}
+\NewDocumentCommand{\tmToSymb}{}%
+{{\ensuremath{\mathtt{to}}}}
+\NewDocumentCommand{\tmPrintIntSymb}{}%
+{{\ensuremath{\mathtt{printInt}}}}
+\NewDocumentCommand{\tmBeforeSymb}{}%
+{{\ensuremath{\mathtt{before}}}}
+
+% Terms
+\NewDocumentCommand{\tmTrue}{}%
+{{\ensuremath{\tmTrueSymb}}}
+\NewDocumentCommand{\tmFalse}{}%
+{{\ensuremath{\tmFalseSymb}}}
+\NewDocumentCommand{\tmThunk}{m}%
+{{\ensuremath{\tmThunkSymb(#1)}}}
+\NewDocumentCommand{\tmForce}{m}%
+{{\ensuremath{\tmForceSymb(#1)}}}
+\NewDocumentCommand{\tmReturn}{m}%
+{{\ensuremath{\tmReturnSymb(#1)}}}
+\NewDocumentCommand{\tmTo}{m m m}%
+{{\ensuremath{#1\ \tmToSymb\ #2 \binderDot #3}}}
+\NewDocumentCommand{\tmLam}{m m}%
+{{\ensuremath{\lambda #1 \binderDot #2}}}
+\NewDocumentCommand{\tmApp}{m m}%
+{{\ensuremath{#1 \mathbin{ } #2}}}
+\NewDocumentCommand{\tmPrintInt}{m m}%
+{{\ensuremath{\tmPrintIntSymb #1 \tmBeforeSymb #2}}}
+
+\newcommand{\lambdacomp}{\texorpdfstring{\(\lambda\)-comp}{lambdacomp}\xspace}
+\newcommand{\lambdacalcplus}%
+{%
+  \texorpdfstring%
+  {\(\lambda\)-Calculus (+ \(\alpha\))}%
+  {Lambda Calculus (+ more)}%
+  \xspace%
 }
+\newcommand{\JJ}{Junyoung~Jang}
+\newcommand{\JJemail}{{\scriptsize junyoung.jang@mail.mcgill.ca}}
+\newcommand{\JJuniv}{{\scriptsize McGill University}}
+
+\title%
+[\lambdacomp: A Primitive \lambdacalcplus Compiler Based on CBPV]%
+{\lambdacomp}%
+\subtitle{A Primitive \lambdacalcplus Compiler Based on CBPV}%
+\author[\JJ]{%
+  \texorpdfstring%
+  {\parbox{10em}{\centering \JJ\\\JJemail\\\JJuniv}}%
+  {\JJ}%
+}%
+\date{}%
+
+% LTeX: enabled=true
 
 \begin{document}
 \begin{frame}[plain]
   \titlepage
 \end{frame}
 
-\begin{frame}{CBPV}
+\begin{frame}{Motivation}
+  \begin{tikzpicture}[fulloverlay]
+    \node at (0.5, 0.8) {Why \textcolor<2-3>{orange}{compiling} \textcolor<4->{orange}{\acf{CBPV}?}};
+
+    \node[visible on=<3>,text width=\textwidth,align=center] at (0.5, 0.5)
+    {%
+      To understand how to compile modal \(\lambda\)-calculus\\
+      (as an experience)%
+    };
+
+    \node[visible on=<5->] at (0.5, 0.55)
+    {Being closer to low-level (value-computation distinction)};
+
+    \node[visible on=<6->] at (0.5, 0.45)
+    {Allowing simple yet useful optimizations};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}[fragile]{\acf{CBPV}}
+  \begin{tikzpicture}[fulloverlay]
+    \node[visible on=<2->] (vttitle) at (0.3, 0.8)
+    {Value Types\qquad\(A,B,\ldots\)};
+
+    \node[visible on=<3->] (cttitle) at (0.7, 0.8)
+    {Computation Types\qquad\(S,T,\ldots\)};
+
+    \matrix[visible on=<4->,alt=<8->{gray}{},align=center,matrix of nodes,%
+    row 1/.style={visible on=<5->,alt=<5>{orange}{}},%
+    row 2/.style={visible on=<6->,alt=<6>{orange}{}},%
+    row 3/.style={visible on=<7->,alt=<7>{orange}{}}] (vtdesc) at (0.3, 0.65)
+    {%
+      \tyInt\\
+      \tyBool\\
+      \tyUp{S}\\
+    };
+
+    \matrix[visible on=<4->,alt=<11->{gray}{},align=center,matrix of nodes,%
+    row 1/.style={visible on=<5->,alt=<5>{orange}{}},%
+    row 2/.style={visible on=<6->,alt=<6>{orange}{}},%
+    row 3/.style={visible on=<7->,alt=<7>{orange}{}}] (ctdesc) at (0.3, 0.65)
+    {%
+      \tyDown\\
+      \tyFun{A}{S}\\
+    };
+
+    % \node[visible on=<2->,alt=<11-16>{gray}{},alt=<17-18>{orange}{}] (vtitle) at (0.3, 0.5)
+    % {Values \qquad\(U,V,W,\ldots\)};
+
+    % \node[visible on=<3->,alt=<4-9>{gray}{},alt=<10>{orange}{}] (ctitle) at (0.7, 0.5)
+    % {Computations\qquad\(L,M,N,\ldots\)};
+
+    % \matrix[visible on=<4->,alt=<11->{gray}{},align=center,matrix of nodes,%
+    % row 1/.style={visible on=<5->,alt=<5>{orange}{}},%
+    % row 2/.style={visible on=<6->,alt=<6>{orange}{}},%
+    % row 3/.style={visible on=<7->,alt=<7>{orange}{}},%
+    % row 4/.style={visible on=<8->,alt=<8>{orange}{}},%
+    % row 5/.style={visible on=<9->,alt=<9-10>{orange}{},alt=<12>{orange}{}}] (vdesc) at (0.3, 0.3)
+    % {%
+    %   \(x\) & {\small (Variable)}\\
+    %   \(i\) & {\small (Integer)}\\
+    %   \tmTrue & \\
+    %   \tmFalse & \\
+    %   \tmThunk{L} & \\
+    % };
+
+    % \draw[visible on=<10>,<-,orange] (vdesc-4-1) -| ($(ctitle.west) - (0.05, 0)$) -- (ctitle);
+
+    % \matrix[visible on=<11->,align=center,matrix of nodes,%
+    % row 1/.style={visible on=<12->,alt=<12>{orange}{},alt=<18>{orange}{}},%
+    % row 2/.style={visible on=<13->,alt=<13>{orange}{},alt=<18-19>{orange}{}},%
+    % row 3/.style={visible on=<14->,alt=<14>{orange}{}},%
+    % row 4/.style={visible on=<15->,alt=<15>{orange}{}},%
+    % row 5/.style={visible on=<16->,alt=<16>{orange}{},alt=<18-19>{orange}{}},%
+    % row 6/.style={visible on=<17->,alt=<17>{orange}{}}] (cdesc) at (0.7, 0.3)
+    % {%
+    %   \tmForce{U}\\
+    %   \tmReturn{U}\\
+    %   \tmTo{L}{x}{M}\\
+    %   \tmLam{x}{L}\\
+    %   \tmApp{L}{U}\\
+    %   \tmPrintInt{U}{L}\\
+    % };
+
+    % \draw[visible on=<12>,<->,orange] (vdesc-5-1) -| (cdesc-1-1);
+
+    % \begin{scope}[every path/.style={visible on=<18-19>,<-,orange}]
+    %   \draw[visible on=<18>] (cdesc-1-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
+    %   \draw (cdesc-2-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
+    %   \draw (cdesc-5-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
+    % \end{scope}
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Usual \(\lambda\)-Calculus Compile}

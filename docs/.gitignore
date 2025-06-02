@@ -5,7 +5,9 @@
 *.lot
 *.fls
 *.out
+*.pdf
 *.toc
+*.xdv
 
 # Bibliography files
 *.bbl
