@@ -66,13 +66,13 @@
 
 % Types
 \NewDocumentCommand{\tyInt}{}%
-{{\ensuremath{\tmIntSymb}}}
+{{\ensuremath{\tyIntSymb}}}
 \NewDocumentCommand{\tyBool}{}%
-{{\ensuremath{\tmBoolSymb}}}
+{{\ensuremath{\tyBoolSymb}}}
 \NewDocumentCommand{\tyUp}{m}%
-{{\ensuremath{#1 \tmUpSymb}}}
+{{\ensuremath{#1 \tyUpSymb}}}
 \NewDocumentCommand{\tyDown}{m}%
-{{\ensuremath{#1 \tmDownSymb}}}
+{{\ensuremath{#1 \tyDownSymb}}}
 \NewDocumentCommand{\tyFun}{m m}%
 {{\ensuremath{#1 \tyFunSymb #2}}}
 
@@ -164,10 +164,10 @@
 
 \begin{frame}[fragile]{\acf{CBPV}}
   \begin{tikzpicture}[fulloverlay]
-    \node[visible on=<2->] (vttitle) at (0.3, 0.8)
+    \node[visible on=<2->,alt=<8->{gray}{}] (vttitle) at (0.3, 0.8)
     {Value Types\qquad\(A,B,\ldots\)};
 
-    \node[visible on=<3->] (cttitle) at (0.7, 0.8)
+    \node[visible on=<3->,alt=<4-7>{gray}{}] (cttitle) at (0.7, 0.8)
     {Computation Types\qquad\(S,T,\ldots\)};
 
     \matrix[visible on=<4->,alt=<8->{gray}{},align=center,matrix of nodes,%
@@ -180,12 +180,12 @@
       \tyUp{S}\\
     };
 
-    \matrix[visible on=<4->,alt=<11->{gray}{},align=center,matrix of nodes,%
-    row 1/.style={visible on=<5->,alt=<5>{orange}{}},%
-    row 2/.style={visible on=<6->,alt=<6>{orange}{}},%
-    row 3/.style={visible on=<7->,alt=<7>{orange}{}}] (ctdesc) at (0.3, 0.65)
+    \matrix[visible on=<8->,align=center,matrix of nodes,%
+    row 1/.style={visible on=<9->,alt=<9>{orange}{}},%
+    row 2/.style={visible on=<10->,alt=<10>{orange}{}},%
+    row 3/.style={visible on=<11->,alt=<11>{orange}{}}] (ctdesc) at (0.7, 0.65)
     {%
-      \tyDown\\
+      \tyDown{A}\\
       \tyFun{A}{S}\\
     };
 
@@ -238,6 +238,28 @@
 \end{frame}
 
 \begin{frame}{Usual \(\lambda\)-Calculus Compile}
+  \begin{tikzpicture}[fulloverlay]
+    \matrix[matrix of nodes,row sep={0.15\paperheight,between origins},nodes={draw,rectangle},%
+    row 1/.style={alt=<2->{gray}{}},%
+    row 5/.style={alt=<2->{gray}{}}] (steps) at (0.5, 0.5)
+    {
+      \strut Elaboration/Type Checking\\
+      \strut Arity Analysis\\
+      \strut Closure Conversion\\
+      \strut Optimizations\\
+      \strut Code Generation\\
+    };
+    \foreach \a in {1,4}%
+    {%
+      \pgfmathtruncatemacro\b{\a+1}
+      \draw[alt=<2->{gray}{},->] (steps-\a-1) -- (steps-\b-1);%
+    }
+    \foreach \a in {2,3}%
+    {%
+      \pgfmathtruncatemacro\b{\a+1}
+      \draw[->] (steps-\a-1) -- (steps-\b-1);%
+    }
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{\(\lambda\)-Abstraction as Computation}
@@ -246,10 +268,10 @@
 \begin{frame}{Where has the closure gone?}
 \end{frame}
 
-\begin{frame}{Full \(\lambda\)-Lifting}
+\begin{frame}{Arity Analysis for CBPV}
 \end{frame}
 
-\begin{frame}{Arity Analysis for CBPV}
+\begin{frame}{Full \(\lambda\)-Lifting}
 \end{frame}
 
 \begin{frame}{\(\eta\)-Reducing Optimization}
