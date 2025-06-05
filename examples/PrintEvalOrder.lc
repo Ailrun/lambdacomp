@@ -1,7 +1,7 @@
 main =
   printInt
     (\(x : Int) ->
-      (\(y : Int) -> printInt y before x)
+      (\(y : Int) -> printInt y then x)
       2)
-    (printInt 7 before 3) before
+    (printInt 7 then 3) then
   0

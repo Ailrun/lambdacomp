@@ -1,5 +1,5 @@
-e_g = printInt 5 before return (thunk (\ (e_x : Int) -> e_x + 3))
+e_g = printInt 5 then return (thunk (\ (e_x : Int) -> e_x + 3))
 ;;
-e_f = printInt 4 before return (thunk (\ (e_x : Int) -> e_x + 1))
+e_f = printInt 4 then return (thunk (\ (e_x : Int) -> e_x + 1))
 ;;
-e_main = printInt 3 before return 0
+e_main = printInt 3 then return 0

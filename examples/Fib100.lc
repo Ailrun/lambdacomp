@@ -2,8 +2,8 @@ recFib : Int -> Int -> Int -> Int -> Int;;
 recFib = \n -> \l -> \x -> \y ->
   if n < l
   then 0
-  else printInt l before
-       printInt x before
+  else printInt l then
+       printInt x then
        recFib n (l + 1) y (x + y)
 ;;
 

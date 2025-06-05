@@ -3,7 +3,7 @@ e_f =
     (thunk
        (\ (aa_0_0 : Int) ->
           ((return 5) to c_v_0 ->
-           printInt c_v_0 before
+           printInt c_v_0 then
            return
              (thunk
                 (\ (e_x : Int) ->
@@ -17,4 +17,4 @@ e_main =
    (return (thunk (\ (aa_0_1 : Int) -> (force #e_f) aa_0_1))) to c_f0_2 ->
    (force c_f0_2) c_a0_2)
   to c_v_3 ->
-  printInt c_v_3 before return 0
+  printInt c_v_3 then return 0

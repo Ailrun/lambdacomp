@@ -1,4 +1,4 @@
 f : Int -> Int -> Int -> Int;;
 f = \x y z -> x + y + z;;
 
-main = (\(g : Int -> Int -> Int) -> printInt g 2 5 before printInt g 4 1 before 0) (f 3)
+main = (\(g : Int -> Int -> Int) -> printInt g 2 5 then printInt g 4 1 then 0) (f 3)

@@ -62,8 +62,8 @@ prettyTmPrec pr (TmTo tm0 x tm1)         = group $ condParens (pr > tmToPrec) $ 
 prettyTmPrec pr (TmLet x tm0 tm1)        = group $ condParens (pr > tmLetPrec) $ align $ prettyTmLet [(x, tm0)] tm1
 prettyTmPrec pr (TmPrimBinOp op tm0 tm1) = group $ prettyTmPrimBinOp pr op tm0 tm1
 prettyTmPrec pr (TmPrimUnOp op tm)       = group $ prettyTmPrimUnOp pr op tm
-prettyTmPrec pr (TmPrintInt tm0 tm1)     = condParens (pr > tmPrintPrec) $ align $ vsep ["printInt" <+> pretty tm0 <+> "before", pretty tm1]
-prettyTmPrec pr (TmPrintDouble tm0 tm1)  = condParens (pr > tmPrintPrec) $ align $ vsep ["printDouble" <+> pretty tm0 <+> "before", pretty tm1]
+prettyTmPrec pr (TmPrintInt tm0 tm1)     = condParens (pr > tmPrintPrec) $ align $ vsep ["printInt" <+> pretty tm0 <+> "then", pretty tm1]
+prettyTmPrec pr (TmPrintDouble tm0 tm1)  = condParens (pr > tmPrintPrec) $ align $ vsep ["printDouble" <+> pretty tm0 <+> "then", pretty tm1]
 prettyTmPrec pr (TmRec p tm)             = group $ prefixOfPrec0 pr ("rec" <+> pretty p <+> "->", tmRecPrec) (group . (line <>) . (`prettyTmPrec` tm))
 
 prettyTmLam :: Int -> [Param] -> Tm Com -> Doc ann

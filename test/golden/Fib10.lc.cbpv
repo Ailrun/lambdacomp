@@ -57,11 +57,11 @@ e_recFib =
                                                                                               (return
                                                                                                  e_l)
                                                                                               to c_v_2 ->
-                                                                                              printInt c_v_2 before
+                                                                                              printInt c_v_2 then
                                                                                               (return
                                                                                                  e_x)
                                                                                               to c_v_3 ->
-                                                                                              printInt c_v_3 before
+                                                                                              printInt c_v_3 then
                                                                                               (return
                                                                                                  e_n)
                                                                                               to c_a0_6 ->

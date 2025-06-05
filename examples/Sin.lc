@@ -20,4 +20,4 @@ sin : Double -> Double;;
 sin = \x -> sinEntry x 1 -. sinEntry x 3 +. sinEntry x 5 -. sinEntry x 7 +. sinEntry x 9 -. sinEntry x 11 +. sinEntry x 13 -. sinEntry x 15
 ;;
 
-main = printDouble sin 0.5 before 0
+main = printDouble sin 0.5 then 0

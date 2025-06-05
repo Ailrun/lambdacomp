@@ -5,8 +5,8 @@ e_recF =
           \ (aa_0_0 : Int) ->
             (aa_0_0 > 0) to c_c_3 ->
             \ (e_x : Int) ->
-              printInt e_x before
-              printInt 2 before
+              printInt e_x then
+              printInt 2 then
               if c_c_3
               then (aa_0_0 - 1) to c_a0_5 -> (force e_recF) c_a0_5 e_x
               else return 0))

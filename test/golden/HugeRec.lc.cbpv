@@ -20,9 +20,9 @@ e_recF =
                                                        (\ (e_x : Int) ->
                                                           (return e_x)
                                                           to c_v_0 ->
-                                                          printInt c_v_0 before
+                                                          printInt c_v_0 then
                                                           (return 2) to c_v_1 ->
-                                                          printInt c_v_1 before
+                                                          printInt c_v_1 then
                                                           ((return e_n)
                                                            to c_inp0_2 ->
                                                            (return 0)

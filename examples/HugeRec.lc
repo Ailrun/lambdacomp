@@ -1,7 +1,7 @@
 recF : Int -> Int -> Int;;
 recF = \n x ->
-  printInt x before
-  printInt 2 before
+  printInt x then
+  printInt 2 then
   if n > 0
   then
     recF (n - 1) x

@@ -1,5 +1,5 @@
 e_main =
-  (((return 7) to c_v_0 -> printInt c_v_0 before return 3) to c_a0_3 ->
+  (((return 7) to c_v_0 -> printInt c_v_0 then return 3) to c_a0_3 ->
    (return
       (thunk
          (\ (e_x : Int) ->
@@ -7,11 +7,10 @@ e_main =
             (return
                (thunk
                   (\ (e_y : Int) ->
-                     (return e_y) to c_v_1 ->
-                     printInt c_v_1 before return e_x)))
+                     (return e_y) to c_v_1 -> printInt c_v_1 then return e_x)))
             to c_f0_2 ->
             (force c_f0_2) c_a0_2)))
    to c_f0_3 ->
    (force c_f0_3) c_a0_3)
   to c_v_4 ->
-  printInt c_v_4 before return 0
+  printInt c_v_4 then return 0

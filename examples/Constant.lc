@@ -1,1 +1,1 @@
-main = printInt (3 + 2) before 0
+main = printInt (3 + 2) then 0

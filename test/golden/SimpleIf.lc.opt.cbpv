@@ -1,1 +1,1 @@
-e_main = printInt 1 before return 1
+e_main = printInt 1 then return 1

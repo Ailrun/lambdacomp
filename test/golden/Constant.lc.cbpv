@@ -1,1 +1,1 @@
-e_main = (return 5) to c_v_0 -> printInt c_v_0 before return 0
+e_main = (return 5) to c_v_0 -> printInt c_v_0 then return 0

@@ -4,5 +4,5 @@ e_main =
    (force c_f0_0) c_a0_0)
   to c_c_1 ->
   if c_c_1
-  then (return 1) to c_v_2 -> printInt c_v_2 before return 1
-  else (return 0) to c_v_3 -> printInt c_v_3 before return 0
+  then (return 1) to c_v_2 -> printInt c_v_2 then return 1
+  else (return 0) to c_v_3 -> printInt c_v_3 then return 0

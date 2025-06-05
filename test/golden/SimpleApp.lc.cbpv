@@ -8,4 +8,4 @@ e_main =
    to c_f0_1 ->
    (force c_f0_1) c_a0_1)
   to c_v_2 ->
-  printInt c_v_2 before return 0
+  printInt c_v_2 then return 0

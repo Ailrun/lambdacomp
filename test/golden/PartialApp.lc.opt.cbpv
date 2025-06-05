@@ -6,4 +6,4 @@ e_f =
 ;;
 e_g = return (thunk ((force #e_f) 3))
 ;;
-e_main = (force #e_g) 2 5 to c_v_4 -> printInt c_v_4 before return 0
+e_main = (force #e_g) 2 5 to c_v_4 -> printInt c_v_4 then return 0

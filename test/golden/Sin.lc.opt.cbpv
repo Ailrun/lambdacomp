@@ -49,4 +49,4 @@ e_sin =
           (c_inp0_28 +. c_inp1_28) to c_inp0_30 ->
           (force #e_sinEntry) e_x 15 to c_inp1_30 -> c_inp0_30 -. c_inp1_30))
 ;;
-e_main = (force #e_sin) 0.5 to c_v_32 -> printDouble c_v_32 before return 0
+e_main = (force #e_sin) 0.5 to c_v_32 -> printDouble c_v_32 then return 0

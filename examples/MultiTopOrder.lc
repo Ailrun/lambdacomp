@@ -1,7 +1,7 @@
 g : Int -> Int;;
-g = printInt 5 before \x -> x + 3;;
+g = printInt 5 then \x -> x + 3;;
 
 f : Int -> Int;;
-f = printInt 4 before \x -> x + 1;;
+f = printInt 4 then \x -> x + 1;;
 
-main = printInt 3 before 0
+main = printInt 3 then 0

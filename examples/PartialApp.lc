@@ -4,4 +4,4 @@ f = \x y z -> x + y + z;;
 g : Int -> Int -> Int;;
 g = f 3;;
 
-main = printInt g 2 5 before 0
+main = printInt g 2 5 then 0

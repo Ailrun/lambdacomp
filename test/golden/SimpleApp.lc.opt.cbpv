@@ -1,1 +1,1 @@
-e_main = printInt 5 before return 0
+e_main = printInt 5 then return 0

@@ -1,6 +1,6 @@
 e_g =
   (return 5) to c_v_0 ->
-  printInt c_v_0 before
+  printInt c_v_0 then
   return
     (thunk
        (\ (e_x : Int) ->
@@ -9,11 +9,11 @@ e_g =
 ;;
 e_f =
   (return 4) to c_v_2 ->
-  printInt c_v_2 before
+  printInt c_v_2 then
   return
     (thunk
        (\ (e_x : Int) ->
           (return e_x) to c_inp0_3 ->
           (return 1) to c_inp1_3 -> c_inp0_3 + c_inp1_3))
 ;;
-e_main = (return 3) to c_v_4 -> printInt c_v_4 before return 0
+e_main = (return 3) to c_v_4 -> printInt c_v_4 then return 0

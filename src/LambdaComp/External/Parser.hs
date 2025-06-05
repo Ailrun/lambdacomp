@@ -87,14 +87,14 @@ tmPrintInt :: Parser Tm
 tmPrintInt = do
   keyword "printInt"
   xtm0 <- xtm
-  keyword "before"
+  keyword "then"
   TmPrintInt xtm0 <$> xtm
 
 tmPrintDouble :: Parser Tm
 tmPrintDouble = do
   keyword "printDouble"
   xtm0 <- xtm
-  keyword "before"
+  keyword "then"
   TmPrintDouble xtm0 <$> xtm
 
 tmTable :: [[Expr.Operator Parser XTm]]
@@ -219,7 +219,6 @@ keywords =
   , "then"
   , "else"
   , "printInt"
-  , "before"
   , "rec"
   , "intToDouble"
   , "doubleToInt"
