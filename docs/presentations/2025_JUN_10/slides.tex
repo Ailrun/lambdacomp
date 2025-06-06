@@ -91,8 +91,8 @@
 {{\ensuremath{\mathtt{to}}}}
 \NewDocumentCommand{\tmPrintIntSymb}{}%
 {{\ensuremath{\mathtt{printInt}}}}
-\NewDocumentCommand{\tmBeforeSymb}{}%
-{{\ensuremath{\mathtt{before}}}}
+\NewDocumentCommand{\tmThenSymb}{}%
+{{\ensuremath{\mathtt{then}}}}
 
 % Terms
 \NewDocumentCommand{\tmTrue}{}%
@@ -112,7 +112,7 @@
 \NewDocumentCommand{\tmApp}{m m}%
 {{\ensuremath{#1 \mathbin{ } #2}}}
 \NewDocumentCommand{\tmPrintInt}{m m}%
-{{\ensuremath{\tmPrintIntSymb #1 \tmBeforeSymb #2}}}
+{{\ensuremath{\tmPrintIntSymb\ #1\ \tmThenSymb\ #2}}}
 
 \newcommand{\lambdacomp}{\texorpdfstring{\(\lambda\)-comp}{lambdacomp}\xspace}
 \newcommand{\lambdacalcplus}%
@@ -164,101 +164,115 @@
 
 \begin{frame}[fragile]{\acf{CBPV}}
   \begin{tikzpicture}[fulloverlay]
-    \node[visible on=<2->,alt=<8->{gray}{}] (vttitle) at (0.3, 0.8)
+    \node[visible on=<2->,alt=<9-11>{gray}{},alt=<10>{orange}{},alt=<12>{orange}{},alt=<14->{gray}{}] (vttitle) at (0.3, 0.8)
     {Value Types\qquad\(A,B,\ldots\)};
 
-    \node[visible on=<3->,alt=<4-7>{gray}{}] (cttitle) at (0.7, 0.8)
+    \node[visible on=<3->,alt=<4-7>{gray}{},alt=<8>{orange}{},alt=<14->{gray}{}] (cttitle) at (0.7, 0.8)
     {Computation Types\qquad\(S,T,\ldots\)};
 
-    \matrix[visible on=<4->,alt=<8->{gray}{},align=center,matrix of nodes,%
+    \matrix[visible on=<4->,alt=<9-12>{gray}{},alt=<14->{gray}{},align=center,matrix of nodes,%
     row 1/.style={visible on=<5->,alt=<5>{orange}{}},%
     row 2/.style={visible on=<6->,alt=<6>{orange}{}},%
-    row 3/.style={visible on=<7->,alt=<7>{orange}{}}] (vtdesc) at (0.3, 0.65)
+    row 3/.style={visible on=<7->,alt=<7-8>{orange}{}}] (vtdesc) at (0.3, 0.7)
     {%
       \tyInt\\
       \tyBool\\
       \tyUp{S}\\
     };
 
-    \matrix[visible on=<8->,align=center,matrix of nodes,%
-    row 1/.style={visible on=<9->,alt=<9>{orange}{}},%
-    row 2/.style={visible on=<10->,alt=<10>{orange}{}},%
-    row 3/.style={visible on=<11->,alt=<11>{orange}{}}] (ctdesc) at (0.7, 0.65)
+    \matrix[visible on=<8->,alt=<14->{gray}{},align=center,matrix of nodes,%
+    row 1/.style={visible on=<9->,alt=<9-10>{orange}{}},%
+    row 2/.style={visible on=<11->,alt=<11-12>{orange}{}}] (ctdesc) at (0.7, 0.7)
     {%
       \tyDown{A}\\
       \tyFun{A}{S}\\
     };
 
-    % \node[visible on=<2->,alt=<11-16>{gray}{},alt=<17-18>{orange}{}] (vtitle) at (0.3, 0.5)
-    % {Values \qquad\(U,V,W,\ldots\)};
+    \draw[visible on=<8>,<-,orange] (vtdesc-3-1)
+    -| node[midway,below] {\scriptsize as a deferred computation}
+    ($(cttitle.west) - (0.05, 0)$)
+    -- (cttitle);
 
-    % \node[visible on=<3->,alt=<4-9>{gray}{},alt=<10>{orange}{}] (ctitle) at (0.7, 0.5)
-    % {Computations\qquad\(L,M,N,\ldots\)};
+    \draw[visible on=<10>,<-,orange] (ctdesc-1-1)
+    -| node[midway,below] {\scriptsize as a return value}
+    ($(vttitle.east) + (0.05, 0)$)
+    -- (vttitle);
 
-    % \matrix[visible on=<4->,alt=<11->{gray}{},align=center,matrix of nodes,%
-    % row 1/.style={visible on=<5->,alt=<5>{orange}{}},%
-    % row 2/.style={visible on=<6->,alt=<6>{orange}{}},%
-    % row 3/.style={visible on=<7->,alt=<7>{orange}{}},%
-    % row 4/.style={visible on=<8->,alt=<8>{orange}{}},%
-    % row 5/.style={visible on=<9->,alt=<9-10>{orange}{},alt=<12>{orange}{}}] (vdesc) at (0.3, 0.3)
-    % {%
-    %   \(x\) & {\small (Variable)}\\
-    %   \(i\) & {\small (Integer)}\\
-    %   \tmTrue & \\
-    %   \tmFalse & \\
-    %   \tmThunk{L} & \\
-    % };
+    \draw[visible on=<12>,<-,orange] (ctdesc-2-1)
+    -| node[midway,below] {\scriptsize as an argument value}
+    ($(vttitle.east) + (0.05, 0)$)
+    -- (vttitle);
 
-    % \draw[visible on=<10>,<-,orange] (vdesc-4-1) -| ($(ctitle.west) - (0.05, 0)$) -- (ctitle);
+    \node[visible on=<14->,alt=<23-28>{gray}{},alt=<30-31>{orange}{}] (vtitle) at (0.3, 0.5)
+    {Values \qquad\(U,V,W,\ldots\)};
 
-    % \matrix[visible on=<11->,align=center,matrix of nodes,%
-    % row 1/.style={visible on=<12->,alt=<12>{orange}{},alt=<18>{orange}{}},%
-    % row 2/.style={visible on=<13->,alt=<13>{orange}{},alt=<18-19>{orange}{}},%
-    % row 3/.style={visible on=<14->,alt=<14>{orange}{}},%
-    % row 4/.style={visible on=<15->,alt=<15>{orange}{}},%
-    % row 5/.style={visible on=<16->,alt=<16>{orange}{},alt=<18-19>{orange}{}},%
-    % row 6/.style={visible on=<17->,alt=<17>{orange}{}}] (cdesc) at (0.7, 0.3)
-    % {%
-    %   \tmForce{U}\\
-    %   \tmReturn{U}\\
-    %   \tmTo{L}{x}{M}\\
-    %   \tmLam{x}{L}\\
-    %   \tmApp{L}{U}\\
-    %   \tmPrintInt{U}{L}\\
-    % };
+    \node[visible on=<15->,alt=<16-21>{gray}{},alt=<22>{orange}{}] (ctitle) at (0.7, 0.5)
+    {Computations\qquad\(L,M,N,\ldots\)};
 
-    % \draw[visible on=<12>,<->,orange] (vdesc-5-1) -| (cdesc-1-1);
+    \matrix[visible on=<16->,alt=<23->{gray}{},align=center,matrix of nodes,%
+    row 1/.style={visible on=<17->,alt=<17>{orange}{}},%
+    row 2/.style={visible on=<18->,alt=<18>{orange}{}},%
+    row 3/.style={visible on=<19->,alt=<19>{orange}{}},%
+    row 4/.style={visible on=<20->,alt=<20>{orange}{}},%
+    row 5/.style={visible on=<21->,alt=<21-22>{orange}{},alt=<24>{orange}{}}] (vdesc) at (0.3, 0.3)
+    {%
+      \(x\) & {\small (Variable)}\\
+      \(i\) & {\small (Integer)}\\
+      \tmTrue & \\
+      \tmFalse & \\
+      \tmThunk{L} & \\
+    };
 
-    % \begin{scope}[every path/.style={visible on=<18-19>,<-,orange}]
-    %   \draw[visible on=<18>] (cdesc-1-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
-    %   \draw (cdesc-2-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
-    %   \draw (cdesc-5-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
-    % \end{scope}
+    \draw[visible on=<22>,<-,orange] (vdesc-5-1) -| ($(ctitle.west) - (0.05, 0)$) -- (ctitle);
+
+    \matrix[visible on=<23->,align=center,matrix of nodes,%
+    row 1/.style={visible on=<24->,alt=<24>{orange}{},alt=<30>{orange}{}},%
+    row 2/.style={visible on=<25->,alt=<25>{orange}{},alt=<30-31>{orange}{}},%
+    row 3/.style={visible on=<26->,alt=<26>{orange}{}},%
+    row 4/.style={visible on=<27->,alt=<27>{orange}{}},%
+    row 5/.style={visible on=<28->,alt=<28>{orange}{},alt=<30-31>{orange}{}},%
+    row 6/.style={visible on=<29->,alt=<29>{orange}{}}] (cdesc) at (0.7, 0.3)
+    {%
+      \tmForce{U}\\
+      \tmReturn{U}\\
+      \tmTo{L}{x}{M}\\
+      \tmLam{x}{L}\\
+      \tmApp{L}{U}\\
+      \tmPrintInt{U}{L}\\
+    };
+
+    \draw[visible on=<24>,<->,orange] (vdesc-5-1) -| (cdesc-1-1);
+
+    \draw[visible on=<30>,<-,orange] (cdesc-1-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
+    \begin{scope}[every path/.style={visible on=<30-31>,<-,orange}]
+      \draw (cdesc-2-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
+      \draw (cdesc-5-1) -| ($(vtitle.east) + (0.05, 0)$) -- (vtitle);
+    \end{scope}
   \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Usual \(\lambda\)-Calculus Compile}
   \begin{tikzpicture}[fulloverlay]
-    \matrix[matrix of nodes,row sep={0.15\paperheight,between origins},nodes={draw,rectangle},%
-    row 1/.style={alt=<2->{gray}{}},%
-    row 5/.style={alt=<2->{gray}{}}] (steps) at (0.5, 0.5)
+    \begin{scope}[every node/.style={draw,rectangle}]
+      \node[alt=<2->{gray}{}] (steps-1) at (0.5, 0.7) {\strut Elaboration/Type Checking};
+      \node[alt=<2->{gray}{}] (steps-3) at (0.5, 0.3) {\strut Code Generation};
+    \end{scope}
+    \matrix[draw,rectangle,matrix of nodes,row sep={0.1\paperheight,between origins},nodes={draw,rectangle}] (steps-2) at (0.5, 0.5)
     {
-      \strut Elaboration/Type Checking\\
-      \strut Arity Analysis\\
-      \strut Closure Conversion\\
+      \node at (-0.1,0) {\strut Arity Analysis};
+      \node at (0.1,0) {\strut Closure Conversion};\\
       \strut Optimizations\\
-      \strut Code Generation\\
     };
-    \foreach \a in {1,4}%
+    \foreach \a in {1,2}%
     {%
       \pgfmathtruncatemacro\b{\a+1}
-      \draw[alt=<2->{gray}{},->] (steps-\a-1) -- (steps-\b-1);%
+      \draw[alt=<2->{gray}{},->] (steps-\a) -- (steps-\b);%
     }
-    \foreach \a in {2,3}%
-    {%
-      \pgfmathtruncatemacro\b{\a+1}
-      \draw[->] (steps-\a-1) -- (steps-\b-1);%
-    }
+    % \foreach \a in {2,3}%
+    % {%
+    %   \pgfmathtruncatemacro\b{\a+1}
+    %   \draw[->] (steps-\a-1) -- (steps-\b-1);%
+    % }
   \end{tikzpicture}
 \end{frame}
 
@@ -268,7 +282,7 @@
 \begin{frame}{Where has the closure gone?}
 \end{frame}
 
-\begin{frame}{Arity Analysis for CBPV}
+\begin{frame}{Arity Analysis for \ac{CBPV}}
 \end{frame}
 
 \begin{frame}{Full \(\lambda\)-Lifting}
