@@ -440,11 +440,11 @@
 
     \node[visible on=<5>,text width=\textwidth,align=center] at (0.5, 0.3)
     {Previous call for \(f\)\\
-      \(\tmTo f {f_1} {(\tmTo {\tmApp {\tmForce{f_1}} {a_1}} {f_2} {(\tmTo {\tmApp {\tmForce{f_2}} {a_2}} {f_3} L)})}\)};
+      \(\tmTo f {f_1} {(\tmTo {\tmApp {\tmForce{f_1}} {U_1}} {f_2} {(\tmTo {\tmApp {\tmForce{f_2}} {U_2}} {f_3} L)})}\)};
 
     \node[visible on=<6>,text width=\textwidth,align=center] at (0.5, 0.3)
     {New call for \(f\)\\
-      \(\tmTo f {f_1} {(\tmTo {\tmApp {(\tmApp {\tmForce{f_1}} {a_1})} {a_2}} {f_3} L)}\)};
+      \(\tmTo f {f_1} {(\tmTo {\tmApp {(\tmApp {\tmForce{f_1}} {U_1})} {U_2}} {f_3} L)}\)};
   \end{tikzpicture}
 \end{frame}
 
@@ -521,6 +521,7 @@
     \inferrule
     {\vtyp U {\tyUp S}}
     {\ctyp {\tmForce U} S}
+
     \\
 
     \inferrule
@@ -529,8 +530,46 @@
 
     \inferrule
     {\ctyp U {\tyDown A}\\
-      \ctyp [\Gamma, x{:}A] U B}
-    {\ctyp {\tmTo L x M} B}
+      \ctyp [\Gamma, x{:}A] U S}
+    {\ctyp {\tmTo L x M} S}
+
+    \\
+
+    \inferrule
+    {\ctyp [\Gamma, x{:}A] L S}
+    {\ctyp {\tmLam x U} {\tyFun A S}}
+
+    \inferrule
+    {\ctyp L {\tyFun A S}\\
+    \vtyp U A}
+    {\ctyp {\tmApp L U} S}
+
+    \\
+
+    \inferrule
+    {\vtyp U \tyInt\\
+      \ctyp L S}
+    {\ctyp {\tmPrintInt U L} S}
   \end{mathpar}
+\end{frame}
+
+\NewDocumentCommand{\embed}{m}{{\llbracket #1 \rrbracket}}
+\NewDocumentCommand{\embedw}{m}{{{\llbracket #1 \rrbracket}^{*}}}
+\begin{frame}{CBV into CBPV}
+  \[
+    \begin{array}{lcl}
+      \embed P & = & \tyDown {\embedw P}\\[1em]
+      \embedw{\tyInt} & = & \tyInt\\
+      \embedw{\tyFun P Q} & = & \tyUp{(\tyFun {\embedw P} {\embed Q})}\\
+    \end{array}
+  \]\\[2em]
+  \[
+    \begin{array}{lcl}
+      \embed{x} & = & \tmReturn{x}\\
+      \embed{\tmLam x e} & = & \tmReturn{\tmThunk{\tmLam x {\embed e}}}\\
+      \embed{\tmApp f e} & = & \tmTo {\embed f} x {(\tmTo {\embed e} y {(\tmApp {\tmForce x} y)})}\\
+      \embed{\tmPrintInt {e_1} {e_2}} & = & \tmTo {\embed {e_1}} {x_1} {(\tmPrintInt {x_1} {\embed {e_2}})}\\
+    \end{array}
+  \]
 \end{frame}
 \end{document}
