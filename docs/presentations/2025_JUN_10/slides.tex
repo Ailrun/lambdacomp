@@ -99,12 +99,12 @@
 {{\ensuremath{\tmTrueSymb}}}
 \NewDocumentCommand{\tmFalse}{}%
 {{\ensuremath{\tmFalseSymb}}}
-\NewDocumentCommand{\tmThunk}{m}%
-{{\ensuremath{\tmThunkSymb(#1)}}}
+\NewDocumentCommand{\tmThunk}{o m}%
+{{\ensuremath{{\IfValueT{#1}{#1}\tmThunkSymb}(#2)}}}
 \NewDocumentCommand{\tmForce}{m}%
 {{\ensuremath{\tmForceSymb(#1)}}}
-\NewDocumentCommand{\tmReturn}{m}%
-{{\ensuremath{\tmReturnSymb(#1)}}}
+\NewDocumentCommand{\tmReturn}{o m}%
+{{\ensuremath{{\IfValueT{#1}{#1}\tmReturnSymb}(#2)}}}
 \NewDocumentCommand{\tmTo}{m m m}%
 {{\ensuremath{#1\ \tmToSymb\ #2 \binderDot #3}}}
 \NewDocumentCommand{\tmLam}{m m}%
@@ -113,6 +113,12 @@
 {{\ensuremath{#1 \mathbin{ } #2}}}
 \NewDocumentCommand{\tmPrintInt}{m m}%
 {{\ensuremath{\tmPrintIntSymb\ #1\ \tmThenSymb\ #2}}}
+
+\NewDocumentCommand{\vtyp}{O{\Gamma} m m}%
+{{\ensuremath{#1 \vdash^v #2 : #3}}}
+
+\NewDocumentCommand{\ctyp}{O{\Gamma} m m}%
+{{\ensuremath{#1 \vdash^c #2 : #3}}}
 
 \newcommand{\lambdacomp}{\texorpdfstring{\(\lambda\)-comp}{lambdacomp}\xspace}
 \newcommand{\lambdacalcplus}%
@@ -253,20 +259,20 @@
 
 \begin{frame}{Usual \(\lambda\)-Calculus Compile}
   \begin{tikzpicture}[fulloverlay]
-    \begin{scope}[every node/.style={draw,rectangle}]
-      \node[alt=<2->{gray}{}] (steps-1) at (0.5, 0.7) {\strut Elaboration/Type Checking};
-      \node[alt=<2->{gray}{}] (steps-3) at (0.5, 0.3) {\strut Code Generation};
+    \begin{scope}[every node/.style={draw,rectangle,alt=<2>{gray}{}}]
+      \node (steps-1) at (0.5, 0.7) {\strut Elaboration/Type Checking};
+      \node (steps-3) at (0.5, 0.3) {\strut Code Generation};
     \end{scope}
-    \matrix[draw,rectangle,matrix of nodes,row sep={0.1\paperheight,between origins},nodes={draw,rectangle}] (steps-2) at (0.5, 0.5)
+    \matrix[draw,rectangle,matrix of nodes,row sep={0.1\paperheight,between origins},nodes={draw,rectangle},alt=<2>{orange}{}] (steps-2) at (0.5, 0.5)
     {
-      \node at (-0.1,0) {\strut Arity Analysis};
-      \node at (0.1,0) {\strut Closure Conversion};\\
+      \node at (0.1,0) {\strut Arity Analysis};
+      \node at (-0.1,0) {\strut Closure Conversion};\\
       \strut Optimizations\\
     };
     \foreach \a in {1,2}%
     {%
       \pgfmathtruncatemacro\b{\a+1}
-      \draw[alt=<2->{gray}{},->] (steps-\a) -- (steps-\b);%
+      \draw[alt=<2>{gray}{},->] (steps-\a) -- (steps-\b);%
     }
     % \foreach \a in {2,3}%
     % {%
@@ -277,20 +283,254 @@
 \end{frame}
 
 \begin{frame}{\(\lambda\)-Abstraction as Computation}
+  \begin{tikzpicture}[fulloverlay]
+    \node[visible on=<-2>] at (0.5,0.5)
+    {\(\tmApp {(\tmLam x {\tmReturn x})} {(\tmLam x {\tmReturn x})}\)};
+
+    \begin{scope}[visible on=<2>,red]
+      \draw (0.3, 0.6) -- (0.7, 0.4);
+      \draw (0.7, 0.6) -- (0.3, 0.4);
+    \end{scope}
+
+    \node[visible on=<3->] at (0.5,0.5)
+    {\(\tmApp {(\tmLam x {\tmReturn x})} {(\tmThunk {\tmLam x {\tmReturn x}})}\)};
+
+    \node[visible on=<4>,orange] at (0.5,0.35)
+    {We never move \((\tmLam x M)\) around solely!};
+  \end{tikzpicture}
 \end{frame}
 
-\begin{frame}{Where has the closure gone?}
+\begin{frame}{No Closure?}
+  \begin{tikzpicture}[fulloverlay]
+    \node at (0.25, 0.7) {Usual \(\lambda\)-Calculus};
+
+    \node[visible on=<2->] at (0.25, 0.5) {\small \((\tmLam x t)\) can be a value};
+    \node[visible on=<3->,text width=16em,align=center] at (0.25, 0.4)
+    {\small \(\Longrightarrow\) \((\tmLam x t)\) can be a closure\\with its free variables};
+
+    \node[visible on=<4->] at (0.75, 0.7) {CBPV};
+
+    \node[visible on=<5->] at (0.75, 0.5) {\small \((\tmLam x L)\) is not a value};
+    \node[visible on=<6->,alt=<7>{red}{}] at (0.75, 0.4)
+    {\small \(\Longrightarrow\) there is no closure{\color<-6>{white}\(\ldots\)?}};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Where Has the Closure Gone?}
+  \begin{tikzpicture}[fulloverlay]
+    \begin{scope}[visible on=<-3>]
+      \begin{scope}[alt=<2->{gray}{}]
+        \node (vttitle) at (0.3, 0.8)
+        {Value Types\qquad\(A,B,\ldots\)};
+
+        \node (cttitle) at (0.7, 0.8)
+        {Computation Types\qquad\(S,T,\ldots\)};
+
+        \matrix[align=center,matrix of nodes] (vtdesc) at (0.3, 0.7)
+        {%
+          \tyInt\\
+          \tyBool\\
+          \tyUp{S}\\
+        };
+
+        \matrix[align=center,matrix of nodes] (ctdesc) at (0.7, 0.7)
+        {%
+          \tyDown{A}\\
+          \tyFun{A}{S}\\
+        };
+
+        \node (ctitle) at (0.7, 0.5)
+        {Computations\qquad\(L,M,N,\ldots\)};
+
+        \matrix[align=center,matrix of nodes] (cdesc) at (0.7, 0.3)
+        {%
+          \tmForce{U}\\
+          \tmReturn{U}\\
+          \tmTo{L}{x}{M}\\
+          \tmLam{x}{L}\\
+          \tmApp{L}{U}\\
+          \tmPrintInt{U}{L}\\
+        };
+      \end{scope}
+
+      \begin{scope}[alt=<2>{orange}{}]
+        \node (vtitle) at (0.3, 0.5)
+        {Values \qquad\(U,V,W,\ldots\)};
+
+        \matrix[align=center,matrix of nodes,%
+        row 5/.style={alt=<3>{orange}{}}] (vdesc) at (0.3, 0.3)
+        {%
+          \(x\)\\
+          \(i\)\\
+          \tmTrue\\
+          \tmFalse\\
+          \tmThunk{L}\\
+        };
+      \end{scope}
+    \end{scope}
+
+    \begin{scope}[visible on=<4->]
+      \node at (0.25, 0.7) {Usual \(\lambda\)-Calculus};
+
+      \node at (0.25, 0.5) {\small \((\tmLam x e)\) can be a value};
+      \node[text width=16em,align=center] at (0.25, 0.4)
+      {\small \(\Longrightarrow\) \((\tmLam x e)\) can be a closure\\with its free variables};
+
+      \node at (0.75, 0.7) {CBPV};
+
+      \node[visible on=<5->,orange] at (0.75, 0.5) {\small \((\tmThunk{L})\) is a value};
+      \node[visible on=<6->,orange,text width=16em,align=center] at (0.75, 0.4)
+      {\small \(\Longrightarrow\) \((\tmThunk{L})\) is a closure\\with its free variables};
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Closures in a General Modal Calculus}
+  \begin{tikzpicture}[fulloverlay]
+    \node at (0.5, 0.7) {General Modal Calculus};
+
+    \node[visible on=<2->] at (0.5, 0.5)
+    {\small Language construct \(C\) can be a value
+      {\color<-3>{white}with some computation}};
+
+    \node[visible on=<3-4>] at (0.5, 0.4)
+    {\small \(\Longrightarrow\) \(C\) can be a closure with its free variables};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Arity Analysis}
+  \begin{tikzpicture}[fulloverlay]
+    \node[visible on=<1>] at (0.5, 0.5) {Exactly when is \((\tmLam x e)\) a value?};
+
+    \node[visible on=<2->,text width=0.8\textwidth,align=center] at (0.5, 0.5)
+    {How many arguments are applied to a given function definition\\
+      \(f {=} (\tmLam {x_1} {\tmLam {x_2} {\ldots \tmLam {x_n} e}})\)
+      at least when it is called?};
+
+    \node[visible on=<3->,text width=\textwidth,align=center] at (0.5, 0.3)
+    {Less closures\\(less calls on allocation functions, less runtime fragmentations, \ldots)};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{How to Represent Arity?}
+  \begin{tikzpicture}[fulloverlay]
+    \node at (0.5, 0.6)
+    {Suppose that \(f {=} (\tmLam {x_1} {\tmLam {x_2} {\ldots \tmLam {x_n} e}})\)
+      takes at least 2 arguments in calling sites};
+
+    \node[visible on=<2->] at (0.5, 0.5)
+    {So?};
+
+    \node[visible on=<3->,orange] at (0.5, 0.4)
+    {No way to represent this in \(\lambda\)-calculus without an IR (CPS, A-normal form, \ldots)};
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Arity Analysis for \ac{CBPV}}
+  \begin{tikzpicture}[fulloverlay]
+    \node[visible on=<1-2>,text width=\textwidth,align=center] at (0.5, 0.55)
+    {\(f {=} (\tmReturn{\tmThunk{\tmLam {x_1} {\tmReturn[\color<2>{orange}]{\tmThunk[\color<2>{orange}]{\tmLam {x_2} {(\ldots \tmReturn{\tmThunk{\tmLam {x_n} L}})}}}}}})\)\\
+      taking 2 arguments};
+    \node[visible on=<3->,text width=\textwidth,align=center] at (0.5, 0.55)
+    {\(f {=} (\tmReturn{\tmThunk{\tmLam {x_1} {\tmLam {x_2} {(\ldots \tmReturn{\tmThunk{\tmLam {x_n} L}})}}}})\)\\
+      taking 2 arguments};
+
+    \node[visible on=<4->,orange] at (0.5, 0.45)
+    {No closure for the first argument application!};
+
+    \node[visible on=<5>,text width=\textwidth,align=center] at (0.5, 0.3)
+    {Previous call for \(f\)\\
+      \(\tmTo f {f_1} {(\tmTo {\tmApp {\tmForce{f_1}} {a_1}} {f_2} {(\tmTo {\tmApp {\tmForce{f_2}} {a_2}} {f_3} L)})}\)};
+
+    \node[visible on=<6>,text width=\textwidth,align=center] at (0.5, 0.3)
+    {New call for \(f\)\\
+      \(\tmTo f {f_1} {(\tmTo {\tmApp {(\tmApp {\tmForce{f_1}} {a_1})} {a_2}} {f_3} L)}\)};
+  \end{tikzpicture}
 \end{frame}
 
-\begin{frame}{Full \(\lambda\)-Lifting}
-\end{frame}
+% \begin{frame}{How to Apply Arity Analysis?}
+%   \begin{tikzpicture}[fulloverlay]
+%     \node[alt=<2->{gray}{}] at (0.5, 0.75)
+%     {\(f {=} (\tmReturn{\tmThunk{\tmLam {x_1} {\tmReturn{\tmThunk{\tmLam {x_2} {(\ldots \tmReturn{\tmThunk{\tmLam {x_n} L}})}}}}}})\)};
+%     \node[alt=<2->{gray}{}] at (0.5, 0.65)
+%     {\(\Longrightarrow f {=} (\tmReturn{\tmThunk{\tmLam {x_1} {\tmLam {x_2} {(\ldots \tmReturn{\tmThunk{\tmLam {x_n} L}})}}}})\)};
+
+%     \node at (0.5, 0.5)
+%     {\(\tmTo f {{\color<2>{orange}f_1}} {(\tmTo {\tmApp {\tmForce{{\color<2>{orange}f_1}}} {a_1}} {f_2} {(\tmTo {\tmApp {\tmForce{f_2}} {a_2}} {f_3} L)})}\)};
+%     \node at (0.5, 0.4)
+%     {\(\Longrightarrow \tmTo f {f_1} {(\tmTo {\tmApp {(\tmApp {\tmForce{f_1}} {a_1})} {a_2}} {f_3} L)}\)};
+
+%     \node[visible on=<2->] at (0.5, 0.3)
+%     {What if \({\color{orange}f_1}\) is passed arround?};
+%   \end{tikzpicture}
+% \end{frame}
 
 \begin{frame}{\(\eta\)-Reducing Optimization}
+  \begin{tikzpicture}[fulloverlay]
+    \node[visible on=<1->] at (0.5, 0.65)
+    {In (effectful) \(\lambda\)-Calculus: \((\tmLam x {\tmApp e x}) \not\equiv_{\mathtt{obs}} e\)};
+
+    \node[visible on=<2->] at (0.5, 0.55)
+    {In (effectful) CBPV: \((\tmLam x {\tmApp L x}) \equiv_{\mathtt{obs}} L\)};
+
+    \node[visible on=<3->] at (0.5, 0.45)
+    {In (effectful) CBPV: \((\tmThunk{\tmForce V}) \equiv_{\mathtt{obs}} V\)};
+
+    \node[visible on=<4->] at (0.5, 0.3)
+    {In (effectful) CBPV: all negative types satisfy \(\eta\)-equivalence};
+  \end{tikzpicture}
 \end{frame}
 
-\begin{frame}{Effect-sensitive Optimizations}
+\begin{frame}{Optimizations in General Modal Calculus}
+  \begin{tikzpicture}[fulloverlay]
+    \node at (0.5, 0.7) {General Modal Calculus};
+
+    \node[visible on=<2->] at (0.5, 0.5)
+    {\small Modality plays a key role in both representing
+      optimization results and justifying optimizations.};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Demo}
+  \begin{tikzpicture}[fulloverlay]
+    \node at (0.5, 0.5) {Let's try some examples!};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Take Away}
+  \pause
+  \begin{itemize}[<+->]
+  \item CBPV uses \(\tmThunk{L}\) as a value containing computation\\
+    \(\Longrightarrow\) \(\tmThunk{L}\) is the closure in CBPV
+  \item CBPV exposes \(\eta\)-equivalence for negative types using its modalities\\
+    \(\Longrightarrow\) \(\eta\)-reduction is a safe optimization\\[2em]
+  \item Compile of a general modal calculus should also consider these two:\\
+    \begin{itemize}
+    \item \vspace{-0.5em}What are the values with computation?
+    \item \vspace{-0.75em}What equivalences are allowed by the modalities?
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Typing Rules of CBPV}
+  \begin{mathpar}
+    \inferrule
+    {\ctyp L S}
+    {\vtyp {\tmThunk L} {\tyUp S}}
+
+    \inferrule
+    {\vtyp U {\tyUp S}}
+    {\ctyp {\tmForce U} S}
+    \\
+
+    \inferrule
+    {\vtyp U A}
+    {\ctyp {\tmReturn U} {\tyDown A}}
+
+    \inferrule
+    {\ctyp U {\tyDown A}\\
+      \ctyp [\Gamma, x{:}A] U B}
+    {\ctyp {\tmTo L x M} B}
+  \end{mathpar}
 \end{frame}
 \end{document}
