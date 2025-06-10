@@ -168,7 +168,7 @@
   \end{tikzpicture}
 \end{frame}
 
-\begin{frame}[fragile]{\acf{CBPV}}
+\begin{frame}[fragile]{\acf{CBPV}\footnote{\scriptsize Paul~Blain~Levy. Call-By-Push-Value. Springer~Netherlands, Dordrecht, 2003. doi~10.1007/978-94-007-0954-6.}}
   \begin{tikzpicture}[fulloverlay]
     \node[visible on=<2->,alt=<9-11>{gray}{},alt=<10>{orange}{},alt=<12>{orange}{},alt=<14->{gray}{}] (vttitle) at (0.3, 0.8)
     {Value Types\qquad\(A,B,\ldots\)};
@@ -293,7 +293,7 @@
     \end{scope}
 
     \node[visible on=<3->] at (0.5,0.5)
-    {\(\tmApp {(\tmLam x {\tmReturn x})} {(\tmThunk {\tmLam x {\tmReturn x}})}\)};
+    {\(\tmApp {(\tmLam x {\tmReturn x})} {(\tmThunk[\color<3>{orange}] {\tmLam x {\tmReturn x}})}\)};
 
     \node[visible on=<4>,orange] at (0.5,0.35)
     {We never move \((\tmLam x M)\) around solely!};
