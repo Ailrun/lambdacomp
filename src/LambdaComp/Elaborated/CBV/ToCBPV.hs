@@ -39,7 +39,7 @@ instance ToCBPV Tp where
   toCBPV TpBool             = CBPV.TpBool
   toCBPV TpInt              = CBPV.TpInt
   toCBPV TpDouble           = CBPV.TpDouble
-  toCBPV (tyPs `TpFun` tyR) = foldr ((CBPV.TpUp .) . (. CBPV.TpDown) . CBPV.TpFun . toCBPV) (toCBPV tyR) tyPs
+  toCBPV (tyPs `TpFun` tyR) = foldr (\tyP acc -> CBPV.TpUp (toCBPV tyP `CBPV.TpFun` CBPV.TpDown acc)) (toCBPV tyR) tyPs
 
 instance ToCBPV Tm where
   type CBPVData Tm = FreshName (CBPV.Tm CBPV.Com)
@@ -47,16 +47,12 @@ instance ToCBPV Tm where
   toCBPV :: Tm -> CBPVData Tm
   toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar x
   toCBPV (TmGlobal x)             = pure $ CBPV.TmReturn $ CBPV.TmGlobal x
-  toCBPV TmUnit                   = pure $ CBPV.TmReturn CBPV.TmUnit
-  toCBPV TmTrue                   = pure $ CBPV.TmReturn CBPV.TmTrue
-  toCBPV TmFalse                  = pure $ CBPV.TmReturn CBPV.TmFalse
-  toCBPV (TmInt n)                = pure $ CBPV.TmReturn $ CBPV.TmInt n
-  toCBPV (TmDouble f)             = pure $ CBPV.TmReturn $ CBPV.TmDouble f
+  toCBPV (TmConst c)              = pure . CBPV.TmReturn . CBPV.TmConst $ toCBPV c
   toCBPV (TmIf tm0 tm1 tm2)       = do
     tm0' <- toCBPV tm0
     c <- freshNameOf $ toCBPVVar "c"
     CBPV.TmTo tm0' c <$> liftA2 (CBPV.TmIf (CBPV.TmVar c)) (toCBPV tm1) (toCBPV tm2)
-  toCBPV (TmLam ps tm)            = foldr (((CBPV.TmReturn . CBPV.TmThunk) .) . CBPV.TmLam . toCBPV) <$> toCBPV tm <*> pure ps
+  toCBPV (TmLam ps tm)            = foldr (\p -> CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam (toCBPV p)) <$> toCBPV tm <*> pure ps
   toCBPV (tmf `TmApp` tmas)       = do
     tmas' <- traverse toCBPV tmas
     tmf' <- toCBPV tmf
@@ -83,6 +79,16 @@ instance ToCBPV Tm where
     tm' <- toCBPV tm
     v <- freshNameOf $ toCBPVVar "r"
     pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec (toCBPV p) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
+
+instance ToCBPV TmConst where
+  type CBPVData TmConst = CBPV.TmConst
+
+  toCBPV :: TmConst -> CBPVData TmConst
+  toCBPV TmCUnit                   = CBPV.TmCUnit
+  toCBPV TmCTrue                   = CBPV.TmCTrue
+  toCBPV TmCFalse                  = CBPV.TmCFalse
+  toCBPV (TmCInt n)                = CBPV.TmCInt n
+  toCBPV (TmCDouble f)             = CBPV.TmCDouble f
 
 instance ToCBPV Param where
   type CBPVData Param = CBPV.Param

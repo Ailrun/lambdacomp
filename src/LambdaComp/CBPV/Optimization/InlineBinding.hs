@@ -23,11 +23,7 @@ inlineSimpleLet tm@(TmVar x)             = do
   mayTm' <- asks (Map.!? x)
   pure $ fromMaybe tm mayTm'
 inlineSimpleLet tm@(TmGlobal _)          = pure tm
-inlineSimpleLet tm@TmUnit                = pure tm
-inlineSimpleLet tm@TmTrue                = pure tm
-inlineSimpleLet tm@TmFalse               = pure tm
-inlineSimpleLet tm@(TmInt _)             = pure tm
-inlineSimpleLet tm@(TmDouble _)          = pure tm
+inlineSimpleLet tm@(TmConst _)           = pure tm
 inlineSimpleLet (TmThunk tm)             = TmThunk <$> inlineSimpleLet tm
 inlineSimpleLet (TmIf tm0 tm1 tm2)       = liftA3 TmIf (inlineSimpleLet tm0) (inlineSimpleLet tm1) (inlineSimpleLet tm2)
 inlineSimpleLet (TmLam p tm)             = TmLam p <$> local (Map.insert (paramName p) (TmVar (paramName p))) (inlineSimpleLet tm)
@@ -49,11 +45,7 @@ inlineSimpleLet (TmRec p tm)             = TmRec p <$> local (Map.insert (paramN
 isSimpleTm :: Ident -> Tm Val -> Bool
 isSimpleTm x (TmVar y)    = x /= y
 isSimpleTm _ (TmGlobal _) = True
-isSimpleTm _ TmUnit       = True
-isSimpleTm _ TmTrue       = True
-isSimpleTm _ TmFalse      = True
-isSimpleTm _ (TmInt _)    = True
-isSimpleTm _ (TmDouble _) = True
+isSimpleTm _ (TmConst _)  = True
 isSimpleTm _ (TmThunk _)  = False
 
 runInlineLinearLet :: Tm c -> Tm c
@@ -68,11 +60,7 @@ inlineLinearLet tm@(TmVar x)             = do
     Just (tm', n) -> tm' <$ modify' (Map.insert x (tm', n + 1))
     Nothing       -> pure tm
 inlineLinearLet tm@(TmGlobal _)          = pure tm
-inlineLinearLet tm@TmUnit                = pure tm
-inlineLinearLet tm@TmTrue                = pure tm
-inlineLinearLet tm@TmFalse               = pure tm
-inlineLinearLet tm@(TmInt _)             = pure tm
-inlineLinearLet tm@(TmDouble _)          = pure tm
+inlineLinearLet tm@(TmConst _)           = pure tm
 inlineLinearLet (TmThunk tm)             = TmThunk <$> inlineLinearLet tm
 inlineLinearLet (TmIf tm0 tm1 tm2)       = liftA3 TmIf (inlineLinearLet tm0) (inlineLinearLet tm1) (inlineLinearLet tm2)
 inlineLinearLet (TmLam p tm)             = TmLam p <$> withSelfBinding (paramName p) (inlineLinearLet tm)

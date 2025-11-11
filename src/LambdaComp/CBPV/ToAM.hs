@@ -41,11 +41,7 @@ instance ToAM (Tm Val) where
   toAM :: Tm Val -> WithAMInfo (AMData (Tm Val))
   toAM (TmVar x)    = VaAddr <$> getVar x
   toAM (TmGlobal x) = VaAddr <$> getGlobal x
-  toAM TmUnit       = pure VaUnit
-  toAM TmTrue       = pure $ VaBool True
-  toAM TmFalse      = pure $ VaBool False
-  toAM (TmInt n)    = pure $ VaInt n
-  toAM (TmDouble d) = pure $ VaDouble d
+  toAM (TmConst c)  = toAM c
   toAM (TmThunk tm) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
     thunkCodeSectionName <- lift $ freshNameOf $ toLowSysVar "thunk"
@@ -94,6 +90,16 @@ instance ToAM (Tm Com) where
       thunkEnvVars = Set.toList thunkEnv
       thunkEnvSize = Set.size thunkEnv
       thunkEnv = freeVarOfTm tm
+
+instance ToAM TmConst where
+  type AMData TmConst = Value
+
+  toAM :: TmConst -> WithAMInfo (AMData TmConst)
+  toAM TmCUnit       = pure VaUnit
+  toAM TmCTrue       = pure $ VaBool True
+  toAM TmCFalse      = pure $ VaBool False
+  toAM (TmCInt n)    = pure $ VaInt n
+  toAM (TmCDouble d) = pure $ VaDouble d
 
 getVar :: Ident -> WithAMInfo Addr
 getVar x = do

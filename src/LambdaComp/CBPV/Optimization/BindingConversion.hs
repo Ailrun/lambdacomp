@@ -31,11 +31,7 @@ commutingToUnder x = uncurry (commitToUnder x) . runWriter . commutingTo
 commutingTo :: Tm c -> CommutingTo c (Tm c)
 commutingTo tm@(TmVar _)             = tm
 commutingTo tm@(TmGlobal _)          = tm
-commutingTo tm@TmUnit                = tm
-commutingTo tm@TmTrue                = tm
-commutingTo tm@TmFalse               = tm
-commutingTo tm@(TmInt _)             = tm
-commutingTo tm@(TmDouble _)          = tm
+commutingTo tm@(TmConst _)           = tm
 commutingTo (TmThunk tm)             = TmThunk $ closedCommutingTo tm
 commutingTo (TmIf tm0 tm1 tm2)       = pure $ TmIf (commutingTo tm0) (closedCommutingTo tm1) (closedCommutingTo tm2)
 commutingTo (TmLam x tm)             = TmLam x <$> commutingToUnder (paramName x) tm
@@ -78,11 +74,7 @@ liftingLetUnder x = uncurry (commitLetUnder x) . runWriter . liftingLet
 liftingLet :: Tm c -> LiftingLet c (Tm c)
 liftingLet tm@(TmVar _)             = tm
 liftingLet tm@(TmGlobal _)          = tm
-liftingLet tm@TmUnit                = tm
-liftingLet tm@TmTrue                = tm
-liftingLet tm@TmFalse               = tm
-liftingLet tm@(TmInt _)             = tm
-liftingLet tm@(TmDouble _)          = tm
+liftingLet tm@(TmConst _)           = tm
 liftingLet (TmThunk tm)             = TmThunk $ closedLiftingLet tm
 liftingLet (TmIf tm0 tm1 tm2)       = liftA2 (TmIf $ liftingLet tm0) (liftingLet tm1) (liftingLet tm2)
 liftingLet (TmLam x tm)             = TmLam x <$> liftingLetUnder (paramName x) tm

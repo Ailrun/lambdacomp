@@ -49,21 +49,11 @@ topInfer top = do
     _          -> throwError $ NonDownType "top-level definition" tp
 
 check :: (TypeErrorC m) => Tm c -> Tp c -> TypeCheckT m ()
-check TmUnit                   = \case
-  TpUnit    -> pure ()
-  tp        -> throwError $ InvalidConsType tp [TpUnit]
-check TmTrue                   = \case
-  TpBool    -> pure ()
-  tp        -> throwError $ InvalidConsType tp [TpBool]
-check TmFalse                  = \case
-  TpBool    -> pure ()
-  tp        -> throwError $ InvalidConsType tp [TpBool]
-check (TmInt _)                = \case
-  TpInt -> pure ()
-  tp    -> throwError $ InvalidConsType tp [TpInt]
-check (TmDouble _)             = \case
-  TpDouble -> pure ()
-  tp       -> throwError $ InvalidConsType tp [TpDouble]
+check (TmConst c)              = \tp ->
+  let tp' = inferConst c in
+  if tp == tp'
+  then pure ()
+  else throwError $ InvalidConstType tp tp'
 check (TmThunk tm)             = \case
   TpUp tp -> check tm tp
   tp      -> throwError $ NonUpType tp
@@ -86,11 +76,7 @@ check tm                       = \tp -> do
 infer :: (TypeErrorC m) => Tm c -> TypeCheckT m (Tp c)
 infer (TmVar x)                = asksTypeCheckInfo (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
 infer (TmGlobal x)             = asksTypeCheckInfo (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
-infer TmUnit                   = pure TpUnit
-infer TmTrue                   = pure TpBool
-infer TmFalse                  = pure TpBool
-infer (TmInt _)                = pure TpInt
-infer (TmDouble _)             = pure TpDouble
+infer (TmConst c)              = pure $ inferConst c
 infer (TmThunk tm)             = TpUp <$> infer tm
 infer (TmIf tm0 tm1 tm2)       = do
   tpc <- infer tm0
@@ -148,6 +134,13 @@ infer (TmRec p tm)             =
     TpUp tp -> tp <$ local (insertParamToInfo p) (check tm tp)
     tp      -> throwError $ NonUpType tp
 
+inferConst :: TmConst -> Tp Val
+inferConst TmCUnit       = TpUnit
+inferConst TmCTrue       = TpBool
+inferConst TmCFalse      = TpBool
+inferConst (TmCInt _)    = TpInt
+inferConst (TmCDouble _) = TpDouble
+
 insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
 insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }
 
@@ -178,7 +171,7 @@ data TypeError where
   NotDefined         :: Ident -> TypeError
   TypeMismatch       :: Text -> Tp c -> Tp c -> TypeError
   BranchTypeMismatch :: Tp c -> Tp c -> TypeError
-  InvalidConsType    :: Tp Val -> [Tp Val] -> TypeError
+  InvalidConstType   :: Tp Val -> Tp Val -> TypeError
   NonFunType         :: Tp Com -> TypeError
   NonUpType          :: Tp Val -> TypeError
   NonDownType        :: Text -> Tp Com -> TypeError

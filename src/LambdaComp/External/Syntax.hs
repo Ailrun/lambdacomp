@@ -37,14 +37,18 @@ data Param where
 
 type XParam = (Param, SourceSpan)
 
+data TmConst where
+  TmCUnit        :: TmConst
+  TmCTrue        :: TmConst
+  TmCFalse       :: TmConst
+  TmCInt         :: !Int -> TmConst
+  TmCDouble      :: !Double -> TmConst
+  deriving stock (Eq, Ord, Show)
+
 data Tm where
   TmAnn         :: XTm -> XTp -> Tm
   TmVar         :: !Ident -> Tm
-  TmUnit        :: Tm
-  TmTrue        :: Tm
-  TmFalse       :: Tm
-  TmInt         :: !Int -> Tm
-  TmDouble      :: !Double -> Tm
+  TmConst       :: !TmConst -> Tm
   TmIf          :: XTm -> XTm -> XTm -> Tm
   TmLam         :: ![XParam] -> XTm -> Tm
   TmApp         :: XTm -> ![XTm] -> Tm

@@ -10,11 +10,7 @@ runEtaReduction = etaReduction
 etaReduction :: Tm c -> Tm c
 etaReduction tm@(TmVar _)                   = tm
 etaReduction tm@(TmGlobal _)                = tm
-etaReduction tm@TmUnit                      = tm
-etaReduction tm@TmTrue                      = tm
-etaReduction tm@TmFalse                     = tm
-etaReduction tm@(TmInt _)                   = tm
-etaReduction tm@(TmDouble _)                = tm
+etaReduction tm@(TmConst _)                 = tm
 etaReduction (TmThunk (TmForce tm))         = etaReduction tm
 etaReduction (TmThunk tm)                   = TmThunk $ etaReduction tm
 etaReduction (TmIf tm0 tm1 tm2)             = TmIf (etaReduction tm0) (etaReduction tm1) (etaReduction tm2)

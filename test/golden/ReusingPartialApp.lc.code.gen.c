@@ -34,7 +34,7 @@ void sys_thunk_3(item *const _, item *const ret)
 
 void sys_thunk_6(item *const _, item *const ret)
 {
-/* TmApp (TmForce (TmGlobal "e_f")) (TmInt 3) */
+/* TmApp (TmForce (TmGlobal "e_f")) (TmConst (TmCInt 3)) */
 (global_stack.items[global_stack.top++]).int_item = 3;
 const item sys_t_5 = top_e_f;
 sys_t_5.thunk_item.code(sys_t_5.thunk_item.env, ret);
@@ -42,7 +42,7 @@ sys_t_5.thunk_item.code(sys_t_5.thunk_item.env, ret);
 
 void sys_thunk_7(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmApp (TmForce (TmGlobal "e_f")) (TmInt 3))) */
+/* TmReturn (TmThunk (TmApp (TmForce (TmGlobal "e_f")) (TmConst (TmCInt 3)))) */
 (*ret).thunk_item.code = sys_thunk_6;
 (*ret).thunk_item.env = NULL;
 }
@@ -50,7 +50,7 @@ void sys_thunk_7(item *const _, item *const ret)
 
 void sys_thunk_13(item *const _, item *const ret)
 {
-/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmInt 2)) (TmInt 5)) "c_v_4" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmInt 4)) (TmInt 1)) "c_v_6" (TmPrintInt (TmVar "c_v_4") (TmPrintInt (TmVar "c_v_6") (TmReturn (TmInt 0))))) */
+/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 2))) (TmConst (TmCInt 5))) "c_v_4" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 4))) (TmConst (TmCInt 1))) "c_v_6" (TmPrintInt (TmVar "c_v_4") (TmPrintInt (TmVar "c_v_6") (TmReturn (TmConst (TmCInt 0)))))) */
 (global_stack.items[global_stack.top++]).int_item = 5;
 (global_stack.items[global_stack.top++]).int_item = 2;
 const item sys_t_9 = top_e_g;
@@ -78,11 +78,11 @@ item *const ret = &retv;
 const item sys_t_4 = {.thunk_item = {.code = sys_thunk_3, .env = NULL}};
 sys_t_4.thunk_item.code(sys_t_4.thunk_item.env, ret);
 top_e_f = (*ret);
-/* TmReturn (TmThunk (TmApp (TmForce (TmGlobal "e_f")) (TmInt 3))) */
+/* TmReturn (TmThunk (TmApp (TmForce (TmGlobal "e_f")) (TmConst (TmCInt 3)))) */
 const item sys_t_8 = {.thunk_item = {.code = sys_thunk_7, .env = NULL}};
 sys_t_8.thunk_item.code(sys_t_8.thunk_item.env, ret);
 top_e_g = (*ret);
-/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmInt 2)) (TmInt 5)) "c_v_4" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmInt 4)) (TmInt 1)) "c_v_6" (TmPrintInt (TmVar "c_v_4") (TmPrintInt (TmVar "c_v_6") (TmReturn (TmInt 0))))) */
+/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 2))) (TmConst (TmCInt 5))) "c_v_4" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 4))) (TmConst (TmCInt 1))) "c_v_6" (TmPrintInt (TmVar "c_v_4") (TmPrintInt (TmVar "c_v_6") (TmReturn (TmConst (TmCInt 0)))))) */
 const item sys_t_14 = {.thunk_item = {.code = sys_thunk_13, .env = NULL}};
 sys_t_14.thunk_item.code(sys_t_14.thunk_item.env, ret);
 top_e_main = (*ret);

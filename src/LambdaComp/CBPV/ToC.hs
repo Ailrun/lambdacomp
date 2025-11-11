@@ -65,11 +65,7 @@ instance ToC (Tm Val) where
   toC :: Tm Val -> CData (Tm Val)
   toC (TmVar x)    = getVar x >>= valueOfConst Nothing
   toC (TmGlobal x) = getGlobal x >>= valueOfConst Nothing
-  toC TmUnit       = valueOfConst (Just ".int_item") "0"
-  toC TmTrue       = valueOfConst (Just ".int_item") "1"
-  toC TmFalse      = valueOfConst (Just ".int_item") "0"
-  toC (TmInt n)    = valueOfConst (Just ".int_item") $ show n
-  toC (TmDouble f) = valueOfConst (Just ".double_item") $ show f
+  toC (TmConst c)  = uncurry valueOfConst $ toC c
   toC (TmThunk tm) = do
     thunkBody <- local (const thunkEnvVars) $ toC tm
     uncurry (<>) . second const <$> thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : thunkBody)
@@ -77,6 +73,16 @@ instance ToC (Tm Val) where
       thunkEnvSize = Set.size thunkEnv
       thunkEnv = freeVarOfTm tm
       thunkEnvVars = Set.toList thunkEnv
+
+instance ToC TmConst where
+  type CData TmConst = (Maybe String, String)
+
+  toC :: TmConst -> CData TmConst
+  toC TmCUnit       = (Just ".int_item", "0")
+  toC TmCTrue       = (Just ".int_item", "1")
+  toC TmCFalse      = (Just ".int_item", "0")
+  toC (TmCInt n)    = (Just ".int_item", show n)
+  toC (TmCDouble f) = (Just ".double_item", show f)
 
 valueOfConst :: Maybe String -> String -> CData (Tm Val)
 valueOfConst mayMem c =

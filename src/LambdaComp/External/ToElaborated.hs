@@ -71,21 +71,11 @@ xcheck :: XTm -> Tp -> ToElaborated E.Tm
 xcheck (tm, tmSpan) = wrapErrorWithSpan tmSpan . check tm
 
 check :: Tm -> Tp -> ToElaborated E.Tm
-check TmUnit                     = \case
-  TpUnit    -> pure E.TmUnit
-  tp        -> throwError $ InvalidConsType tp [TpUnit]
-check TmTrue                     = \case
-  TpBool -> pure E.TmTrue
-  tp     -> throwError $ InvalidConsType tp [TpBool]
-check TmFalse                    = \case
-  TpBool -> pure E.TmFalse
-  tp     -> throwError $ InvalidConsType tp [TpBool]
-check (TmInt i)                  = \case
-  TpInt -> pure (E.TmInt i)
-  tp    -> throwError $ InvalidConsType tp [TpInt]
-check (TmDouble d)               = \case
-  TpDouble -> pure (E.TmDouble d)
-  tp       -> throwError $ InvalidConsType tp [TpDouble]
+check (TmConst c)                = \tp ->
+  let (tp', tm') = inferConst c in
+  if tp == tp
+  then pure $ E.TmConst tm'
+  else throwError $ InvalidConstType tp tp'
 check (TmIf xtm0 xtm1 xtm2)      = \tp -> do
   (tp0, tm0') <- xinfer xtm0
   case tp0 of
@@ -132,11 +122,7 @@ infer (TmVar x)                  = do
     (\d -> (fmap ((, E.TmVar x') . fst) . Map.lookup x $ localCtx d)
            <|> (fmap ((, E.TmGlobal x') . fst) . Map.lookup x $ topDefs d))
   maybe (throwError $ NotInScope x) pure mayLocalX
-infer TmUnit                     = pure (TpUnit, E.TmUnit)
-infer TmTrue                     = pure (TpBool, E.TmTrue)
-infer TmFalse                    = pure (TpBool, E.TmFalse)
-infer (TmInt i)                  = pure (TpInt, E.TmInt i)
-infer (TmDouble d)               = pure (TpDouble, E.TmDouble d)
+infer (TmConst c)                = pure (E.TmConst <$> inferConst c)
 infer (TmIf xtm0 xtm1 xtm2)      = do
   (tp0, tm0') <- xinfer xtm0
   case tp0 of
@@ -186,6 +172,13 @@ infer (TmPrintDouble xtm0 xtm1)  = do
     TpDouble -> second (E.TmPrintDouble tm0') <$> xinfer xtm1
     _        -> throwError $ TypeMismatch TpDouble tp0
 
+inferConst :: TmConst -> (Tp, E.TmConst)
+inferConst TmCUnit       = (TpUnit, E.TmCUnit)
+inferConst TmCTrue       = (TpBool, E.TmCTrue)
+inferConst TmCFalse      = (TpBool, E.TmCFalse)
+inferConst (TmCInt i)    = (TpInt, E.TmCInt i)
+inferConst (TmCDouble d) = (TpDouble, E.TmCDouble d)
+
 flattenFunctionType :: Tp -> ([Tp], Tp)
 flattenFunctionType (tpPs `TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
 flattenFunctionType tpR                = ([], tpR)
@@ -225,7 +218,7 @@ data ElaborationError where
   NotInScope         :: !Ident -> ElaborationError
   TypeMismatch       :: Tp -> Tp -> ElaborationError
   BranchTypeMismatch :: Tp -> Tp -> ElaborationError
-  InvalidConsType    :: Tp -> [Tp] -> ElaborationError
+  InvalidConstType   :: Tp -> Tp -> ElaborationError
   NonFunType         :: Tp -> ElaborationError
   NeedParamTypeAnn   :: !Ident -> ElaborationError
   OfSpan             :: ElaborationError -> SourceSpan -> ElaborationError

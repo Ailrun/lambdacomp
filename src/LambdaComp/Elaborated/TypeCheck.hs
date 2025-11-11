@@ -46,21 +46,11 @@ topInfer :: (TypeErrorC m) => Top -> TypeCheckT m Tp
 topInfer = infer . tmDefBody
 
 check :: (TypeErrorC m) => Tm -> Tp -> TypeCheckT m ()
-check TmUnit                   = \case
-  TpUnit    -> pure ()
-  tp        -> throwError $ InvalidConsType tp [TpUnit]
-check TmTrue                   = \case
-  TpBool -> pure ()
-  tp     -> throwError $ InvalidConsType tp [TpBool]
-check TmFalse                  = \case
-  TpBool -> pure ()
-  tp     -> throwError $ InvalidConsType tp [TpBool]
-check (TmInt _)                = \case
-  TpInt -> pure ()
-  tp    -> throwError $ InvalidConsType tp [TpInt]
-check (TmDouble _)             = \case
-  TpDouble -> pure ()
-  tp       -> throwError $ InvalidConsType tp [TpDouble]
+check (TmConst c)              = \tp ->
+  let tp' = inferConst c in
+  if tp == tp'
+  then pure ()
+  else throwError $ InvalidConstType tp tp'
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
@@ -69,11 +59,7 @@ check tm                       = \tp -> do
 infer :: (TypeErrorC m) => Tm -> TypeCheckT m Tp
 infer (TmVar x)                = asksTypeCheckInfo (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
 infer (TmGlobal x)             = asksTypeCheckInfo (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
-infer TmUnit                   = pure TpUnit
-infer TmTrue                   = pure TpBool
-infer TmFalse                  = pure TpBool
-infer (TmInt _)                = pure TpInt
-infer (TmDouble _)             = pure TpDouble
+infer (TmConst c)              = pure $ inferConst c
 infer (TmIf tm0 tm1 tm2)       = do
   tp0 <- infer tm0
   case tp0 of
@@ -120,6 +106,13 @@ infer (TmPrintDouble tm0 tm1)  = do
     _        -> throwError $ TypeMismatch TpDouble tp0
 infer (TmRec p tm)             = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
 
+inferConst :: TmConst -> Tp
+inferConst TmCUnit       = TpUnit
+inferConst TmCTrue       = TpBool
+inferConst TmCFalse      = TpBool
+inferConst (TmCInt _)    = TpInt
+inferConst (TmCDouble _) = TpDouble
+
 flattenFunctionType :: Tp -> ([Tp], Tp)
 flattenFunctionType (tpPs `TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
 flattenFunctionType tpR                = ([], tpR)
@@ -154,7 +147,7 @@ data TypeError where
   NotDefined         :: Ident -> TypeError
   TypeMismatch       :: Tp -> Tp -> TypeError
   BranchTypeMismatch :: Tp -> Tp -> TypeError
-  InvalidConsType    :: Tp -> [Tp] -> TypeError
+  InvalidConstType   :: Tp -> Tp -> TypeError
   NonFunType         :: Tp -> TypeError
   NeedTypeAnn        :: Tm -> TypeError
   deriving stock Show

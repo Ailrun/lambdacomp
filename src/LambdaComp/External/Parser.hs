@@ -151,12 +151,18 @@ atomicXTm :: Parser XTm
 atomicXTm =
   choice
   [ withSourceSpan $ TmVar <$> ident
-  , withSourceSpan $ TmTrue <$ keyword "True"
-  , withSourceSpan $ TmFalse <$ keyword "False"
-  , withSourceSpan $ TmDouble <$> double
-  , withSourceSpan $ TmInt <$> int
-  , withSourceSpan $ try $ parened $ pure TmUnit
+  , withSourceSpan $ TmConst <$> tmConst
   , parened xtm
+  ]
+
+tmConst :: Parser TmConst
+tmConst =
+  choice
+  [ TmCTrue <$ keyword "True"
+  , TmCFalse <$ keyword "False"
+  , TmCDouble <$> double
+  , TmCInt <$> int
+  , try $ parened $ pure TmCUnit
   ]
 
 param :: Parser Param

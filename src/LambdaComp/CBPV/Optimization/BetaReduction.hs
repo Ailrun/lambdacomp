@@ -10,17 +10,13 @@ runBetaReduction = betaReduction
 betaReduction :: Tm c -> Tm c
 betaReduction tm@(TmVar _)             = tm
 betaReduction tm@(TmGlobal _)          = tm
-betaReduction tm@TmUnit                = tm
-betaReduction tm@TmTrue                = tm
-betaReduction tm@TmFalse               = tm
-betaReduction tm@(TmInt _)             = tm
-betaReduction tm@(TmDouble _)          = tm
+betaReduction tm@(TmConst _)           = tm
 betaReduction (TmThunk tm)             = TmThunk $ betaReduction tm
 betaReduction (TmIf tm0 tm1 tm2)       =
   case betaReduction tm0 of
-    TmTrue  -> tm1'
-    TmFalse -> tm2'
-    tm0'    -> TmIf tm0' tm1' tm2'
+    TmConst TmCTrue  -> tm1'
+    TmConst TmCFalse -> tm2'
+    tm0'             -> TmIf tm0' tm1' tm2'
   where
     tm1' = betaReduction tm1
     tm2' = betaReduction tm2

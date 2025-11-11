@@ -47,11 +47,7 @@ instance Pretty (Tm c) where
 prettyTmPrec :: Int -> Tm c -> Doc ann
 prettyTmPrec _  (TmVar x)                = pretty x
 prettyTmPrec _  (TmGlobal x)             = "#" <> pretty x
-prettyTmPrec _  TmUnit                   = "()"
-prettyTmPrec _  TmTrue                   = "True"
-prettyTmPrec _  TmFalse                  = "False"
-prettyTmPrec _  (TmInt i)                = pretty i
-prettyTmPrec _  (TmDouble d)             = pretty d
+prettyTmPrec _  (TmConst c)              = pretty c
 prettyTmPrec pr (TmThunk tm)             = group $ prefixOfPrec2 pr ("thunk", tmThunkPrec) (group . (line <>) . (`prettyTmPrec` tm))
 prettyTmPrec pr (TmIf tm0 tm1 tm2)       = group $ condParens (pr > tmIfPrec) $ align $ vsep $ fmap group ["if" <> line <> pretty tm0, "then" <> line <> prettyTmPrec (tmIfPrec + 1) tm1, "else" <> line <> prettyTmPrec (tmIfPrec + 1) tm2]
 prettyTmPrec pr (TmLam p tm)             = group $ prettyTmLam pr [p] tm
@@ -157,6 +153,13 @@ tmMultiplicativePrec = 5
 tmNotPrec = 6
 tmNegPrec = 8
 
+instance Pretty TmConst where
+  pretty TmCUnit       = "()"
+  pretty TmCTrue       = "True"
+  pretty TmCFalse      = "False"
+  pretty (TmCInt i)    = pretty i
+  pretty (TmCDouble d) = pretty d
+
 instance Pretty Param where
   pretty Param {..} = parens . align . nest 2 $ pretty paramName <+> group (":" <+> pretty paramType)
 
@@ -212,13 +215,13 @@ instance Pretty TypeError where
     , reflow "but the other is with"
     , indent 2 $ pretty tpFalse
     ]
-  pretty (InvalidConsType tpChk tps) =
+  pretty (InvalidConstType tpChk tp) =
     align
     $ vsep
     [ reflow "A constructor is checked against"
     , indent 2 $ pretty tpChk
-    , reflow $ "but it should have" <> (if null (drop 1 tps) then "" else " one of")
-    , indent 2 . vsep $ fmap pretty tps
+    , reflow "but it should have"
+    , indent 2 $ pretty tp
     ]
   pretty (NonFunType tpAct) =
     align

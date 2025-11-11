@@ -85,11 +85,7 @@ arityAnalysisInTopUp TopTmDef {..} = TopTmDef tmDefName <$> arityAnalysisInTermU
 arityAnalysisInTermDown :: Tm c -> ArityAnalysisDown (Tm c)
 arityAnalysisInTermDown tm@(TmVar x)             = tm <$ useVar x
 arityAnalysisInTermDown tm@(TmGlobal x)          = tm <$ useVar x
-arityAnalysisInTermDown tm@TmUnit                = pure tm
-arityAnalysisInTermDown tm@TmTrue                = pure tm
-arityAnalysisInTermDown tm@TmFalse               = pure tm
-arityAnalysisInTermDown tm@(TmInt _)             = pure tm
-arityAnalysisInTermDown tm@(TmDouble _)          = pure tm
+arityAnalysisInTermDown tm@(TmConst _)           = pure tm
 arityAnalysisInTermDown (TmThunk tm)             = TmThunk <$> arityAnalysisInTermDown tm
 arityAnalysisInTermDown (TmIf tm0 tm1 tm2)       =
   liftA3
@@ -158,11 +154,7 @@ etaExpandDown tp tm arity = do
 arityAnalysisInTermUp :: Tm c -> ArityAnalysisUp (Tm c)
 arityAnalysisInTermUp tm@(TmVar x)              = asks (Map.!? x) >>= maybe (pure tm) (`etaExpandUpVar` tm)
 arityAnalysisInTermUp tm@(TmGlobal x)           = asks (Map.! x) >>= (`etaExpandUpVar` tm)
-arityAnalysisInTermUp tm@TmUnit                 = pure tm
-arityAnalysisInTermUp tm@TmTrue                 = pure tm
-arityAnalysisInTermUp tm@TmFalse                = pure tm
-arityAnalysisInTermUp tm@(TmInt _)              = pure tm
-arityAnalysisInTermUp tm@(TmDouble _)           = pure tm
+arityAnalysisInTermUp tm@(TmConst _)            = pure tm
 arityAnalysisInTermUp (TmThunk tm)              = TmThunk <$> arityAnalysisInTermUp tm
 arityAnalysisInTermUp (TmIf tm0 tm1 tm2)        = liftA3 TmIf (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1) (arityAnalysisInTermUp tm2)
 arityAnalysisInTermUp (TmLam p tm)              = TmLam p <$> arityAnalysisInTermUp tm

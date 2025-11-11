@@ -43,15 +43,19 @@ data Param where
   Param :: { paramName :: !Ident, paramType :: !(Tp Val) } -> Param
   deriving stock (Eq, Ord, Show)
 
+data TmConst where
+  TmCUnit   :: TmConst
+  TmCTrue   :: TmConst
+  TmCFalse  :: TmConst
+  TmCInt    :: !Int -> TmConst
+  TmCDouble :: !Double -> TmConst
+  deriving stock (Eq, Ord, Show)
+
 type role Tm nominal
 data Tm (c :: Class) where
   TmVar    :: !Ident -> Tm Val
   TmGlobal :: !Ident -> Tm Val
-  TmUnit   :: Tm Val
-  TmTrue   :: Tm Val
-  TmFalse  :: Tm Val
-  TmInt    :: !Int -> Tm Val
-  TmDouble :: !Double -> Tm Val
+  TmConst  :: !TmConst -> Tm Val
 
   TmThunk  :: Tm Com -> Tm Val
 
