@@ -10,7 +10,7 @@ item top_e_main;
 
 void sys_thunk_2(item *const env, item *const ret)
 {
-/* TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))) */
+/* TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpConst TpCInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))) */
 const item sys_arg0_0 = (env[0]);
 const item sys_arg1_0 = (env[1]);
 (*ret).int_item = sys_arg0_0.int_item + sys_arg1_0.int_item;
@@ -23,7 +23,7 @@ const item sys_arg1_1 = var_e_z;
 
 void sys_thunk_3(item *const env, item *const ret)
 {
-/* TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z")))))) */
+/* TmLam (Param {paramName = "e_y", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpConst TpCInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z")))))) */
 const item var_e_y = (global_stack.items[--global_stack.top]);
 (*ret).thunk_item.code = sys_thunk_2;
 (*ret).thunk_item.env = (item *) malloc(2 * sizeof(item));
@@ -33,7 +33,7 @@ const item var_e_y = (global_stack.items[--global_stack.top]);
 
 void sys_thunk_4(item *const _, item *const ret)
 {
-/* TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmReturn (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))))))))) */
+/* TmLam (Param {paramName = "e_x", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpConst TpCInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))))))))) */
 const item var_e_x = (global_stack.items[--global_stack.top]);
 (*ret).thunk_item.code = sys_thunk_3;
 (*ret).thunk_item.env = (item *) malloc(1 * sizeof(item));
@@ -42,7 +42,7 @@ const item var_e_x = (global_stack.items[--global_stack.top]);
 
 void sys_thunk_5(item *const _, item *const ret)
 {
-/* TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmReturn (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))))))))))) */
+/* TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpConst TpCInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))))))))))) */
 (*ret).thunk_item.code = sys_thunk_4;
 (*ret).thunk_item.env = NULL;
 }
@@ -84,7 +84,7 @@ int main(void)
 item retv;
 {
 item *const ret = &retv;
-/* TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpInt}) (TmReturn (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))))))))))) */
+/* TmReturn (TmThunk (TmLam (Param {paramName = "e_x", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmLam (Param {paramName = "e_y", paramType = TpConst TpCInt}) (TmReturn (TmThunk (TmTo (TmPrimBinOp PrimIAdd (TmVar "e_x") (TmVar "e_y")) "c_inp0_1" (TmLam (Param {paramName = "e_z", paramType = TpConst TpCInt}) (TmPrimBinOp PrimIAdd (TmVar "c_inp0_1") (TmVar "e_z"))))))))))) */
 const item sys_t_6 = {.thunk_item = {.code = sys_thunk_5, .env = NULL}};
 sys_t_6.thunk_item.code(sys_t_6.thunk_item.env, ret);
 top_e_f = (*ret);

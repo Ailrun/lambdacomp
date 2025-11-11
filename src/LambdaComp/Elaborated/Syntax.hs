@@ -16,18 +16,22 @@ data Top where
   TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm } -> Top
   deriving stock (Eq, Ord, Show)
 
+data TpConst where
+  TpCUnit   :: TpConst
+  TpCBool   :: TpConst
+  TpCInt    :: TpConst
+  TpCDouble :: TpConst
+  deriving stock (Eq, Ord, Show)
+
 data Tp where
-  TpUnit   :: Tp
-  TpBool   :: Tp
-  TpInt    :: Tp
-  TpDouble :: Tp
+  TpConst  :: !TpConst -> Tp
   (:->:)   :: ![Tp] -> Tp -> Tp
   deriving stock (Eq, Ord, Show)
 infixr 8 :->:
 
 pattern TpFun :: [Tp] -> Tp -> Tp
 pattern TpFun tpPs tpR = tpPs :->: tpR
-{-# COMPLETE TpUnit, TpBool, TpInt, TpDouble, TpFun #-}
+{-# COMPLETE TpConst, TpFun #-}
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !Tp } -> Param

@@ -48,12 +48,17 @@ tp = Expr.makeExprParser atomicTp tpTable
 atomicTp :: Parser Tp
 atomicTp =
   choice
-  [ TpBool <$ keyword "Bool"
-  , TpInt <$ keyword "Int"
-  , TpDouble <$ keyword "Double"
-  , symbol "(" *>
-    (TpUnit <$ symbol ")"
-     <|> tp <* symbol ")")
+  [ TpConst <$> tpConst
+  , parened tp
+  ]
+
+tpConst :: Parser TpConst
+tpConst =
+  choice
+  [ TpCBool <$ keyword "Bool"
+  , TpCInt <$ keyword "Int"
+  , TpCDouble <$ keyword "Double"
+  , try $ parened $ pure TpCUnit
   ]
 
 tpTable :: [[Expr.Operator Parser Tp]]

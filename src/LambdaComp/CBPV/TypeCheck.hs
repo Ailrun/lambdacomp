@@ -35,7 +35,7 @@ runProgramInfer :: (TypeErrorC m) => Program -> m Context
 runProgramInfer p = do
   ctx <- foldM go Map.empty p
   let lastDef = tmDefName (last p)
-  when (ctx Map.! lastDef /= TpInt) $ throwError $ NonIntLastTopDecl lastDef
+  when (ctx Map.! lastDef /= TpConst TpCInt) $ throwError $ NonIntLastTopDecl lastDef
   pure ctx
   where
     go :: (TypeErrorC m) => Context -> Top -> m Context
@@ -50,7 +50,7 @@ topInfer top = do
 
 check :: (TypeErrorC m) => Tm c -> Tp c -> TypeCheckT m ()
 check (TmConst c)              = \tp ->
-  let tp' = inferConst c in
+  let tp' = TpConst $ inferConst c in
   if tp == tp'
   then pure ()
   else throwError $ InvalidConstType tp tp'
@@ -76,18 +76,18 @@ check tm                       = \tp -> do
 infer :: (TypeErrorC m) => Tm c -> TypeCheckT m (Tp c)
 infer (TmVar x)                = asksTypeCheckInfo (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
 infer (TmGlobal x)             = asksTypeCheckInfo (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
-infer (TmConst c)              = pure $ inferConst c
+infer (TmConst c)              = pure . TpConst $ inferConst c
 infer (TmThunk tm)             = TpUp <$> infer tm
 infer (TmIf tm0 tm1 tm2)       = do
   tpc <- infer tm0
   case tpc of
-    TpBool -> do
+    TpConst TpCBool -> do
       tp1 <- infer tm1
       tp2 <- infer tm2
       if tp1 == tp2
         then pure tp1
         else throwError $ BranchTypeMismatch tp1 tp2
-    _      -> throwError $ TypeMismatch "If condition" TpBool tpc
+    _               -> throwError $ TypeMismatch "If condition" (TpConst TpCBool) tpc
 infer (TmLam p tm)             = (paramType p :->:) <$> local (insertParamToInfo p) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
@@ -109,37 +109,37 @@ infer (TmLet x tm0 tm1)        = do
   tp0 <- infer tm0
   local (insertEntryToInfo x tp0) $ infer tm1
 infer (TmPrimBinOp op tm0 tm1) = do
-  check tm0 arg0Tp
-  check tm1 arg1Tp
-  pure $ TpDown retTp
+  check tm0 $ TpConst arg0Tp
+  check tm1 $ TpConst arg1Tp
+  pure . TpDown $ TpConst retTp
   where
     ((arg0Tp, arg1Tp), retTp) = getPrimOpType op primOpTypeBase
 infer (TmPrimUnOp op tm)       = do
-  check tm argTp
-  pure $ TpDown retTp
+  check tm $ TpConst argTp
+  pure . TpDown $ TpConst retTp
   where
     (argTp, retTp) = getPrimOpType op primOpTypeBase
 infer (TmPrintInt tm0 tm1)     = do
   tp0 <- infer tm0
   case tp0 of
-    TpInt -> infer tm1
-    _     -> throwError $ TypeMismatch "PrintInt printing value" TpInt tp0
+    TpConst TpCInt -> infer tm1
+    _              -> throwError $ TypeMismatch "PrintInt printing value" (TpConst TpCInt) tp0
 infer (TmPrintDouble tm0 tm1)  = do
   tp0 <- infer tm0
   case tp0 of
-    TpDouble -> infer tm1
-    _        -> throwError $ TypeMismatch "PrintDouble printing value" TpDouble tp0
+    TpConst TpCDouble -> infer tm1
+    _                 -> throwError $ TypeMismatch "PrintDouble printing value" (TpConst TpCDouble) tp0
 infer (TmRec p tm)             =
   withError (OfRec (paramName p)) $ case paramType p of
     TpUp tp -> tp <$ local (insertParamToInfo p) (check tm tp)
     tp      -> throwError $ NonUpType tp
 
-inferConst :: TmConst -> Tp Val
-inferConst TmCUnit       = TpUnit
-inferConst TmCTrue       = TpBool
-inferConst TmCFalse      = TpBool
-inferConst (TmCInt _)    = TpInt
-inferConst (TmCDouble _) = TpDouble
+inferConst :: TmConst -> TpConst
+inferConst TmCUnit       = TpCUnit
+inferConst TmCTrue       = TpCBool
+inferConst TmCFalse      = TpCBool
+inferConst (TmCInt _)    = TpCInt
+inferConst (TmCDouble _) = TpCDouble
 
 insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
 insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }
@@ -150,8 +150,8 @@ insertEntryToInfo x tp info = info{ localCtx = Map.insert x tp $ localCtx info }
 insertParamToContext :: Param -> Context -> Context
 insertParamToContext Param {..} = Map.insert paramName paramType
 
-primOpTypeBase :: PrimOpTypeBase (Tp Val)
-primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
+primOpTypeBase :: PrimOpTypeBase TpConst
+primOpTypeBase = PrimOpTypeBase { boolTp = TpCBool, intTp = TpCInt, doubleTp = TpCDouble }
 
 runGlobalTypeCheckT :: TypeCheckT m a -> Context -> m a
 runGlobalTypeCheckT tc = runTypeCheckT tc . flip TypeCheckInfo Map.empty

@@ -21,10 +21,7 @@ instance Pretty (Tp c) where
   pretty = prettyTpPrec 0
 
 prettyTpPrec :: Int -> Tp c -> Doc ann
-prettyTpPrec _ TpUnit          = "Unit"
-prettyTpPrec _ TpBool          = "Bool"
-prettyTpPrec _ TpInt           = "Int"
-prettyTpPrec _ TpDouble        = "Double"
+prettyTpPrec _  (TpConst tpc)  = pretty tpc
 prettyTpPrec pr (TpUp tp)      = group $ prefixOfPrec1 pr ("Up", tpUpPrec) (group . (line <>) . (`prettyTpPrec` tp))
 prettyTpPrec pr (tpP :->: tpR) = group $ prettyTpFun pr [tpP] tpR
 prettyTpPrec pr (TpDown tp)    = group $ prefixOfPrec1 pr ("Down", tpDownPrec) (group . (line <>) . (`prettyTpPrec` tp))
@@ -40,6 +37,12 @@ tpDownPrec :: Int
 tpFunPrec = 0
 tpUpPrec = 1
 tpDownPrec = 1
+
+instance Pretty TpConst where
+  pretty TpCUnit   = "Unit"
+  pretty TpCBool   = "Bool"
+  pretty TpCInt    = "Int"
+  pretty TpCDouble = "Double"
 
 instance Pretty (Tm c) where
   pretty = prettyTmPrec 0

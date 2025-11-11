@@ -1,7 +1,6 @@
 {-# LANGUAGE PatternSynonyms #-}
 module LambdaComp.External.Syntax
   ( module LambdaComp.External.Syntax
-  , module LambdaComp.Elaborated.Syntax
   , module LambdaComp.Ident
   , module LambdaComp.PrimOp
 
@@ -12,7 +11,6 @@ module LambdaComp.External.Syntax
 import Data.String     (IsString (..))
 import Text.Megaparsec (SourcePos (..), mkPos, sourcePosPretty)
 
-import LambdaComp.Elaborated.Syntax (Tp (..), pattern TpFun)
 import LambdaComp.Ident
 import LambdaComp.PrimOp            (PrimOp (..), PrimOpArity (..))
 
@@ -28,6 +26,23 @@ data Top where
   deriving stock (Eq, Ord, Show)
 
 type XTop = (Top, SourceSpan)
+
+data TpConst where
+  TpCUnit   :: TpConst
+  TpCBool   :: TpConst
+  TpCInt    :: TpConst
+  TpCDouble :: TpConst
+  deriving stock (Eq, Ord, Show)
+
+data Tp where
+  TpConst  :: !TpConst -> Tp
+  (:->:)   :: ![Tp] -> Tp -> Tp
+  deriving stock (Eq, Ord, Show)
+infixr 8 :->:
+
+pattern TpFun :: [Tp] -> Tp -> Tp
+pattern TpFun tpPs tpR = tpPs :->: tpR
+{-# COMPLETE TpConst, TpFun #-}
 
 type XTp = (Tp, SourceSpan)
 

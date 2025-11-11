@@ -35,11 +35,17 @@ instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Val
 
   toCBPV :: Tp -> CBPVData Tp
-  toCBPV TpUnit             = CBPV.TpUnit
-  toCBPV TpBool             = CBPV.TpBool
-  toCBPV TpInt              = CBPV.TpInt
-  toCBPV TpDouble           = CBPV.TpDouble
+  toCBPV (TpConst tpc)      = CBPV.TpConst $ toCBPV tpc
   toCBPV (tyPs `TpFun` tyR) = foldr (\tyP acc -> CBPV.TpUp (toCBPV tyP `CBPV.TpFun` CBPV.TpDown acc)) (toCBPV tyR) tyPs
+
+instance ToCBPV TpConst where
+  type CBPVData TpConst = CBPV.TpConst
+
+  toCBPV :: TpConst -> CBPVData TpConst
+  toCBPV TpCUnit   = CBPV.TpCUnit
+  toCBPV TpCBool   = CBPV.TpCBool
+  toCBPV TpCInt    = CBPV.TpCInt
+  toCBPV TpCDouble = CBPV.TpCDouble
 
 instance ToCBPV Tm where
   type CBPVData Tm = FreshName (CBPV.Tm CBPV.Com)

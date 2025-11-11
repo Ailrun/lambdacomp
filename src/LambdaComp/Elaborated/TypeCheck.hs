@@ -36,7 +36,7 @@ runProgramInfer :: (TypeErrorC m) => Program -> m Context
 runProgramInfer p = do
   ctx <- foldM go Map.empty p
   let lastDef = tmDefName (last p)
-  when (ctx Map.! lastDef /= TpInt) $ throwError $ NonIntLastTopDecl lastDef
+  when (ctx Map.! lastDef /= TpConst TpCInt) $ throwError $ NonIntLastTopDecl lastDef
   pure ctx
   where
     go :: (TypeErrorC m) => Context -> Top -> m (Map Ident Tp)
@@ -47,7 +47,7 @@ topInfer = infer . tmDefBody
 
 check :: (TypeErrorC m) => Tm -> Tp -> TypeCheckT m ()
 check (TmConst c)              = \tp ->
-  let tp' = inferConst c in
+  let tp' = TpConst $ inferConst c in
   if tp == tp'
   then pure ()
   else throwError $ InvalidConstType tp tp'
@@ -59,17 +59,17 @@ check tm                       = \tp -> do
 infer :: (TypeErrorC m) => Tm -> TypeCheckT m Tp
 infer (TmVar x)                = asksTypeCheckInfo (Map.lookup x . localCtx) >>= maybe (throwError $ NotInScope x) pure
 infer (TmGlobal x)             = asksTypeCheckInfo (Map.lookup x . topDefs) >>= maybe (throwError $ NotDefined x) pure
-infer (TmConst c)              = pure $ inferConst c
+infer (TmConst c)              = pure . TpConst $ inferConst c
 infer (TmIf tm0 tm1 tm2)       = do
   tp0 <- infer tm0
   case tp0 of
-    TpBool -> do
+    TpConst TpCBool -> do
       tp1 <- infer tm1
       tp2 <- infer tm2
       unless (tp1 == tp2) $
         throwError $ BranchTypeMismatch tp1 tp2
       pure tp1
-    _      -> throwError $ TypeMismatch TpBool tp0
+    _               -> throwError $ TypeMismatch (TpConst TpCBool) tp0
 infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> local (insertParamsToInfo ps) (infer tm)
 infer (tmf `TmApp` tmas)       = do
   tpf <- infer tmf
@@ -84,34 +84,34 @@ infer (tmf `TmApp` tmas)       = do
         tmasLength = length tmas
         (tpPsUsed, tpPsRest) = splitAt tmasLength tpPs
 infer (TmPrimBinOp op tm0 tm1) = do
-  check tm0 arg0Tp
-  check tm1 arg1Tp
-  pure retTp
+  check tm0 $ TpConst arg0Tp
+  check tm1 $ TpConst arg1Tp
+  pure $ TpConst retTp
   where
     ((arg0Tp, arg1Tp), retTp) = getPrimOpType op primOpTypeBase
 infer (TmPrimUnOp op tm)       = do
-  check tm argTp
-  pure retTp
+  check tm $ TpConst argTp
+  pure $ TpConst retTp
   where
     (argTp, retTp) = getPrimOpType op primOpTypeBase
 infer (TmPrintInt tm0 tm1)     = do
   tp0 <- infer tm0
   case tp0 of
-    TpInt -> infer tm1
-    _     -> throwError $ TypeMismatch TpInt tp0
+    TpConst TpCInt -> infer tm1
+    _              -> throwError $ TypeMismatch (TpConst TpCInt) tp0
 infer (TmPrintDouble tm0 tm1)  = do
   tp0 <- infer tm0
   case tp0 of
-    TpDouble -> infer tm1
-    _        -> throwError $ TypeMismatch TpDouble tp0
+    TpConst TpCDouble -> infer tm1
+    _                 -> throwError $ TypeMismatch (TpConst TpCDouble) tp0
 infer (TmRec p tm)             = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
 
-inferConst :: TmConst -> Tp
-inferConst TmCUnit       = TpUnit
-inferConst TmCTrue       = TpBool
-inferConst TmCFalse      = TpBool
-inferConst (TmCInt _)    = TpInt
-inferConst (TmCDouble _) = TpDouble
+inferConst :: TmConst -> TpConst
+inferConst TmCUnit       = TpCUnit
+inferConst TmCTrue       = TpCBool
+inferConst TmCFalse      = TpCBool
+inferConst (TmCInt _)    = TpCInt
+inferConst (TmCDouble _) = TpCDouble
 
 flattenFunctionType :: Tp -> ([Tp], Tp)
 flattenFunctionType (tpPs `TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
@@ -126,8 +126,8 @@ insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx in
 insertParamToContext :: Param -> Context -> Context
 insertParamToContext Param {..} = Map.insert paramName paramType
 
-primOpTypeBase :: PrimOpTypeBase Tp
-primOpTypeBase = PrimOpTypeBase { boolTp = TpBool, intTp = TpInt, doubleTp = TpDouble }
+primOpTypeBase :: PrimOpTypeBase TpConst
+primOpTypeBase = PrimOpTypeBase { boolTp = TpCBool, intTp = TpCInt, doubleTp = TpCDouble }
 
 runGlobalTypeCheckT :: TypeCheckT m a -> Context -> m a
 runGlobalTypeCheckT tc = runTypeCheckT tc . flip TypeCheckInfo Map.empty
