@@ -6,8 +6,6 @@ module LambdaComp.Elaborated.CBV.ToCBPV
 import Control.Monad.FreshName (FreshName, freshNameOf, freshNamesOf, runFreshName)
 import Data.Functor.Identity   (Identity (..))
 import Data.Functor.Product    (Product (..))
-import Data.List               (foldl')
-import Data.String             (IsString (fromString))
 
 import LambdaComp.CBPV.Syntax       qualified as CBPV
 import LambdaComp.Elaborated.Syntax
@@ -35,8 +33,8 @@ instance ToCBPV Tp where
   type CBPVData Tp = CBPV.Tp CBPV.Val
 
   toCBPV :: Tp -> CBPVData Tp
-  toCBPV (TpConst tpc)      = CBPV.TpConst $ toCBPV tpc
-  toCBPV (tyPs `TpFun` tyR) = foldr (\tyP acc -> CBPV.TpUp (toCBPV tyP `CBPV.TpFun` CBPV.TpDown acc)) (toCBPV tyR) tyPs
+  toCBPV (TpConst tpc)     = CBPV.TpConst $ toCBPV tpc
+  toCBPV (tyP `TpFun` tyR) = CBPV.TpUp $ toCBPV tyP `CBPV.TpFun` CBPV.TpDown (toCBPV tyR)
 
 instance ToCBPV TpConst where
   type CBPVData TpConst = CBPV.TpConst
@@ -58,12 +56,12 @@ instance ToCBPV Tm where
     tm0' <- toCBPV tm0
     c <- freshNameOf $ toCBPVVar "c"
     CBPV.TmTo tm0' c <$> liftA2 (CBPV.TmIf (CBPV.TmVar c)) (toCBPV tm1) (toCBPV tm2)
-  toCBPV (TmLam ps tm)            = foldr (\p -> CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam (toCBPV p)) <$> toCBPV tm <*> pure ps
-  toCBPV (tmf `TmApp` tmas)       = do
-    tmas' <- traverse toCBPV tmas
+  toCBPV (TmLam p tm)             = CBPV.TmReturn . CBPV.TmThunk . CBPV.TmLam (toCBPV p) <$> toCBPV tm
+  toCBPV (tmf `TmApp` tma)        = do
+    tma' <- toCBPV tma
     tmf' <- toCBPV tmf
-    Pair as fs <- freshNamesOf (Pair (fmap ((toCBPVVar "a" <>) . fromString . show) [0..(length tmas - 1)]) (fmap ((toCBPVVar "f" <>) . fromString . show) [0..(length tmas - 1)]))
-    pure $ foldl' (.) id (zipWith CBPV.TmTo tmas' as) $ foldl' (uncurry . appTmOnVar) tmf' $ zip fs as
+    Pair (Identity a) (Identity f) <- freshNamesOf (Pair (toCBPVVar <$> "a") (toCBPVVar <$> "f"))
+    pure $ CBPV.TmTo tma' a (appTmOnVar tmf' f a)
   toCBPV (TmPrimBinOp op tm0 tm1) = do
     tm0' <- toCBPV tm0
     tm1' <- toCBPV tm1

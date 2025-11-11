@@ -1,7 +1,7 @@
 e_main =
-  ((return True) to c_a0_0 ->
-   (return (thunk (\ (e_x : Bool) -> return e_x))) to c_f0_0 ->
-   (force c_f0_0) c_a0_0)
+  ((return True) to c_a_0 ->
+   (return (thunk (\ (e_x : Bool) -> return e_x))) to c_f_0 ->
+   (force c_f_0) c_a_0)
   to c_c_1 ->
   if c_c_1
   then (return 1) to c_v_2 -> printInt c_v_2 then return 1

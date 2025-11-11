@@ -56,14 +56,14 @@
         , IPrimBinOp PrimISub
         , IEndScope
         , IReceive
-            ( AIdent "var_c_a0_5" )
+            ( AIdent "var_c_a_5" )
         , IPush
             ( VaAddr
                 ( AIdent "var_e_x" )
             )
         , IPush
             ( VaAddr
-                ( AIdent "var_c_a0_5" )
+                ( AIdent "var_c_a_5" )
             )
         , ICall
             ( VaAddr

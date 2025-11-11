@@ -57,6 +57,19 @@
         , IScope
         , IPush
             ( VaAddr
+                ( AIdent "var_aa_2_1" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_e_y" )
+            )
+        , IPrimBinOp PrimIAdd
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_a_9" )
+        , IScope
+        , IPush
+            ( VaAddr
                 ( AIdent "var_aa_1_1" )
             )
         , IPush
@@ -64,20 +77,7 @@
         , IPrimBinOp PrimIAdd
         , IEndScope
         , IReceive
-            ( AIdent "var_c_a1_6" )
-        , IScope
-        , IPush
-            ( VaAddr
-                ( AIdent "var_aa_2_1" )
-            )
-        , IPush
-            ( VaAddr
-                ( AIdent "var_e_y" )
-            )
-        , IPrimBinOp PrimIAdd
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_a3_6" )
+            ( AIdent "var_c_a_7" )
         , IPrintInt
             ( VaAddr
                 ( AIdent "var_aa_1_1" )
@@ -88,7 +88,7 @@
             )
         , IPush
             ( VaAddr
-                ( AIdent "var_c_a3_6" )
+                ( AIdent "var_c_a_9" )
             )
         , IPush
             ( VaAddr
@@ -96,7 +96,7 @@
             )
         , IPush
             ( VaAddr
-                ( AIdent "var_c_a1_6" )
+                ( AIdent "var_c_a_7" )
             )
         , IPush
             ( VaAddr

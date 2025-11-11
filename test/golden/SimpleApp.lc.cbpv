@@ -1,11 +1,11 @@
 e_main =
-  ((return (thunk (\ (e_x : Int) -> return e_x))) to c_a0_1 ->
+  ((return (thunk (\ (e_x : Int) -> return e_x))) to c_a_1 ->
    (return
       (thunk
          (\ (e_x : Up (Int -> Down Int)) ->
-            (return 5) to c_a0_0 ->
-            (return e_x) to c_f0_0 -> (force c_f0_0) c_a0_0)))
-   to c_f0_1 ->
-   (force c_f0_1) c_a0_1)
+            (return 5) to c_a_0 ->
+            (return e_x) to c_f_0 -> (force c_f_0) c_a_0)))
+   to c_f_1 ->
+   (force c_f_1) c_a_1)
   to c_v_2 ->
   printInt c_v_2 then return 0

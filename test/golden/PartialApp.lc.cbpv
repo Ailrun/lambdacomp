@@ -28,7 +28,7 @@ e_g =
   return
     (thunk
        (\ (aa_0_0 : Int) (aa_1_0 : Int) ->
-          (((return 3) to c_a0_2 ->
+          (((return 3) to c_a_2 ->
             (return
                (thunk
                   (\ (aa_0_2 : Int) ->
@@ -39,23 +39,23 @@ e_g =
                                (thunk
                                   (\ (aa_2_2 : Int) ->
                                      (force #e_f) aa_0_2 aa_1_2 aa_2_2)))))))
-            to c_f0_2 ->
-            (force c_f0_2) c_a0_2)
+            to c_f_2 ->
+            (force c_f_2) c_a_2)
            to aa_0_0_temp ->
            (force aa_0_0_temp) aa_0_0)
           to aa_1_0_temp ->
           (force aa_1_0_temp) aa_1_0))
 ;;
 e_main =
-  ((return 2) to c_a0_3 ->
-   (return 5) to c_a1_3 ->
-   ((return
+  ((return 5) to c_a_4 ->
+   ((return 2) to c_a_3 ->
+    (return
        (thunk
           (\ (aa_0_3 : Int) ->
              return (thunk (\ (aa_1_3 : Int) -> (force #e_g) aa_0_3 aa_1_3)))))
-    to c_f0_3 ->
-    (force c_f0_3) c_a0_3)
-   to c_f1_3 ->
-   (force c_f1_3) c_a1_3)
-  to c_v_4 ->
-  printInt c_v_4 then return 0
+    to c_f_3 ->
+    (force c_f_3) c_a_3)
+   to c_f_4 ->
+   (force c_f_4) c_a_4)
+  to c_v_5 ->
+  printInt c_v_5 then return 0

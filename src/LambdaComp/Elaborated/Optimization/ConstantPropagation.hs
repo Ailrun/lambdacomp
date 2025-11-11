@@ -13,7 +13,7 @@ propagateConstants tm@(TmGlobal _)          = tm
 propagateConstants tm@(TmConst _)           = tm
 propagateConstants (TmIf tm0 tm1 tm2)       = TmIf (propagateConstants tm0) (propagateConstants tm1) (propagateConstants tm2)
 propagateConstants (TmLam ps tm)            = TmLam ps $ propagateConstants tm
-propagateConstants (tmf `TmApp` tma)        = propagateConstants tmf `TmApp` fmap propagateConstants tma
+propagateConstants (tmf `TmApp` tma)        = propagateConstants tmf `TmApp` propagateConstants tma
 propagateConstants (TmPrimBinOp op tm0 tm1) = maybe (TmPrimBinOp op tm0' tm1') TmConst $ propagateWithBinOp op tm0' tm1'
   where
     tm0' = propagateConstants tm0

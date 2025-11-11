@@ -82,7 +82,7 @@ xtpElaborate = tpElaborate . fst
 
 tpElaborate :: Tp -> E.Tp
 tpElaborate (TpConst tpc)      = E.TpConst $ tpConstElaborate tpc
-tpElaborate (tpPs `TpFun` tpR) = fmap tpElaborate tpPs `E.TpFun` tpElaborate tpR
+tpElaborate (tpPs `TpFun` tpR) = foldr (\p acc -> tpElaborate p `E.TpFun` acc) (tpElaborate tpR) tpPs
 
 tpConstElaborate :: TpConst -> E.TpConst
 tpConstElaborate TpCUnit   = E.TpCUnit
@@ -107,11 +107,21 @@ check (TmIf xtm0 xtm1 xtm2)      = \tp -> do
   case tp0 of
     E.TpConst E.TpCBool -> E.TmIf tm0' <$> xcheck xtm1 tp <*> xcheck xtm2 tp
     _                   -> throwError $ TypeMismatch (E.TpConst E.TpCBool) tp0
-check (TmLam xps xtm)            = \case
-  tpPs `E.TpFun` tpR -> do
-    bs <- zipWithM xcheckParam xps tpPs
-    E.TmLam (uncurry E.Param . first toExtVar <$> bs) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm tpR)
-  tp               -> throwError $ NonFunType tp
+check (TmLam xps xtm)            = \(flattenFunctionType -> (tpPs, tpR)) ->
+  case tpPs of
+    []                          -> throwError $ NonFunType tpR
+    _
+      | tpPsLength == xpsLength -> do
+          bs <- zipWithM xcheckParam xps tpPs
+          foldr (E.TmLam . uncurry E.Param . first toExtVar) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm tpR) <*> pure bs
+      | tpPsLength > xpsLength  -> do
+          bs <- zipWithM xcheckParam xps tpPsUsed
+          foldr (E.TmLam . uncurry E.Param . first toExtVar) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm (foldr E.TpFun tpR tpPsRest)) <*> pure bs
+      | otherwise               -> throwError $ NonFunType tpR
+      where
+        tpPsLength = length tpPs
+        xpsLength = length xps
+        (tpPsUsed, tpPsRest) = splitAt xpsLength tpPs
 check (TmPrimBinOp op xtm0 xtm1) = \tp -> do
   unless (tp == E.TpConst retTp) $
     throwError $ TypeMismatch (E.TpConst retTp) tp
@@ -161,19 +171,17 @@ infer (TmIf xtm0 xtm1 xtm2)      = do
     _                   -> throwError $ TypeMismatch (E.TpConst E.TpCBool) tp0
 infer (TmLam xps xtm)            = do
   bs <- traverse xinferParam xps
-  tpR <- local (addLocalCtx (Map.fromList bs)) (xinfer xtm)
-  pure
-    $ bimap
-      (E.TpFun (snd <$> bs))
-      (E.TmLam (uncurry E.Param . first toExtVar <$> bs))
-      tpR
+  bimap
+    (flip (foldr E.TpFun) (snd <$> bs))
+    (flip (foldr (E.TmLam . uncurry E.Param . first toExtVar)) bs)
+    <$> local (addLocalCtx (Map.fromList bs)) (xinfer xtm)
 infer (xtmf `TmApp` xtmas)       = do
   (tpf, tmf') <- xinfer xtmf
   case flattenFunctionType tpf of
     ([], _)                       -> throwError $ NonFunType tpf
     (tpPs, tpR)
-      | tpPsLength == xtmasLength -> (tpR,) . E.TmApp tmf' <$> zipWithM xcheck xtmas tpPs
-      | tpPsLength > xtmasLength  -> (tpPsRest `E.TpFun` tpR,) . E.TmApp tmf' <$> zipWithM xcheck xtmas tpPsUsed
+      | tpPsLength == xtmasLength -> (tpR,) . foldl E.TmApp tmf' <$> zipWithM xcheck xtmas tpPs
+      | tpPsLength > xtmasLength  -> (foldr E.TpFun tpR tpPsRest,) . foldl E.TmApp tmf' <$> zipWithM xcheck xtmas tpPsUsed
       | otherwise                 -> throwError $ NonFunType tpR
       where
         tpPsLength = length tpPs
@@ -206,8 +214,8 @@ inferConst (TmCInt i)    = (E.TpCInt, E.TmCInt i)
 inferConst (TmCDouble d) = (E.TpCDouble, E.TmCDouble d)
 
 flattenFunctionType :: E.Tp -> ([E.Tp], E.Tp)
-flattenFunctionType (tpPs `E.TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
-flattenFunctionType tpR                  = ([], tpR)
+flattenFunctionType (tpP `E.TpFun` tpR) = first (tpP :) $ flattenFunctionType tpR
+flattenFunctionType tpR                 = ([], tpR)
 
 xcheckParam :: XParam -> E.Tp -> ToElaborated (Ident, E.Tp)
 xcheckParam (param, paramSpan) tp = wrapErrorWithSpan paramSpan $ checkParam param tp

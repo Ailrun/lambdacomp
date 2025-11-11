@@ -7,13 +7,13 @@
             ( VaInt 3 )
         , IEndScope
         , IReceive
-            ( AIdent "var_c_a0_3" )
+            ( AIdent "var_c_a_3" )
         , IScope
         , IPrintInt
             ( VaInt 2 )
         , ISetReturn
             ( VaAddr
-                ( AIdent "var_c_a0_3" )
+                ( AIdent "var_c_a_3" )
             )
         , IEndScope
         , IReceive

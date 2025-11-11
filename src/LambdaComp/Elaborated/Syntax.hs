@@ -25,12 +25,12 @@ data TpConst where
 
 data Tp where
   TpConst  :: !TpConst -> Tp
-  (:->:)   :: ![Tp] -> Tp -> Tp
+  (:->:)   :: Tp -> Tp -> Tp
   deriving stock (Eq, Ord, Show)
 infixr 8 :->:
 
-pattern TpFun :: [Tp] -> Tp -> Tp
-pattern TpFun tpPs tpR = tpPs :->: tpR
+pattern TpFun :: Tp -> Tp -> Tp
+pattern TpFun tpP tpR = tpP :->: tpR
 {-# COMPLETE TpConst, TpFun #-}
 
 data Param where
@@ -50,8 +50,8 @@ data Tm where
   TmGlobal      :: !Ident -> Tm
   TmConst       :: !TmConst -> Tm
   TmIf          :: Tm -> Tm -> Tm -> Tm
-  TmLam         :: ![Param] -> Tm -> Tm
-  TmApp         :: Tm -> ![Tm] -> Tm
+  TmLam         :: !Param -> Tm -> Tm
+  TmApp         :: Tm -> Tm -> Tm
   TmPrimBinOp   :: !(PrimOp Binary) -> Tm -> Tm -> Tm
   TmPrimUnOp    :: !(PrimOp Unary) -> Tm -> Tm
   TmPrintInt    :: Tm -> Tm -> Tm

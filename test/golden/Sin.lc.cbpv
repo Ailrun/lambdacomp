@@ -28,16 +28,16 @@ e_pow =
                                                           then return 1.0
                                                           else
                                                           (return e_x)
-                                                          to c_inp0_4 ->
-                                                          ((return e_x)
-                                                           to c_a0_3 ->
-                                                           ((return e_n)
+                                                          to c_inp0_5 ->
+                                                          (((return e_n)
                                                             to c_inp0_2 ->
                                                             (return 1)
                                                             to c_inp1_2 ->
                                                             c_inp0_2 - c_inp1_2)
-                                                           to c_a1_3 ->
-                                                           ((return
+                                                           to c_a_4 ->
+                                                           ((return e_x)
+                                                            to c_a_3 ->
+                                                            (return
                                                                (thunk
                                                                   (\ (aa_0_6 : Double) ->
                                                                      return
@@ -47,17 +47,15 @@ e_pow =
                                                                                 e_pow)
                                                                                aa_0_6
                                                                                aa_1_6)))))
-                                                            to c_f0_3 ->
-                                                            (force c_f0_3)
-                                                              c_a0_3)
-                                                           to c_f1_3 ->
-                                                           (force c_f1_3)
-                                                             c_a1_3)
-                                                          to c_inp1_4 ->
-                                                          c_inp0_4
-                                                            *. c_inp1_4)))))
-                                         to c_r_5 ->
-                                         force c_r_5)))
+                                                            to c_f_3 ->
+                                                            (force c_f_3) c_a_3)
+                                                           to c_f_4 ->
+                                                           (force c_f_4) c_a_4)
+                                                          to c_inp1_5 ->
+                                                          c_inp0_5
+                                                            *. c_inp1_5)))))
+                                         to c_r_6 ->
+                                         force c_r_6)))
                                   to aa_0_4_temp ->
                                   (force aa_0_4_temp) aa_0_4)
                                  to aa_1_4_temp ->
@@ -81,28 +79,28 @@ e_fact =
                               ((return
                                   (thunk
                                      (\ (e_x : Int) ->
-                                        ((return e_x) to c_inp0_6 ->
-                                         (return 0) to c_inp1_6 ->
-                                         c_inp0_6 <= c_inp1_6)
-                                        to c_c_7 ->
-                                        if c_c_7
+                                        ((return e_x) to c_inp0_7 ->
+                                         (return 0) to c_inp1_7 ->
+                                         c_inp0_7 <= c_inp1_7)
+                                        to c_c_8 ->
+                                        if c_c_8
                                         then return 1
                                         else
-                                        (return e_x) to c_inp0_10 ->
-                                        (((return e_x) to c_inp0_8 ->
-                                          (return 1) to c_inp1_8 ->
-                                          c_inp0_8 - c_inp1_8)
-                                         to c_a0_9 ->
+                                        (return e_x) to c_inp0_11 ->
+                                        (((return e_x) to c_inp0_9 ->
+                                          (return 1) to c_inp1_9 ->
+                                          c_inp0_9 - c_inp1_9)
+                                         to c_a_10 ->
                                          (return
                                             (thunk
                                                (\ (aa_0_8 : Int) ->
                                                   (force e_fact) aa_0_8)))
-                                         to c_f0_9 ->
-                                         (force c_f0_9) c_a0_9)
-                                        to c_inp1_10 ->
-                                        c_inp0_10 * c_inp1_10)))
-                               to c_r_11 ->
-                               force c_r_11)))
+                                         to c_f_10 ->
+                                         (force c_f_10) c_a_10)
+                                        to c_inp1_11 ->
+                                        c_inp0_11 * c_inp1_11)))
+                               to c_r_12 ->
+                               force c_r_12)))
                         to aa_0_2_temp ->
                         (force aa_0_2_temp) aa_0_2) aa_0_9)))
           to aa_0_3_temp ->
@@ -118,9 +116,9 @@ e_sinEntry =
                     return
                       (thunk
                          (\ (e_n : Int) ->
-                            ((return e_x) to c_a0_12 ->
-                             (return e_n) to c_a1_12 ->
-                             ((return
+                            ((return e_n) to c_a_14 ->
+                             ((return e_x) to c_a_13 ->
+                              (return
                                  (thunk
                                     (\ (aa_0_10 : Double) ->
                                        return
@@ -128,22 +126,22 @@ e_sinEntry =
                                             (\ (aa_1_10 : Int) ->
                                                (force #e_pow) aa_0_10
                                                  aa_1_10)))))
-                              to c_f0_12 ->
-                              (force c_f0_12) c_a0_12)
-                             to c_f1_12 ->
-                             (force c_f1_12) c_a1_12)
-                            to c_inp0_15 ->
-                            (((return e_n) to c_a0_13 ->
+                              to c_f_13 ->
+                              (force c_f_13) c_a_13)
+                             to c_f_14 ->
+                             (force c_f_14) c_a_14)
+                            to c_inp0_17 ->
+                            (((return e_n) to c_a_15 ->
                               (return
                                  (thunk
                                     (\ (aa_0_11 : Int) ->
                                        (force #e_fact) aa_0_11)))
-                              to c_f0_13 ->
-                              (force c_f0_13) c_a0_13)
-                             to c_inp_14 ->
-                             intToDouble c_inp_14)
-                            to c_inp1_15 ->
-                            c_inp0_15 /. c_inp1_15)))))
+                              to c_f_15 ->
+                              (force c_f_15) c_a_15)
+                             to c_inp_16 ->
+                             intToDouble c_inp_16)
+                            to c_inp1_17 ->
+                            c_inp0_17 /. c_inp1_17)))))
            to aa_0_1_temp ->
            (force aa_0_1_temp) aa_0_1)
           to aa_1_1_temp ->
@@ -156,9 +154,9 @@ e_sin =
           (return
              (thunk
                 (\ (e_x : Double) ->
-                   ((((((((return e_x) to c_a0_16 ->
-                          (return 1) to c_a1_16 ->
-                          ((return
+                   ((((((((return 1) to c_a_19 ->
+                          ((return e_x) to c_a_18 ->
+                           (return
                               (thunk
                                  (\ (aa_0_12 : Double) ->
                                     return
@@ -166,14 +164,14 @@ e_sin =
                                          (\ (aa_1_12 : Int) ->
                                             (force #e_sinEntry) aa_0_12
                                               aa_1_12)))))
-                           to c_f0_16 ->
-                           (force c_f0_16) c_a0_16)
-                          to c_f1_16 ->
-                          (force c_f1_16) c_a1_16)
-                         to c_inp0_18 ->
-                         ((return e_x) to c_a0_17 ->
-                          (return 3) to c_a1_17 ->
-                          ((return
+                           to c_f_18 ->
+                           (force c_f_18) c_a_18)
+                          to c_f_19 ->
+                          (force c_f_19) c_a_19)
+                         to c_inp0_22 ->
+                         ((return 3) to c_a_21 ->
+                          ((return e_x) to c_a_20 ->
+                           (return
                               (thunk
                                  (\ (aa_0_13 : Double) ->
                                     return
@@ -181,16 +179,16 @@ e_sin =
                                          (\ (aa_1_13 : Int) ->
                                             (force #e_sinEntry) aa_0_13
                                               aa_1_13)))))
-                           to c_f0_17 ->
-                           (force c_f0_17) c_a0_17)
-                          to c_f1_17 ->
-                          (force c_f1_17) c_a1_17)
-                         to c_inp1_18 ->
-                         c_inp0_18 -. c_inp1_18)
-                        to c_inp0_20 ->
-                        ((return e_x) to c_a0_19 ->
-                         (return 5) to c_a1_19 ->
-                         ((return
+                           to c_f_20 ->
+                           (force c_f_20) c_a_20)
+                          to c_f_21 ->
+                          (force c_f_21) c_a_21)
+                         to c_inp1_22 ->
+                         c_inp0_22 -. c_inp1_22)
+                        to c_inp0_25 ->
+                        ((return 5) to c_a_24 ->
+                         ((return e_x) to c_a_23 ->
+                          (return
                              (thunk
                                 (\ (aa_0_14 : Double) ->
                                    return
@@ -198,16 +196,16 @@ e_sin =
                                         (\ (aa_1_14 : Int) ->
                                            (force #e_sinEntry) aa_0_14
                                              aa_1_14)))))
-                          to c_f0_19 ->
-                          (force c_f0_19) c_a0_19)
-                         to c_f1_19 ->
-                         (force c_f1_19) c_a1_19)
-                        to c_inp1_20 ->
-                        c_inp0_20 +. c_inp1_20)
-                       to c_inp0_22 ->
-                       ((return e_x) to c_a0_21 ->
-                        (return 7) to c_a1_21 ->
-                        ((return
+                          to c_f_23 ->
+                          (force c_f_23) c_a_23)
+                         to c_f_24 ->
+                         (force c_f_24) c_a_24)
+                        to c_inp1_25 ->
+                        c_inp0_25 +. c_inp1_25)
+                       to c_inp0_28 ->
+                       ((return 7) to c_a_27 ->
+                        ((return e_x) to c_a_26 ->
+                         (return
                             (thunk
                                (\ (aa_0_15 : Double) ->
                                   return
@@ -215,16 +213,16 @@ e_sin =
                                        (\ (aa_1_15 : Int) ->
                                           (force #e_sinEntry) aa_0_15
                                             aa_1_15)))))
-                         to c_f0_21 ->
-                         (force c_f0_21) c_a0_21)
-                        to c_f1_21 ->
-                        (force c_f1_21) c_a1_21)
-                       to c_inp1_22 ->
-                       c_inp0_22 -. c_inp1_22)
-                      to c_inp0_24 ->
-                      ((return e_x) to c_a0_23 ->
-                       (return 9) to c_a1_23 ->
-                       ((return
+                         to c_f_26 ->
+                         (force c_f_26) c_a_26)
+                        to c_f_27 ->
+                        (force c_f_27) c_a_27)
+                       to c_inp1_28 ->
+                       c_inp0_28 -. c_inp1_28)
+                      to c_inp0_31 ->
+                      ((return 9) to c_a_30 ->
+                       ((return e_x) to c_a_29 ->
+                        (return
                            (thunk
                               (\ (aa_0_16 : Double) ->
                                  return
@@ -232,67 +230,67 @@ e_sin =
                                       (\ (aa_1_16 : Int) ->
                                          (force #e_sinEntry) aa_0_16
                                            aa_1_16)))))
-                        to c_f0_23 ->
-                        (force c_f0_23) c_a0_23)
-                       to c_f1_23 ->
-                       (force c_f1_23) c_a1_23)
-                      to c_inp1_24 ->
-                      c_inp0_24 +. c_inp1_24)
-                     to c_inp0_26 ->
-                     ((return e_x) to c_a0_25 ->
-                      (return 11) to c_a1_25 ->
-                      ((return
+                        to c_f_29 ->
+                        (force c_f_29) c_a_29)
+                       to c_f_30 ->
+                       (force c_f_30) c_a_30)
+                      to c_inp1_31 ->
+                      c_inp0_31 +. c_inp1_31)
+                     to c_inp0_34 ->
+                     ((return 11) to c_a_33 ->
+                      ((return e_x) to c_a_32 ->
+                       (return
                           (thunk
                              (\ (aa_0_17 : Double) ->
                                 return
                                   (thunk
                                      (\ (aa_1_17 : Int) ->
                                         (force #e_sinEntry) aa_0_17 aa_1_17)))))
-                       to c_f0_25 ->
-                       (force c_f0_25) c_a0_25)
-                      to c_f1_25 ->
-                      (force c_f1_25) c_a1_25)
-                     to c_inp1_26 ->
-                     c_inp0_26 -. c_inp1_26)
-                    to c_inp0_28 ->
-                    ((return e_x) to c_a0_27 ->
-                     (return 13) to c_a1_27 ->
-                     ((return
+                       to c_f_32 ->
+                       (force c_f_32) c_a_32)
+                      to c_f_33 ->
+                      (force c_f_33) c_a_33)
+                     to c_inp1_34 ->
+                     c_inp0_34 -. c_inp1_34)
+                    to c_inp0_37 ->
+                    ((return 13) to c_a_36 ->
+                     ((return e_x) to c_a_35 ->
+                      (return
                          (thunk
                             (\ (aa_0_18 : Double) ->
                                return
                                  (thunk
                                     (\ (aa_1_18 : Int) ->
                                        (force #e_sinEntry) aa_0_18 aa_1_18)))))
-                      to c_f0_27 ->
-                      (force c_f0_27) c_a0_27)
-                     to c_f1_27 ->
-                     (force c_f1_27) c_a1_27)
-                    to c_inp1_28 ->
-                    c_inp0_28 +. c_inp1_28)
-                   to c_inp0_30 ->
-                   ((return e_x) to c_a0_29 ->
-                    (return 15) to c_a1_29 ->
-                    ((return
+                      to c_f_35 ->
+                      (force c_f_35) c_a_35)
+                     to c_f_36 ->
+                     (force c_f_36) c_a_36)
+                    to c_inp1_37 ->
+                    c_inp0_37 +. c_inp1_37)
+                   to c_inp0_40 ->
+                   ((return 15) to c_a_39 ->
+                    ((return e_x) to c_a_38 ->
+                     (return
                         (thunk
                            (\ (aa_0_19 : Double) ->
                               return
                                 (thunk
                                    (\ (aa_1_19 : Int) ->
                                       (force #e_sinEntry) aa_0_19 aa_1_19)))))
-                     to c_f0_29 ->
-                     (force c_f0_29) c_a0_29)
-                    to c_f1_29 ->
-                    (force c_f1_29) c_a1_29)
-                   to c_inp1_30 ->
-                   c_inp0_30 -. c_inp1_30)))
+                     to c_f_38 ->
+                     (force c_f_38) c_a_38)
+                    to c_f_39 ->
+                    (force c_f_39) c_a_39)
+                   to c_inp1_40 ->
+                   c_inp0_40 -. c_inp1_40)))
           to aa_0_0_temp ->
           (force aa_0_0_temp) aa_0_0))
 ;;
 e_main =
-  ((return 0.5) to c_a0_31 ->
+  ((return 0.5) to c_a_41 ->
    (return (thunk (\ (aa_0_20 : Double) -> (force #e_sin) aa_0_20)))
-   to c_f0_31 ->
-   (force c_f0_31) c_a0_31)
-  to c_v_32 ->
-  printDouble c_v_32 then return 0
+   to c_f_41 ->
+   (force c_f_41) c_a_41)
+  to c_v_42 ->
+  printDouble c_v_42 then return 0

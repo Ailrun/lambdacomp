@@ -50,20 +50,20 @@ void sys_thunk_7(item *const _, item *const ret)
 
 void sys_thunk_13(item *const _, item *const ret)
 {
-/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 2))) (TmConst (TmCInt 5))) "c_v_4" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 4))) (TmConst (TmCInt 1))) "c_v_6" (TmPrintInt (TmVar "c_v_4") (TmPrintInt (TmVar "c_v_6") (TmReturn (TmConst (TmCInt 0)))))) */
+/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 2))) (TmConst (TmCInt 5))) "c_v_5" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 4))) (TmConst (TmCInt 1))) "c_v_8" (TmPrintInt (TmVar "c_v_5") (TmPrintInt (TmVar "c_v_8") (TmReturn (TmConst (TmCInt 0)))))) */
 (global_stack.items[global_stack.top++]).int_item = 5;
 (global_stack.items[global_stack.top++]).int_item = 2;
 const item sys_t_9 = top_e_g;
 sys_t_9.thunk_item.code(sys_t_9.thunk_item.env, ret);
-const item var_c_v_4 = (*ret);
+const item var_c_v_5 = (*ret);
 (global_stack.items[global_stack.top++]).int_item = 1;
 (global_stack.items[global_stack.top++]).int_item = 4;
 const item sys_t_10 = top_e_g;
 sys_t_10.thunk_item.code(sys_t_10.thunk_item.env, ret);
-const item var_c_v_6 = (*ret);
-const item sys_msg_12 = var_c_v_4;
+const item var_c_v_8 = (*ret);
+const item sys_msg_12 = var_c_v_5;
 printf("%d\n", sys_msg_12.int_item);
-const item sys_msg_11 = var_c_v_6;
+const item sys_msg_11 = var_c_v_8;
 printf("%d\n", sys_msg_11.int_item);
 (*ret).int_item = 0;
 }
@@ -82,7 +82,7 @@ top_e_f = (*ret);
 const item sys_t_8 = {.thunk_item = {.code = sys_thunk_7, .env = NULL}};
 sys_t_8.thunk_item.code(sys_t_8.thunk_item.env, ret);
 top_e_g = (*ret);
-/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 2))) (TmConst (TmCInt 5))) "c_v_4" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 4))) (TmConst (TmCInt 1))) "c_v_6" (TmPrintInt (TmVar "c_v_4") (TmPrintInt (TmVar "c_v_6") (TmReturn (TmConst (TmCInt 0)))))) */
+/* TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 2))) (TmConst (TmCInt 5))) "c_v_5" (TmTo (TmApp (TmApp (TmForce (TmGlobal "e_g")) (TmConst (TmCInt 4))) (TmConst (TmCInt 1))) "c_v_8" (TmPrintInt (TmVar "c_v_5") (TmPrintInt (TmVar "c_v_8") (TmReturn (TmConst (TmCInt 0)))))) */
 const item sys_t_14 = {.thunk_item = {.code = sys_thunk_13, .env = NULL}};
 sys_t_14.thunk_item.code(sys_t_14.thunk_item.env, ret);
 top_e_main = (*ret);

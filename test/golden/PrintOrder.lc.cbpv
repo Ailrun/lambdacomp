@@ -13,8 +13,8 @@ e_f =
           (force aa_0_0_temp) aa_0_0))
 ;;
 e_main =
-  ((return 3) to c_a0_2 ->
-   (return (thunk (\ (aa_0_1 : Int) -> (force #e_f) aa_0_1))) to c_f0_2 ->
-   (force c_f0_2) c_a0_2)
+  ((return 3) to c_a_2 ->
+   (return (thunk (\ (aa_0_1 : Int) -> (force #e_f) aa_0_1))) to c_f_2 ->
+   (force c_f_2) c_a_2)
   to c_v_3 ->
   printInt c_v_3 then return 0

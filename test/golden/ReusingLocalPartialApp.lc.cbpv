@@ -21,24 +21,26 @@ e_f =
           (force aa_0_0_temp) aa_0_0))
 ;;
 e_main =
-  ((return 3) to c_a0_2 ->
-   (return (thunk (\ (aa_0_1 : Int) -> (force #e_f) aa_0_1))) to c_f0_2 ->
-   (force c_f0_2) c_a0_2)
-  to c_a0_7 ->
+  ((return 3) to c_a_2 ->
+   (return (thunk (\ (aa_0_1 : Int) -> (force #e_f) aa_0_1))) to c_f_2 ->
+   (force c_f_2) c_a_2)
+  to c_a_9 ->
   (return
      (thunk
         (\ (e_g : Up (Int -> Down (Up (Int -> Down Int)))) ->
-           ((return 2) to c_a0_3 ->
-            (return 5) to c_a1_3 ->
-            ((return e_g) to c_f0_3 -> (force c_f0_3) c_a0_3) to c_f1_3 ->
-            (force c_f1_3) c_a1_3)
-           to c_v_4 ->
-           printInt c_v_4 then
-           ((return 4) to c_a0_5 ->
-            (return 1) to c_a1_5 ->
-            ((return e_g) to c_f0_5 -> (force c_f0_5) c_a0_5) to c_f1_5 ->
-            (force c_f1_5) c_a1_5)
-           to c_v_6 ->
-           printInt c_v_6 then return 0)))
-  to c_f0_7 ->
-  (force c_f0_7) c_a0_7
+           ((return 5) to c_a_4 ->
+            ((return 2) to c_a_3 ->
+             (return e_g) to c_f_3 -> (force c_f_3) c_a_3)
+            to c_f_4 ->
+            (force c_f_4) c_a_4)
+           to c_v_5 ->
+           printInt c_v_5 then
+           ((return 1) to c_a_7 ->
+            ((return 4) to c_a_6 ->
+             (return e_g) to c_f_6 -> (force c_f_6) c_a_6)
+            to c_f_7 ->
+            (force c_f_7) c_a_7)
+           to c_v_8 ->
+           printInt c_v_8 then return 0)))
+  to c_f_9 ->
+  (force c_f_9) c_a_9

@@ -12,11 +12,9 @@ module LambdaComp.Elaborated.TypeCheck
   , TypeError
   ) where
 
-import Control.Monad        (foldM, unless, when, zipWithM_)
+import Control.Monad        (foldM, unless, when)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (MonadReader (ask), ReaderT (runReaderT), asks, local)
-import Data.Bifunctor       (Bifunctor (first))
-import Data.Foldable        (foldr')
 import Data.Map             (Map)
 import Data.Map             qualified as Map
 
@@ -70,19 +68,12 @@ infer (TmIf tm0 tm1 tm2)       = do
         throwError $ BranchTypeMismatch tp1 tp2
       pure tp1
     _               -> throwError $ TypeMismatch (TpConst TpCBool) tp0
-infer (TmLam ps tm)            = TpFun (fmap paramType ps) <$> local (insertParamsToInfo ps) (infer tm)
-infer (tmf `TmApp` tmas)       = do
+infer (TmLam p tm)             = TpFun (paramType p) <$> local (insertParamToInfo p) (infer tm)
+infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
-  case flattenFunctionType tpf of
-    ([], _)                      -> throwError $ NonFunType tpf
-    (tpPs, tpR)
-      | tpPsLength == tmasLength -> tpR <$ zipWithM_ check tmas tpPs
-      | tpPsLength > tmasLength  -> tpPsRest `TpFun` tpR <$ zipWithM_ check tmas tpPsUsed
-      | otherwise                -> throwError $ NonFunType tpR
-      where
-        tpPsLength = length tpPs
-        tmasLength = length tmas
-        (tpPsUsed, tpPsRest) = splitAt tmasLength tpPs
+  case tpf of
+    tpP `TpFun` tpR -> tpR <$ check tma tpP
+    _               -> throwError $ NonFunType tpf
 infer (TmPrimBinOp op tm0 tm1) = do
   check tm0 $ TpConst arg0Tp
   check tm1 $ TpConst arg1Tp
@@ -112,13 +103,6 @@ inferConst TmCTrue       = TpCBool
 inferConst TmCFalse      = TpCBool
 inferConst (TmCInt _)    = TpCInt
 inferConst (TmCDouble _) = TpCDouble
-
-flattenFunctionType :: Tp -> ([Tp], Tp)
-flattenFunctionType (tpPs `TpFun` tpR) = first (tpPs <>) $ flattenFunctionType tpR
-flattenFunctionType tpR                = ([], tpR)
-
-insertParamsToInfo :: [Param] -> TypeCheckInfo -> TypeCheckInfo
-insertParamsToInfo ps info = info{ localCtx = foldr' insertParamToContext (localCtx info) ps }
 
 insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
 insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }

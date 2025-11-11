@@ -16,54 +16,54 @@
             )
         , IEndScope
         , IReceive
-            ( AIdent "var_c_a0_7" )
+            ( AIdent "var_c_a_9" )
         , IScope
         , IPush
             ( VaInt 2 )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_a0_7" )
+                ( AIdent "var_c_a_9" )
             )
         , IEndScope
         , IReceive
-            ( AIdent "var_c_f1_3" )
+            ( AIdent "var_c_f_4" )
         , IScope
         , IPush
             ( VaInt 5 )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_3" )
+                ( AIdent "var_c_f_4" )
             )
         , IEndScope
         , IReceive
-            ( AIdent "var_c_v_4" )
+            ( AIdent "var_c_v_5" )
         , IScope
         , IPush
             ( VaInt 4 )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_a0_7" )
+                ( AIdent "var_c_a_9" )
             )
         , IEndScope
         , IReceive
-            ( AIdent "var_c_f1_5" )
+            ( AIdent "var_c_f_7" )
         , IScope
         , IPush
             ( VaInt 1 )
         , ICall
             ( VaAddr
-                ( AIdent "var_c_f1_5" )
+                ( AIdent "var_c_f_7" )
             )
         , IEndScope
         , IReceive
-            ( AIdent "var_c_v_6" )
+            ( AIdent "var_c_v_8" )
         , IPrintInt
             ( VaAddr
-                ( AIdent "var_c_v_4" )
+                ( AIdent "var_c_v_5" )
             )
         , IPrintInt
             ( VaAddr
-                ( AIdent "var_c_v_6" )
+                ( AIdent "var_c_v_8" )
             )
         , ISetReturn
             ( VaInt 0 )
