@@ -7,8 +7,9 @@ module LambdaComp.CBPV.Syntax
   , module LambdaComp.PrimOp
   ) where
 
-import Data.Set (Set)
-import Data.Set qualified as Set
+import Control.Applicative (Const (Const, getConst), liftA3)
+import Data.Set            (Set)
+import Data.Set            qualified as Set
 
 import LambdaComp.Const
 import LambdaComp.Ident
@@ -74,35 +75,54 @@ deriving stock instance Eq (Tm c)
 deriving stock instance Ord (Tm c)
 deriving stock instance Show (Tm c)
 
+polyRecTmM :: (Applicative f) => (forall c. Tm c -> f (Tm c)) -> Tm c' -> f (Tm c')
+polyRecTmM _ tm@(TmVar _; TmGlobal _; TmConst _) = pure tm
+polyRecTmM f (TmThunk tm)                        = TmThunk <$> f tm
+polyRecTmM f (TmIf tm0 tm1 tm2)                  = liftA3 TmIf (f tm0) (f tm1) (f tm2)
+polyRecTmM f (TmLam p tm)                        = TmLam p <$> f tm
+polyRecTmM f (tmf `TmApp` tma)                   = liftA2 TmApp (f tmf) (f tma)
+polyRecTmM f (TmForce tm)                        = TmForce <$> f tm
+polyRecTmM f (TmReturn tm)                       = TmReturn <$> f tm
+polyRecTmM f (TmTo tm0 x tm1)                    = liftA2 (`TmTo` x) (f tm0) (f tm1)
+polyRecTmM f (TmLet x tm0 tm1)                   = liftA2 (TmLet x) (f tm0) (f tm1)
+polyRecTmM f (TmPrimBinOp bop tm0 tm1)           = liftA2 (TmPrimBinOp bop) (f tm0) (f tm1)
+polyRecTmM f (TmPrimUnOp uop tm)                 = TmPrimUnOp uop <$> f tm
+polyRecTmM f (TmPrintInt tm0 tm1)                = liftA2 TmPrintInt (f tm0) (f tm1)
+polyRecTmM f (TmPrintDouble tm0 tm1)             = liftA2 TmPrintDouble (f tm0) (f tm1)
+polyRecTmM f (TmRec p tm)                        = TmRec p <$> f tm
+
 freeVarOfTm :: Tm c -> Set Ident
-freeVarOfTm (TmVar x)               = Set.singleton x
-freeVarOfTm (TmThunk tm)            = freeVarOfTm tm
-freeVarOfTm (TmIf tm0 tm1 tm2)      = Set.unions [freeVarOfTm tm0, freeVarOfTm tm1, freeVarOfTm tm2]
-freeVarOfTm (TmLam p tm)            = paramName p `Set.delete` freeVarOfTm tm
-freeVarOfTm (tmf `TmApp` tma)       = freeVarOfTm tmf `Set.union` freeVarOfTm tma
-freeVarOfTm (TmForce tm)            = freeVarOfTm tm
-freeVarOfTm (TmReturn tm)           = freeVarOfTm tm
-freeVarOfTm (TmTo tm0 x tm1)        = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
-freeVarOfTm (TmLet x tm0 tm1)       = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
-freeVarOfTm (TmPrimBinOp _ tm0 tm1) = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
-freeVarOfTm (TmPrimUnOp _ tm)       = freeVarOfTm tm
-freeVarOfTm (TmPrintInt tm0 tm1)    = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
-freeVarOfTm (TmRec p tm)            = paramName p `Set.delete` freeVarOfTm tm
-freeVarOfTm _                       = Set.empty -- ground values/global defs
+
+freeVarOfTm tm@(TmGlobal _
+               ; TmConst _
+               ; TmThunk _) = getConst $ polyRecTmM (Const . freeVarOfTm) tm
+freeVarOfTm (TmVar x)       = Set.singleton x
+
+freeVarOfTm tm@(TmIf {}
+               ; TmApp {}
+               ; TmForce _
+               ; TmReturn _
+               ; TmPrimBinOp {}; TmPrimUnOp {}
+               ; TmPrintInt {}; TmPrintDouble {}) = getConst $ polyRecTmM (Const . freeVarOfTm) tm
+freeVarOfTm (TmLam p tm)                          = paramName p `Set.delete` freeVarOfTm tm
+freeVarOfTm (TmTo tm0 x tm1)                      = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
+freeVarOfTm (TmLet x tm0 tm1)                     = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
+freeVarOfTm (TmRec p tm)                          = paramName p `Set.delete` freeVarOfTm tm
 
 freeVarAndGlobalOfTm :: Tm c -> Set Ident
-freeVarAndGlobalOfTm (TmVar x)               = Set.singleton x
-freeVarAndGlobalOfTm (TmGlobal x)            = Set.singleton x
-freeVarAndGlobalOfTm (TmThunk tm)            = freeVarOfTm tm
-freeVarAndGlobalOfTm (TmIf tm0 tm1 tm2)      = Set.unions [freeVarOfTm tm0, freeVarOfTm tm1, freeVarOfTm tm2]
-freeVarAndGlobalOfTm (TmLam p tm)            = paramName p `Set.delete` freeVarOfTm tm
-freeVarAndGlobalOfTm (tmf `TmApp` tma)       = freeVarOfTm tmf `Set.union` freeVarOfTm tma
-freeVarAndGlobalOfTm (TmForce tm)            = freeVarOfTm tm
-freeVarAndGlobalOfTm (TmReturn tm)           = freeVarOfTm tm
-freeVarAndGlobalOfTm (TmTo tm0 x tm1)        = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
-freeVarAndGlobalOfTm (TmLet x tm0 tm1)       = freeVarOfTm tm0 `Set.union` (x `Set.delete` freeVarOfTm tm1)
-freeVarAndGlobalOfTm (TmPrimBinOp _ tm0 tm1) = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
-freeVarAndGlobalOfTm (TmPrimUnOp _ tm)       = freeVarOfTm tm
-freeVarAndGlobalOfTm (TmPrintInt tm0 tm1)    = freeVarOfTm tm0 `Set.union` freeVarOfTm tm1
-freeVarAndGlobalOfTm (TmRec p tm)            = paramName p `Set.delete` freeVarOfTm tm
-freeVarAndGlobalOfTm _                       = Set.empty
+
+freeVarAndGlobalOfTm tm@(TmConst _
+                        ; TmThunk _) = getConst $ polyRecTmM (Const . freeVarAndGlobalOfTm) tm
+freeVarAndGlobalOfTm (TmVar x)       = Set.singleton x
+freeVarAndGlobalOfTm (TmGlobal x)    = Set.singleton x
+
+freeVarAndGlobalOfTm tm@(TmIf {}
+                        ; TmApp {}
+                        ; TmForce _
+                        ; TmReturn _
+                        ; TmPrimBinOp {}; TmPrimUnOp {}
+                        ; TmPrintInt {}; TmPrintDouble {}) = getConst $ polyRecTmM (Const . freeVarAndGlobalOfTm) tm
+freeVarAndGlobalOfTm (TmLam p tm)                          = paramName p `Set.delete` freeVarAndGlobalOfTm tm
+freeVarAndGlobalOfTm (TmTo tm0 x tm1)                      = freeVarAndGlobalOfTm tm0 `Set.union` (x `Set.delete` freeVarAndGlobalOfTm tm1)
+freeVarAndGlobalOfTm (TmLet x tm0 tm1)                     = freeVarAndGlobalOfTm tm0 `Set.union` (x `Set.delete` freeVarAndGlobalOfTm tm1)
+freeVarAndGlobalOfTm (TmRec p tm)                          = paramName p `Set.delete` freeVarAndGlobalOfTm tm

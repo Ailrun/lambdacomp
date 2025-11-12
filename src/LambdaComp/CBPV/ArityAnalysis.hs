@@ -82,10 +82,13 @@ arityAnalysisInTopUp TopTmDef {..} = TopTmDef tmDefName <$> arityAnalysisInTermU
 
 -- See note [The order of arity analysis]
 arityAnalysisInTermDown :: Tm c -> ArityAnalysisDown (Tm c)
-arityAnalysisInTermDown tm@(TmVar x)             = tm <$ useVar x
-arityAnalysisInTermDown tm@(TmGlobal x)          = tm <$ useVar x
-arityAnalysisInTermDown tm@(TmConst _)           = pure tm
-arityAnalysisInTermDown (TmThunk tm)             = TmThunk <$> arityAnalysisInTermDown tm
+arityAnalysisInTermDown tm@(TmConst _
+                           ; TmThunk _) = polyRecTmM arityAnalysisInTermDown tm
+arityAnalysisInTermDown tm@(TmVar x)    = tm <$ useVar x
+arityAnalysisInTermDown tm@(TmGlobal x) = tm <$ useVar x
+
+arityAnalysisInTermDown tm@(TmForce _
+                           ; TmReturn _)         = polyRecTmM arityAnalysisInTermDown tm
 arityAnalysisInTermDown (TmIf tm0 tm1 tm2)       =
   liftA3
   TmIf
@@ -94,8 +97,6 @@ arityAnalysisInTermDown (TmIf tm0 tm1 tm2)       =
   (arityAnalysisInBranchDown tm2)
 arityAnalysisInTermDown (TmLam p tm)             = TmLam p <$> arityAnalysisInLamDown tm
 arityAnalysisInTermDown (tmf `TmApp` tma)        = liftA2 TmApp (arityAnalysisInAppFunDown tmf) (arityAnalysisInNonTailDown tma)
-arityAnalysisInTermDown (TmForce tm)             = TmForce <$> arityAnalysisInTermDown tm
-arityAnalysisInTermDown (TmReturn tm)            = TmReturn <$> arityAnalysisInTermDown tm
 arityAnalysisInTermDown (TmTo tm0 x tm1)         = do
   (tm1', ar) <- censor (deleteArity x) . listens (readArityWithDefault 0 x) $ arityAnalysisInTermDown tm1
   tm0' <- local (const ar) $ arityAnalysisInTermDown tm0
@@ -151,21 +152,21 @@ etaExpandDown tp tm arity = do
         tempX = toArityTempVar x
 
 arityAnalysisInTermUp :: Tm c -> ArityAnalysisUp (Tm c)
-arityAnalysisInTermUp tm@(TmVar x)              = asks (Map.!? x) >>= maybe (pure tm) (`etaExpandUpVar` tm)
-arityAnalysisInTermUp tm@(TmGlobal x)           = asks (Map.! x) >>= (`etaExpandUpVar` tm)
-arityAnalysisInTermUp tm@(TmConst _)            = pure tm
-arityAnalysisInTermUp (TmThunk tm)              = TmThunk <$> arityAnalysisInTermUp tm
-arityAnalysisInTermUp (TmIf tm0 tm1 tm2)        = liftA3 TmIf (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1) (arityAnalysisInTermUp tm2)
-arityAnalysisInTermUp (TmLam p tm)              = TmLam p <$> arityAnalysisInTermUp tm
-arityAnalysisInTermUp (tmf `TmApp` tma)         = liftA2 TmApp (arityAnalysisInTermUp tmf) (arityAnalysisInTermUp tma)
-arityAnalysisInTermUp (TmForce tm)              = TmForce <$> arityAnalysisInTermUp tm
-arityAnalysisInTermUp (TmReturn tm)             = TmReturn <$> arityAnalysisInTermUp tm
-arityAnalysisInTermUp (TmTo tm0 x tm1)          = liftA2 (`TmTo` x) (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1)
-arityAnalysisInTermUp (TmLet x tm0 tm1)         = liftA2 (TmLet x) (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1)
-arityAnalysisInTermUp (TmPrimBinOp op tm0 tm1)  = liftA2 (TmPrimBinOp op) (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1)
-arityAnalysisInTermUp (TmPrimUnOp op tm)        = TmPrimUnOp op <$> arityAnalysisInTermUp tm
-arityAnalysisInTermUp (TmPrintInt tm0 tm1)      = liftA2 TmPrintInt (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1)
-arityAnalysisInTermUp (TmPrintDouble tm0 tm1)   = liftA2 TmPrintDouble (arityAnalysisInTermUp tm0) (arityAnalysisInTermUp tm1)
+arityAnalysisInTermUp tm@(TmConst _
+                         ; TmThunk _) = polyRecTmM arityAnalysisInTermUp tm
+arityAnalysisInTermUp tm@(TmVar x)    = asks (Map.!? x) >>= maybe (pure tm) (`etaExpandUpVar` tm)
+arityAnalysisInTermUp tm@(TmGlobal x) = asks (Map.! x) >>= (`etaExpandUpVar` tm)
+
+arityAnalysisInTermUp tm@(TmIf {}
+                         ; TmLam {}; TmApp {}
+                         ; TmForce {}
+                         ; TmReturn {}
+                         ; TmTo {}
+                         ; TmLet {}
+                         ; TmPrimBinOp {}
+                         ; TmPrimUnOp {}
+                         ; TmPrintInt {}
+                         ; TmPrintDouble {})    = polyRecTmM arityAnalysisInTermUp tm
 arityAnalysisInTermUp (TmRec p@(Param {..}) tm) =
   local (Map.insert paramName paramType) (arityAnalysisInTermUp tm)
   >>= etaExpandUp (unwrapTpUp paramType) . TmRec p

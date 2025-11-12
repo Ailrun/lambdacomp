@@ -6,7 +6,8 @@ module LambdaComp.Elaborated.Syntax
   , module LambdaComp.PrimOp
   ) where
 
-import Data.String (IsString (..))
+import Control.Applicative (liftA3)
+import Data.String         (IsString (..))
 
 import LambdaComp.Const
 import LambdaComp.Ident
@@ -48,3 +49,14 @@ data Tm where
 
 instance IsString Tm where
   fromString = TmVar . fromString
+
+recTmM :: (Applicative f) => (Tm -> f Tm) -> Tm -> f Tm
+recTmM _ tm@(TmVar _; TmGlobal _; TmConst _) = pure tm
+recTmM f (TmIf tm0 tm1 tm2)                  = liftA3 TmIf (f tm0) (f tm1) (f tm2)
+recTmM f (TmLam p tm)                        = TmLam p <$> f tm
+recTmM f (tmf `TmApp` tma)                   = liftA2 TmApp (f tmf) (f tma)
+recTmM f (TmPrimBinOp bop tm0 tm1)           = liftA2 (TmPrimBinOp bop) (f tm0) (f tm1)
+recTmM f (TmPrimUnOp uop tm)                 = TmPrimUnOp uop <$> f tm
+recTmM f (TmPrintInt tm0 tm1)                = liftA2 TmPrintInt (f tm0) (f tm1)
+recTmM f (TmPrintDouble tm0 tm1)             = liftA2 TmPrintDouble (f tm0) (f tm1)
+recTmM f (TmRec p tm)                        = TmRec p <$> f tm

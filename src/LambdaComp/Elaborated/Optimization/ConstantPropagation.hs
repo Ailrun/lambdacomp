@@ -3,17 +3,18 @@ module LambdaComp.Elaborated.Optimization.ConstantPropagation
   ) where
 
 import LambdaComp.Elaborated.Syntax
+import Data.Functor.Identity (Identity(Identity, runIdentity))
 
 runConstantsPropagation :: Tm -> Tm
 runConstantsPropagation = propagateConstants
 
 propagateConstants :: Tm -> Tm
-propagateConstants tm@(TmVar _)             = tm
-propagateConstants tm@(TmGlobal _)          = tm
-propagateConstants tm@(TmConst _)           = tm
-propagateConstants (TmIf tm0 tm1 tm2)       = TmIf (propagateConstants tm0) (propagateConstants tm1) (propagateConstants tm2)
-propagateConstants (TmLam ps tm)            = TmLam ps $ propagateConstants tm
-propagateConstants (tmf `TmApp` tma)        = propagateConstants tmf `TmApp` propagateConstants tma
+propagateConstants tm@(TmVar _; TmGlobal _
+                      ; TmConst _
+                      ; TmIf {}
+                      ; TmLam {}; TmApp{}
+                      ; TmPrintInt {}; TmPrintDouble {}
+                      ; TmRec {})           = runIdentity $ recTmM (Identity . propagateConstants) tm
 propagateConstants (TmPrimBinOp op tm0 tm1) = maybe (TmPrimBinOp op tm0' tm1') TmConst $ propagateWithBinOp op tm0' tm1'
   where
     tm0' = propagateConstants tm0
@@ -21,9 +22,6 @@ propagateConstants (TmPrimBinOp op tm0 tm1) = maybe (TmPrimBinOp op tm0' tm1') T
 propagateConstants (TmPrimUnOp op tm)       = maybe (TmPrimUnOp op tm') TmConst $ propagateWithUnOp op tm
   where
     tm' = propagateConstants tm
-propagateConstants (TmPrintInt tm0 tm1)     = TmPrintInt (propagateConstants tm0) (propagateConstants tm1)
-propagateConstants (TmPrintDouble tm0 tm1)  = TmPrintDouble (propagateConstants tm0) (propagateConstants tm1)
-propagateConstants (TmRec p tm)             = TmRec p (propagateConstants tm)
 
 propagateWithBinOp :: PrimOp Binary -> Tm -> Tm -> Maybe TmConst
 propagateWithBinOp PrimIAdd = propagateWithBinIntOp (+) TmCInt

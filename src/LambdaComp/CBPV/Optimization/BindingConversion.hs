@@ -40,7 +40,7 @@ commutingTo (TmForce tm)             = pure . TmForce $ commutingTo tm
 commutingTo (TmReturn tm)            = pure . TmReturn $ commutingTo tm
 commutingTo (TmTo tm0 x tm1)         = do
   tm0' <- commutingTo tm0
-  tell [TmToPrefix (freeVarAndGlobalOfTm tm0') tm0' x]
+  tell [TmToPrefix (freeVarOfTm tm0') tm0' x]
   commutingTo tm1
 commutingTo (TmLet x tm0 tm1)        = TmLet x (commutingTo tm0) <$> commutingToUnder x tm1
 commutingTo (TmPrimBinOp op tm0 tm1) = pure $ TmPrimBinOp op (commutingTo tm0) (commutingTo tm1)
