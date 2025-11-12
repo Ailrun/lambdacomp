@@ -49,8 +49,8 @@ instance ToCBPV Tm where
   type CBPVData Tm = FreshName (CBPV.Tm CBPV.Com)
 
   toCBPV :: Tm -> CBPVData Tm
-  toCBPV (TmVar x)                = pure $ CBPV.TmReturn $ CBPV.TmVar x
-  toCBPV (TmGlobal x)             = pure $ CBPV.TmReturn $ CBPV.TmGlobal x
+  toCBPV (TmVar x)                = pure . CBPV.TmReturn $ CBPV.TmVar x
+  toCBPV (TmGlobal x)             = pure . CBPV.TmReturn $ CBPV.TmGlobal x
   toCBPV (TmConst c)              = pure . CBPV.TmReturn . CBPV.TmConst $ toCBPV c
   toCBPV (TmIf tm0 tm1 tm2)       = do
     tm0' <- toCBPV tm0
@@ -61,44 +61,41 @@ instance ToCBPV Tm where
     tma' <- toCBPV tma
     tmf' <- toCBPV tmf
     Pair (Identity a) (Identity f) <- freshNamesOf (Pair (toCBPVVar <$> "a") (toCBPVVar <$> "f"))
-    pure $ CBPV.TmTo tma' a (appTmOnVar tmf' f a)
+    pure . CBPV.TmTo tma' a . CBPV.TmTo tmf' f $ CBPV.TmForce (CBPV.TmVar f) `CBPV.TmApp` CBPV.TmVar a
   toCBPV (TmPrimBinOp op tm0 tm1) = do
     tm0' <- toCBPV tm0
     tm1' <- toCBPV tm1
     Pair (Identity inp0) (Identity inp1) <- freshNamesOf (Pair (toCBPVVar <$> "inp0") (toCBPVVar <$> "inp1"))
-    pure $ CBPV.TmTo tm0' inp0 $ CBPV.TmTo tm1' inp1 $ CBPV.TmPrimBinOp op (CBPV.TmVar inp0) (CBPV.TmVar inp1)
+    pure . CBPV.TmTo tm0' inp0 . CBPV.TmTo tm1' inp1 $ CBPV.TmPrimBinOp op (CBPV.TmVar inp0) (CBPV.TmVar inp1)
   toCBPV (TmPrimUnOp op tm)       = do
     tm' <- toCBPV tm
     inp <- freshNameOf $ toCBPVVar "inp"
-    pure $ CBPV.TmTo tm' inp $ CBPV.TmPrimUnOp op (CBPV.TmVar inp)
-  toCBPV (TmPrintInt tm0 tm1)     = do
-    tm0' <- toCBPV tm0
-    v <- freshNameOf $ toCBPVVar "v"
-    CBPV.TmTo tm0' v . CBPV.TmPrintInt (CBPV.TmVar v) <$> toCBPV tm1
-  toCBPV (TmPrintDouble tm0 tm1)  = do
-    tm0' <- toCBPV tm0
-    v <- freshNameOf $ toCBPVVar "v"
-    CBPV.TmTo tm0' v . CBPV.TmPrintDouble (CBPV.TmVar v) <$> toCBPV tm1
+    pure . CBPV.TmTo tm' inp . CBPV.TmPrimUnOp op $ CBPV.TmVar inp
+  toCBPV (TmPrintInt tm0 tm1)     = toCBPVPrint tm0 tm1 CBPV.TmPrintInt
+  toCBPV (TmPrintDouble tm0 tm1)  = toCBPVPrint tm0 tm1 CBPV.TmPrintDouble
   toCBPV (TmRec p tm)             = do
     tm' <- toCBPV tm
     v <- freshNameOf $ toCBPVVar "r"
-    pure $ CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec (toCBPV p) $ CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
+    pure . CBPV.TmReturn . CBPV.TmThunk . CBPV.TmRec (toCBPV p) . CBPV.TmTo tm' v $ CBPV.TmForce (CBPV.TmVar v)
+
+toCBPVPrint :: Tm -> Tm -> (CBPV.Tm CBPV.Val -> CBPV.Tm CBPV.Com -> CBPV.Tm CBPV.Com) -> CBPVData Tm
+toCBPVPrint tm0 tm1 printer = do
+  tm0' <- toCBPV tm0
+  v <- freshNameOf $ toCBPVVar "v"
+  CBPV.TmTo tm0' v . printer (CBPV.TmVar v) <$> toCBPV tm1
 
 instance ToCBPV TmConst where
   type CBPVData TmConst = CBPV.TmConst
 
   toCBPV :: TmConst -> CBPVData TmConst
-  toCBPV TmCUnit                   = CBPV.TmCUnit
-  toCBPV TmCTrue                   = CBPV.TmCTrue
-  toCBPV TmCFalse                  = CBPV.TmCFalse
-  toCBPV (TmCInt n)                = CBPV.TmCInt n
-  toCBPV (TmCDouble f)             = CBPV.TmCDouble f
+  toCBPV TmCUnit       = CBPV.TmCUnit
+  toCBPV TmCTrue       = CBPV.TmCTrue
+  toCBPV TmCFalse      = CBPV.TmCFalse
+  toCBPV (TmCInt n)    = CBPV.TmCInt n
+  toCBPV (TmCDouble f) = CBPV.TmCDouble f
 
 instance ToCBPV Param where
   type CBPVData Param = CBPV.Param
 
   toCBPV :: Param -> CBPVData Param
   toCBPV Param {..} = CBPV.Param paramName (toCBPV paramType)
-
-appTmOnVar :: CBPV.Tm CBPV.Com -> Ident -> Ident -> CBPV.Tm CBPV.Com
-appTmOnVar tmf f a = CBPV.TmTo tmf f $ CBPV.TmForce (CBPV.TmVar f) `CBPV.TmApp` CBPV.TmVar a
