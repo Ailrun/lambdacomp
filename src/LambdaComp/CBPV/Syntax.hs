@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeData        #-}
 module LambdaComp.CBPV.Syntax
   ( module LambdaComp.CBPV.Syntax
+  , module LambdaComp.Const
   , module LambdaComp.Ident
   , module LambdaComp.PrimOp
   ) where
@@ -9,6 +10,7 @@ module LambdaComp.CBPV.Syntax
 import Data.Set (Set)
 import Data.Set qualified as Set
 
+import LambdaComp.Const
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 
@@ -21,16 +23,9 @@ data Top where
   TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm Com } -> Top
   deriving stock (Eq, Ord, Show)
 
-data TpConst where
-  TpCUnit   :: TpConst
-  TpCBool   :: TpConst
-  TpCInt    :: TpConst
-  TpCDouble :: TpConst
-  deriving stock (Eq, Ord, Show)
-
 type role Tp nominal
 data Tp (c :: Class) where
-  TpConst  :: TpConst -> Tp Val
+  TpConst  :: !TpConst -> Tp Val
   TpUp     :: Tp Com -> Tp Val
 
   (:->:) :: Tp Val -> Tp Com -> Tp Com
@@ -45,14 +40,6 @@ pattern TpFun tp0 tp1 = tp0 :->: tp1
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !(Tp Val) } -> Param
-  deriving stock (Eq, Ord, Show)
-
-data TmConst where
-  TmCUnit   :: TmConst
-  TmCTrue   :: TmConst
-  TmCFalse  :: TmConst
-  TmCInt    :: !Int -> TmConst
-  TmCDouble :: !Double -> TmConst
   deriving stock (Eq, Ord, Show)
 
 type role Tm nominal

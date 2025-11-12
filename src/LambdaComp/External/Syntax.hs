@@ -1,6 +1,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 module LambdaComp.External.Syntax
-  ( module LambdaComp.External.Syntax
+  ( module LambdaComp.Const
+  , module LambdaComp.External.Syntax
   , module LambdaComp.Ident
   , module LambdaComp.PrimOp
 
@@ -11,8 +12,9 @@ module LambdaComp.External.Syntax
 import Data.String     (IsString (..))
 import Text.Megaparsec (SourcePos (..), mkPos, sourcePosPretty)
 
+import LambdaComp.Const
 import LambdaComp.Ident
-import LambdaComp.PrimOp            (PrimOp (..), PrimOpArity (..))
+import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 
 data SourceSpan where
   SourceSpan :: { startPos :: SourcePos, endPos :: SourcePos } -> SourceSpan
@@ -26,13 +28,6 @@ data Top where
   deriving stock (Eq, Ord, Show)
 
 type XTop = (Top, SourceSpan)
-
-data TpConst where
-  TpCUnit   :: TpConst
-  TpCBool   :: TpConst
-  TpCInt    :: TpConst
-  TpCDouble :: TpConst
-  deriving stock (Eq, Ord, Show)
 
 data Tp where
   TpConst  :: !TpConst -> Tp
@@ -51,14 +46,6 @@ data Param where
   deriving stock (Eq, Ord, Show)
 
 type XParam = (Param, SourceSpan)
-
-data TmConst where
-  TmCUnit        :: TmConst
-  TmCTrue        :: TmConst
-  TmCFalse       :: TmConst
-  TmCInt         :: !Int -> TmConst
-  TmCDouble      :: !Double -> TmConst
-  deriving stock (Eq, Ord, Show)
 
 data Tm where
   TmAnn         :: XTm -> XTp -> Tm

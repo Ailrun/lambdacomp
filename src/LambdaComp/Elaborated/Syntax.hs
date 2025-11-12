@@ -1,12 +1,14 @@
 {-# LANGUAGE PatternSynonyms #-}
 module LambdaComp.Elaborated.Syntax
-  ( module LambdaComp.Elaborated.Syntax
+  ( module LambdaComp.Const
+  , module LambdaComp.Elaborated.Syntax
   , module LambdaComp.Ident
   , module LambdaComp.PrimOp
   ) where
 
 import Data.String (IsString (..))
 
+import LambdaComp.Const
 import LambdaComp.Ident
 import LambdaComp.PrimOp (PrimOp (..), PrimOpArity (..))
 
@@ -14,13 +16,6 @@ type Program = [Top]
 
 data Top where
   TopTmDef :: { tmDefName :: Ident, tmDefBody :: Tm } -> Top
-  deriving stock (Eq, Ord, Show)
-
-data TpConst where
-  TpCUnit   :: TpConst
-  TpCBool   :: TpConst
-  TpCInt    :: TpConst
-  TpCDouble :: TpConst
   deriving stock (Eq, Ord, Show)
 
 data Tp where
@@ -35,14 +30,6 @@ pattern TpFun tpP tpR = tpP :->: tpR
 
 data Param where
   Param :: { paramName :: !Ident, paramType :: !Tp } -> Param
-  deriving stock (Eq, Ord, Show)
-
-data TmConst where
-  TmCUnit        :: TmConst
-  TmCTrue        :: TmConst
-  TmCFalse       :: TmConst
-  TmCInt         :: !Int -> TmConst
-  TmCDouble      :: !Double -> TmConst
   deriving stock (Eq, Ord, Show)
 
 data Tm where
