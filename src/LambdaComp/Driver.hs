@@ -66,15 +66,15 @@ mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH
         AMBackend      -> getAMTm >>= exitCodeToExceptT . topEval outH
 
 handleElabError :: Handle -> Either ElaborationError a -> ExceptT Int IO a
-handleElabError outH (Left elabErr) = lift (hPutStrLn outH "Elab") >> pHPrintNoColor outH elabErr >> throwError 1
+handleElabError outH (Left elabErr) = lift (hPutStrLn outH "Elaboration") >> pHPrintNoColor outH elabErr >> throwError 1
 handleElabError _    (Right prog)   = pure prog
 
 handleElTcError :: Handle -> Either El.TypeError a -> ExceptT Int IO a
-handleElTcError outH (Left elTcErr) = lift (hPutStrLn outH "ElTc") >> pHPrintNoColor outH elTcErr >> throwError 1
+handleElTcError outH (Left elTcErr) = lift (hPutStrLn outH "Internal Type Checking") >> pHPrintNoColor outH elTcErr >> throwError 1
 handleElTcError _    (Right prog)   = pure prog
 
 handleCBPVTcError :: Handle -> Either CBPV.TypeError a -> ExceptT Int IO a
-handleCBPVTcError outH (Left cbpvTcErr) = lift (hPutStrLn outH "CBPVTc") >> lift (hPutDoc outH $ pretty cbpvTcErr) >> throwError 1
+handleCBPVTcError outH (Left cbpvTcErr) = lift (hPutStrLn outH "Internal CBPV Type Checking") >> lift (hPutDoc outH $ pretty cbpvTcErr) >> throwError 1
 handleCBPVTcError _    (Right prog)     = pure prog
 
 runWithFp :: (Bool -> FilePath -> ExceptT Int IO a) -> Maybe FilePath -> ExceptT Int IO a
