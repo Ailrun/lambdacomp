@@ -3,7 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
     "ghcr.io/devcontainers-extra/features/haskell:2": {
-      "ghcVersion": "9.8.4",
+      "ghcVersion": "9.12.2",
       "cabalVersion": "3.14.2.0",
       "installStack": false,
       "installStackGHCupHook": false
