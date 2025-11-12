@@ -11,7 +11,6 @@ import Control.Monad.Trans.Writer.CPS (runWriterT)
 import Control.Monad.Writer.CPS       (MonadWriter (tell), WriterT, censor, listens)
 import Data.Bifunctor                 (Bifunctor (bimap, first, second))
 import Data.Coerce                    (coerce)
-import Data.List                      (foldl')
 import Data.Map                       (Map)
 import Data.Map                       qualified as Map
 import Data.String                    (IsString (fromString))

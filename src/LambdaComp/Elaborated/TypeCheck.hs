@@ -38,7 +38,7 @@ runProgramInfer p = do
   pure ctx
   where
     go :: (TypeErrorC m) => Context -> Top -> m (Map Ident Tp)
-    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runGlobalTypeCheckT` ctx
+    go ctx top = flip (Map.insert (tmDefName top)) ctx <$> topInfer top `runGlobalTypeCheckT` ctx
 
 topInfer :: (TypeErrorC m) => Top -> TypeCheckT m Tp
 topInfer = infer . tmDefBody
