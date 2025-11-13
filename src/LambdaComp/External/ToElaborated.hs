@@ -81,14 +81,8 @@ xtpElaborate :: XTp -> E.Tp
 xtpElaborate = tpElaborate . fst
 
 tpElaborate :: Tp -> E.Tp
-tpElaborate (TpConst tpc)      = E.TpConst $ tpConstElaborate tpc
+tpElaborate (TpConst tpc)      = E.TpConst tpc
 tpElaborate (tpPs `TpFun` tpR) = foldr (\p acc -> tpElaborate p `E.TpFun` acc) (tpElaborate tpR) tpPs
-
-tpConstElaborate :: TpConst -> E.TpConst
-tpConstElaborate TpCUnit   = E.TpCUnit
-tpConstElaborate TpCBool   = E.TpCBool
-tpConstElaborate TpCInt    = E.TpCInt
-tpConstElaborate TpCDouble = E.TpCDouble
 
 ------------------------------------------------------------
 -- Term Elaboration
@@ -98,9 +92,9 @@ xcheck (tm, tmSpan) = wrapErrorWithSpan tmSpan . check tm
 
 check :: Tm -> E.Tp -> ToElaborated E.Tm
 check (TmConst c)                = \tp ->
-  let (E.TpConst -> tp', tm') = inferConst c in
+  let tp' = E.TpConst $ inferConst c in
   if tp == tp
-  then pure $ E.TmConst tm'
+  then pure $ E.TmConst c
   else throwError $ InvalidConstType tp tp'
 check (TmIf xtm0 xtm1 xtm2)      = \tp -> do
   (tp0, tm0') <- xinfer xtm0
@@ -158,7 +152,7 @@ infer (TmVar x)                  = do
     (\d -> (fmap (, E.TmVar x') . Map.lookup x $ localCtx d)
            <|> (fmap (, E.TmGlobal x') . Map.lookup x $ topDefs d))
   maybe (throwError $ NotInScope x) pure mayLocalX
-infer (TmConst c)                = pure (bimap E.TpConst E.TmConst $ inferConst c)
+infer (TmConst c)                = pure (E.TpConst $ inferConst c, E.TmConst c)
 infer (TmIf xtm0 xtm1 xtm2)      = do
   (tp0, tm0') <- xinfer xtm0
   case tp0 of
@@ -205,13 +199,6 @@ infer (TmPrintDouble xtm0 xtm1)  = do
   case tp0 of
     E.TpConst E.TpCDouble -> second (E.TmPrintDouble tm0') <$> xinfer xtm1
     _                     -> throwError $ TypeMismatch (E.TpConst E.TpCDouble) tp0
-
-inferConst :: TmConst -> (E.TpConst, E.TmConst)
-inferConst TmCUnit       = (E.TpCUnit, E.TmCUnit)
-inferConst TmCTrue       = (E.TpCBool, E.TmCTrue)
-inferConst TmCFalse      = (E.TpCBool, E.TmCFalse)
-inferConst (TmCInt i)    = (E.TpCInt, E.TmCInt i)
-inferConst (TmCDouble d) = (E.TpCDouble, E.TmCDouble d)
 
 flattenFunctionType :: E.Tp -> ([E.Tp], E.Tp)
 flattenFunctionType (tpP `E.TpFun` tpR) = first (tpP :) $ flattenFunctionType tpR

@@ -97,13 +97,6 @@ infer (TmPrintDouble tm0 tm1)  = do
     _                 -> throwError $ TypeMismatch (TpConst TpCDouble) tp0
 infer (TmRec p tm)             = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
 
-inferConst :: TmConst -> TpConst
-inferConst TmCUnit       = TpCUnit
-inferConst TmCTrue       = TpCBool
-inferConst TmCFalse      = TpCBool
-inferConst (TmCInt _)    = TpCInt
-inferConst (TmCDouble _) = TpCDouble
-
 insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
 insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }
 

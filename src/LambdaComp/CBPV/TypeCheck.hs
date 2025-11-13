@@ -134,13 +134,6 @@ infer (TmRec p tm)             =
     TpUp tp -> tp <$ local (insertParamToInfo p) (check tm tp)
     tp      -> throwError $ NonUpType tp
 
-inferConst :: TmConst -> TpConst
-inferConst TmCUnit       = TpCUnit
-inferConst TmCTrue       = TpCBool
-inferConst TmCFalse      = TpCBool
-inferConst (TmCInt _)    = TpCInt
-inferConst (TmCDouble _) = TpCDouble
-
 insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
 insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }
 
