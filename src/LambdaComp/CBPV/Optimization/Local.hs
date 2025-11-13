@@ -1,8 +1,10 @@
 module LambdaComp.CBPV.Optimization.Local
-  ( runLocalOptDefault
+  ( runLocalOpt
   ) where
 
 import Control.Monad.Identity (Identity (Identity, runIdentity))
+import Data.Set               (Set)
+import Data.Set               qualified as Set
 
 import LambdaComp.CBPV.Optimization.BetaReduction          (runBetaReduction)
 import LambdaComp.CBPV.Optimization.BindingConversion      (runCommutingTo, runLiftingLet)
@@ -11,15 +13,32 @@ import LambdaComp.CBPV.Optimization.EtaReduction           (runEtaReduction)
 import LambdaComp.CBPV.Optimization.InlineBinding          (runInlineLinearLet, runInlineSimpleLet)
 import LambdaComp.CBPV.Optimization.PrintConversion        (runCommutingPrint)
 import LambdaComp.CBPV.Syntax
+import LambdaComp.Optimizations                            (Optimization (..))
 
-runLocalOptDefault :: Program -> Program
-runLocalOptDefault = fmap runLocalOptDefaultTop
+runLocalOpt :: Set Optimization -> Program -> Program
+runLocalOpt opts = fmap (runLocalOptTop opts)
 
-runLocalOptDefaultTop :: Top -> Top
-runLocalOptDefaultTop m = m{ tmDefBody = runLocalOptDefaultTm $ tmDefBody m }
+runLocalOptTop :: Set Optimization -> Top -> Top
+runLocalOptTop opts = \m -> m{ tmDefBody = runLocalOptTm' $ tmDefBody m }
+  where
+    runLocalOptTm' = runLocalOptTm opts
 
-runLocalOptDefaultTm :: Tm Com -> Tm Com
-runLocalOptDefaultTm = runIdentity . repeatUntilFix (Identity . runDeadLetElimination . runInlineLinearLet . runInlineSimpleLet . runLiftingLet . runEtaReduction . runBetaReduction . runCommutingTo . runCommutingPrint)
+runLocalOptTm :: Set Optimization -> Tm Com -> Tm Com
+runLocalOptTm opts = runIdentity . repeatUntilFix (Identity . runDeadLetElimination' . runInlineLinearLet' . runInlineSimpleLet' . runLiftingLet' . runEtaReduction' . runBetaReduction' . runCommutingTo' . runCommutingPrint')
+  where
+    runDeadLetElimination' = optionalByOption OCBPVDeadLetElimination runDeadLetElimination
+    runInlineLinearLet' = optionalByOption OCBPVInlineLinearLet (runInlineLinearLet :: Tm Com -> Tm Com)
+    runInlineSimpleLet' = optionalByOption OCBPVInlineSimpleLet (runInlineSimpleLet :: Tm Com -> Tm Com)
+    runLiftingLet' = optionalByOption OCBPVLiftingLet runLiftingLet
+    runEtaReduction' = optionalByOption OCBPVEtaReduction runEtaReduction
+    runBetaReduction' = optionalByOption OCBPVBetaReduction runBetaReduction
+    runCommutingTo' = optionalByOption OCBPVCommutingTo runCommutingTo
+    runCommutingPrint' = optionalByOption OCBPVCommutingPrint runCommutingPrint
+
+    optionalByOption :: Optimization -> (a -> a) -> a -> a
+    optionalByOption opt f
+      | opt `Set.member` opts = f
+      | otherwise             = id
 
 repeatUntilFix :: (Monad m, Eq a) => (a -> m a) -> a -> m a
 repeatUntilFix f a = do

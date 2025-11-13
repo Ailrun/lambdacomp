@@ -1,15 +1,25 @@
 module LambdaComp.Elaborated.Optimization.Local
-  ( runLocalOptDefault
+  ( runLocalOpt
   ) where
+
+import Data.Set (Set)
+import Data.Set qualified as Set
 
 import LambdaComp.Elaborated.Optimization.ConstantPropagation
 import LambdaComp.Elaborated.Syntax
+import LambdaComp.Optimizations                               (Optimization (..))
 
-runLocalOptDefault :: Program -> Program
-runLocalOptDefault = fmap runLocalOptDefaultTop
+runLocalOpt :: Set Optimization -> Program -> Program
+runLocalOpt opt = fmap (runLocalOptTop opt)
 
-runLocalOptDefaultTop :: Top -> Top
-runLocalOptDefaultTop m = m{ tmDefBody = runLocalOptDefaultTm $ tmDefBody m }
+runLocalOptTop :: Set Optimization -> Top -> Top
+runLocalOptTop opt = \m -> m{ tmDefBody = runLocalOptTm' $ tmDefBody m }
+  where
+    runLocalOptTm' = runLocalOptTm opt
 
-runLocalOptDefaultTm :: Tm -> Tm
-runLocalOptDefaultTm = runConstantsPropagation
+runLocalOptTm :: Set Optimization -> Tm -> Tm
+runLocalOptTm opt = runConstantsPropagation'
+  where
+    runConstantsPropagation'
+      | OElabConstantPropagation `Set.member` opt = runConstantsPropagation
+      | otherwise                                 = id

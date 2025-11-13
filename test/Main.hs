@@ -15,6 +15,7 @@ import Test.Tasty.Golden    (findByExtension, goldenVsStringDiff)
 
 import LambdaComp.Driver          (mainFuncWithOptions)
 import LambdaComp.Driver.Argument (Backend (..), BackendType (..), Options (..), Phase (..))
+import LambdaComp.Optimizations   (defaultOptimizations)
 
 main :: IO ()
 main = listAllExamples >>= defaultMain . tests
@@ -112,10 +113,10 @@ goldenOf maySize tag f optionBuilder s =
       Nothing   -> LBS.readFile fp
 
 makeCOptions :: Phase DirectCBackendType -> FilePath -> Options
-makeCOptions phase input = Options { input, backend = DirectCBackend, phase, output = Nothing }
+makeCOptions phase input = Options { input, backend = DirectCBackend, phase, optimizations = defaultOptimizations, output = Nothing }
 
 makeAMOptions :: Phase AMBackendType -> FilePath -> Options
-makeAMOptions phase input = Options { input, backend = AMBackend, phase, output = () }
+makeAMOptions phase input = Options { input, backend = AMBackend, phase, optimizations = defaultOptimizations, output = () }
 
 listAllExamples :: IO [String]
 listAllExamples = getExampleDir >>= fmap (fmap takeFileName) . findByExtension [".lc"]

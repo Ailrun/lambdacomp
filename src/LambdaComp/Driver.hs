@@ -34,18 +34,18 @@ import Prettyprinter.Render.Text (hPutDoc)
 import Prettyprinter (Pretty(pretty))
 
 mainFuncWithOptions :: Handle -> Options -> IO ExitCode
-mainFuncWithOptions outH (Options inputFp backend phase mayFp) = (<* hFlush outH) . exceptTToExitCode $ do
+mainFuncWithOptions outH (Options inputFp backend phase opts mayFp) = (<* hFlush outH) . exceptTToExitCode $ do
   input <- lift $ T.readFile inputFp
   let getTm          = either ((>> throwError 1) . lift . hPutStrLn stderr) pure $ runProgramParser inputFp input
       getElTm        = getTm >>= handleElabError outH . runToElaborated
       getElTmTc      = getElTm >>= \p -> p <$ handleElTcError outH (El.runProgramInfer p)
-      getElOptTm     = El.runLocalOptDefault <$> getElTmTc
+      getElOptTm     = El.runLocalOpt opts <$> getElTmTc
       getElOptTmTc   = getElOptTm >>= \p -> p <$ handleElTcError outH (El.runProgramInfer p)
       getCBPVTm      = runToCBPV <$> getElOptTmTc
       getCBPVTmTc    = getCBPVTm >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
       getCBPVTmAA    = runArityAnalysis <$> getCBPVTmTc
       getCBPVTmAATc  = getCBPVTmAA >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
-      getCBPVOptTm   = CBPV.runLocalOptDefault <$> getCBPVTmAATc
+      getCBPVOptTm   = CBPV.runLocalOpt opts <$> getCBPVTmAATc
       getCBPVOptTmTc = getCBPVOptTm >>= \p -> p <$ handleCBPVTcError outH (CBPV.runProgramInfer p)
       getCCode       = runToC <$> getCBPVOptTmTc
       getAMTm        = runToAM <$> getCBPVOptTmTc

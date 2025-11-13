@@ -3,7 +3,6 @@ module LambdaComp.CBPV.Optimization.PrintConversion
   ( runCommutingPrint
   ) where
 
-
 import Control.Monad.Writer.Strict (MonadWriter (tell), Writer, lift, runWriter)
 import Data.Functor.Identity       (Identity (Identity))
 import Data.Set                    qualified as Set
