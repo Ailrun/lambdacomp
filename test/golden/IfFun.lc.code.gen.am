@@ -1,0 +1,103 @@
+[ TmDefCodeSection
+    { tmDefCode =
+        [ ISetReturn
+            ( VaThunk "sys_thunk_2" [] )
+        , IDefine "top_e_f"
+        ]
+    }
+, TmDefCodeSection
+    { tmDefCode =
+        [ IScope
+        , IPush ( VaBool True )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_e_f" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_v_5" )
+        , IScope
+        , IPush ( VaBool False )
+        , ICall
+            ( VaAddr
+                ( AIdent "top_e_f" )
+            )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_v_7" )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_5" )
+            )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_7" )
+            )
+        , ISetReturn
+            ( VaInt 0 )
+        , IDefine "top_e_main"
+        ]
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_0"
+    , thunkCode =
+        [ IPop
+            ( AIdent "var_e_x" )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_e_x" )
+            )
+        , IPush
+            ( VaInt 3 )
+        , IPrimBinOp PrimIAdd
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_1"
+    , thunkCode =
+        [ IPop
+            ( AIdent "var_e_x" )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_e_x" )
+            )
+        , IPush
+            ( VaAddr
+                ( AIdent "var_e_x" )
+            )
+        , IPrimBinOp PrimIMul
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+, ThunkCodeSection
+    { thunkCodeSectionName = "sys_thunk_2"
+    , thunkCode =
+        [ IPop
+            ( AIdent "var_e_c" )
+        , IScope
+        , ICondJump
+            ( VaAddr
+                ( AIdent "var_e_c" )
+            ) 2
+        , ISetReturn
+            ( VaThunk "sys_thunk_0" [] )
+        , IJump 1
+        , ISetReturn
+            ( VaThunk "sys_thunk_1" [] )
+        , IEndScope
+        , IReceive
+            ( AIdent "var_c_f_3" )
+        , IPush
+            ( VaInt 3 )
+        , ICall
+            ( VaAddr
+                ( AIdent "var_c_f_3" )
+            )
+        , IExit
+        ]
+    , thunkEnvSize = 0
+    }
+]

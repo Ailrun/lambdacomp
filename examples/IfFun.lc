@@ -1,0 +1,7 @@
+f = \(c : Bool) -> (if c then (\(x : Int) -> x + 3) else (\(x : Int) -> x * x)) 3
+;;
+
+main =
+  printInt f True then
+  printInt f False then
+  0
