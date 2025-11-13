@@ -1,7 +1,7 @@
 [ TmDefCodeSection
     { tmDefCode =
         [ ISetReturn
-            ( VaThunk "sys_thunk_1" [] )
+            ( VaThunk "sys_thunk_0" [] )
         , IDefine "top_e_f"
         ]
     }
@@ -29,7 +29,9 @@
 , ThunkCodeSection
     { thunkCodeSectionName = "sys_thunk_0"
     , thunkCode =
-        [ IPop
+        [ IPrintInt
+            ( VaInt 5 )
+        , IPop
             ( AIdent "var_e_x" )
         , IPush
             ( VaAddr
@@ -38,25 +40,6 @@
         , IPush
             ( VaInt 3 )
         , IPrimBinOp PrimIAdd
-        , IExit
-        ]
-    , thunkEnvSize = 0
-    }
-, ThunkCodeSection
-    { thunkCodeSectionName = "sys_thunk_1"
-    , thunkCode =
-        [ IScope
-        , IPrintInt
-            ( VaInt 5 )
-        , ISetReturn
-            ( VaThunk "sys_thunk_0" [] )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_aa_0_0_temp" )
-        , ICall
-            ( VaAddr
-                ( AIdent "var_aa_0_0_temp" )
-            )
         , IExit
         ]
     , thunkEnvSize = 0

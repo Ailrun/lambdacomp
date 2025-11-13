@@ -9,6 +9,7 @@ import LambdaComp.CBPV.Optimization.BindingConversion      (runCommutingTo, runL
 import LambdaComp.CBPV.Optimization.DeadBindingElimination (runDeadLetElimination)
 import LambdaComp.CBPV.Optimization.EtaReduction           (runEtaReduction)
 import LambdaComp.CBPV.Optimization.InlineBinding          (runInlineLinearLet, runInlineSimpleLet)
+import LambdaComp.CBPV.Optimization.PrintConversion        (runCommutingPrint)
 import LambdaComp.CBPV.Syntax
 
 runLocalOptDefault :: Program -> Program
@@ -18,7 +19,7 @@ runLocalOptDefaultTop :: Top -> Top
 runLocalOptDefaultTop m = m{ tmDefBody = runLocalOptDefaultTm $ tmDefBody m }
 
 runLocalOptDefaultTm :: Tm Com -> Tm Com
-runLocalOptDefaultTm = runIdentity . repeatUntilFix (Identity . runDeadLetElimination . runInlineLinearLet . runInlineSimpleLet . runLiftingLet . runEtaReduction . runBetaReduction . runCommutingTo)
+runLocalOptDefaultTm = runIdentity . repeatUntilFix (Identity . runDeadLetElimination . runInlineLinearLet . runInlineSimpleLet . runLiftingLet . runEtaReduction . runBetaReduction . runCommutingTo . runCommutingPrint)
 
 repeatUntilFix :: (Monad m, Eq a) => (a -> m a) -> a -> m a
 repeatUntilFix f a = do

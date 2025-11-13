@@ -1,3 +1,1 @@
-e_main =
-  (printInt 7 then return 3) to c_a_3 ->
-  (printInt 2 then return c_a_3) to c_v_4 -> printInt c_v_4 then return 0
+e_main = printInt 7 then printInt 2 then printInt 3 then return 0

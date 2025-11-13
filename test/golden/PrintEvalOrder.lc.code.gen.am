@@ -1,27 +1,11 @@
 [ TmDefCodeSection
     { tmDefCode =
-        [ IScope
-        , IPrintInt
+        [ IPrintInt
             ( VaInt 7 )
-        , ISetReturn
-            ( VaInt 3 )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_a_3" )
-        , IScope
         , IPrintInt
             ( VaInt 2 )
-        , ISetReturn
-            ( VaAddr
-                ( AIdent "var_c_a_3" )
-            )
-        , IEndScope
-        , IReceive
-            ( AIdent "var_c_v_4" )
         , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_4" )
-            )
+            ( VaInt 3 )
         , ISetReturn
             ( VaInt 0 )
         , IDefine "top_e_main"
