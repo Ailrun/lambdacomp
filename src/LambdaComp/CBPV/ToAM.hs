@@ -12,6 +12,7 @@ import Data.Set                    qualified as Set
 import Data.Vector                 qualified as Vector
 
 import LambdaComp.AM.Syntax
+import LambdaComp.Binder      (getBinderBody, getBoundVar)
 import LambdaComp.CBPV.Syntax
 
 runToAM :: Program -> [CodeSection]
@@ -61,15 +62,15 @@ instance ToAM (Tm Com) where
     code1 <- toAM tm1
     code2 <- toAM tm2
     pure $ Vector.cons (ICondJump val0 (1 + length code1)) code1 <> Vector.cons (IJump (length code2)) code2
-  toAM (TmLam p tm) = Vector.cons (IPop (toVarAddr (paramName p))) <$> toAM tm
+  toAM (TmLam b) = Vector.cons (IPop (toVarAddr (getBoundVar b))) <$> toAM (getBinderBody b)
   toAM (tmf `TmApp` tma) = liftA2 Vector.cons (IPush <$> toAM tma) (toAM tmf)
   toAM (TmForce tm) = pure . ICall <$> toAM tm
   toAM (TmReturn tm) = pure . ISetReturn <$> toAM tm
-  toAM (TmTo tm0 x tm1) = do
+  toAM (TmTo tm0 b) = do
     code0 <- toAM tm0
-    code1 <- toAM tm1
-    pure ([IScope] <> code0 <> [IEndScope, IReceive (toVarAddr x)] <> code1)
-  toAM (TmLet x tm0 tm1) = liftA2 Vector.cons (IAssign (toVarAddr x) <$> toAM tm0) (toAM tm1)
+    code1 <- toAM $ getBinderBody b
+    pure ([IScope] <> code0 <> [IEndScope, IReceive . toVarAddr $ getBoundVar b] <> code1)
+  toAM (TmLet tm0 b) = liftA2 Vector.cons ((IAssign . toVarAddr $ getBoundVar b) <$> toAM tm0) . toAM $ getBinderBody b
   toAM (TmPrimBinOp op tm0 tm1) = do
     val0 <- toAM tm0
     val1 <- toAM tm1
@@ -79,14 +80,15 @@ instance ToAM (Tm Com) where
     pure [IPush val, IPrimUnOp op]
   toAM (TmPrintInt tm0 tm1) = liftA2 Vector.cons (IPrintInt <$> toAM tm0) (toAM tm1)
   toAM (TmPrintDouble tm0 tm1) = liftA2 Vector.cons (IPrintDouble <$> toAM tm0) (toAM tm1)
-  toAM (TmRec p tm) = do
+  toAM (TmRec b) = do
     thunkCode <- fmap (<> [IExit]) . local (const thunkEnvVars) $ toAM tm
     thunkCodeSectionName <- lift $ freshNameOf $ toLowSysVar "thunk"
     tell [ThunkCodeSection {..}]
     initCode <- IRecAssign xVar thunkCodeSectionName . Vector.fromList <$> traverse getVar thunkEnvVars
     pure [initCode, ICall (VaAddr xVar)]
     where
-      xVar = toVarAddr (paramName p)
+      tm = getBinderBody b
+      xVar = toVarAddr $ getBoundVar b
       thunkEnvVars = Set.toList thunkEnv
       thunkEnvSize = Set.size thunkEnv
       thunkEnv = freeVarOfTm tm

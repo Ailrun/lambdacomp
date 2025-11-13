@@ -2,8 +2,7 @@ module LambdaComp.CBPV.Optimization.BetaReduction
   ( runBetaReduction
   ) where
 
-import Data.Functor.Identity (Identity (Identity, runIdentity))
-
+import LambdaComp.Binder      (getBinderBody, getBoundVar, mapBinderBody)
 import LambdaComp.CBPV.Syntax
 
 runBetaReduction :: Tm Com -> Tm Com
@@ -13,14 +12,14 @@ betaReduction :: Tm c -> Tm c
 betaReduction tm@(TmVar _
                  ; TmGlobal _
                  ; TmConst _
-                 ; TmThunk _) = runIdentity $ polyRecTmM (Identity . betaReduction) tm
+                 ; TmThunk _) = polyRecTm betaReduction tm
 
-betaReduction tm@(TmLam {}
+betaReduction tm@(TmLam _
                  ; TmReturn _
                  ; TmLet {}
                  ; TmPrimBinOp {}; TmPrimUnOp {}
                  ; TmPrintInt {}; TmPrintDouble {}
-                 ; TmRec {})     = runIdentity $ polyRecTmM (Identity . betaReduction) tm
+                 ; TmRec _)      = polyRecTm betaReduction tm
 betaReduction (TmIf tm0 tm1 tm2) =
   case betaReduction tm0 of
     TmConst TmCTrue  -> tm1'
@@ -31,17 +30,17 @@ betaReduction (TmIf tm0 tm1 tm2) =
     tm2' = betaReduction tm2
 betaReduction (tmf `TmApp` tma)  =
   case betaReduction tmf of
-    TmLam Param{..} tmf' -> TmLet paramName tma' tmf'
-    tmf'                 -> tmf' `TmApp` tma'
+    TmLam b -> TmLet tma' . BUntyped (getBoundVar b) $ getBinderBody b
+    tmf'    -> tmf' `TmApp` tma'
   where
     tma' = betaReduction tma
 betaReduction (TmForce tm)       =
   case betaReduction tm of
     TmThunk tm' -> tm'
     tm'         -> TmForce tm'
-betaReduction (TmTo tm0 x tm1)   =
+betaReduction (TmTo tm0 b)       =
   case betaReduction tm0 of
-    TmReturn tm0' -> TmLet x tm0' tm1'
-    tm0'          -> TmTo tm0' x tm1'
+    TmReturn tm0' -> TmLet tm0' b'
+    tm0'          -> TmTo tm0' b'
   where
-    tm1' = betaReduction tm1
+    b' = mapBinderBody betaReduction b

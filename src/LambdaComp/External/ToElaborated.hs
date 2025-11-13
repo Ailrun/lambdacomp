@@ -60,7 +60,7 @@ topCheck (toExtVar -> tmDefName) xtm (tpElaborate -> tmDefType, _) = do
   let
     p = E.Param tmDefName tmDefType
     tmDefBody
-      | referSelf = E.TmRec p tm'
+      | referSelf = E.TmRec (E.BTyped p tm')
       | otherwise = tm'
   pure E.TopTmDef {..}
 
@@ -70,7 +70,7 @@ topInfer (toExtVar -> tmDefName) xtm = do
   let
     p = E.Param tmDefName tp
     tmDefBody
-      | referSelf = E.TmRec p tm'
+      | referSelf = E.TmRec (E.BTyped p tm')
       | otherwise = tm'
   pure (E.TopTmDef {..}, tp)
 
@@ -107,12 +107,15 @@ check (TmLam xps xtm)            = \(flattenFunctionType -> (tpPs, tpR)) ->
     _
       | tpPsLength == xpsLength -> do
           bs <- zipWithM xcheckParam xps tpPs
-          foldr (E.TmLam . uncurry E.Param . first toExtVar) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm tpR) <*> pure bs
+          builder bs (xcheck xtm tpR)
       | tpPsLength > xpsLength  -> do
           bs <- zipWithM xcheckParam xps tpPsUsed
-          foldr (E.TmLam . uncurry E.Param . first toExtVar) <$> local (addLocalCtx (Map.fromList bs)) (xcheck xtm (foldr E.TpFun tpR tpPsRest)) <*> pure bs
+          builder bs (xcheck xtm (foldr E.TpFun tpR tpPsRest))
       | otherwise               -> throwError $ NonFunType tpR
       where
+        builder :: [(Ident, E.Tp)] -> ToElaborated E.Tm -> ToElaborated E.Tm
+        builder bs tm' = foldr ((E.TmLam .) . E.BTyped . uncurry E.Param . first toExtVar) <$> local (addLocalCtx (Map.fromList bs)) tm' <*> pure bs
+
         tpPsLength = length tpPs
         xpsLength = length xps
         (tpPsUsed, tpPsRest) = splitAt xpsLength tpPs
@@ -167,7 +170,7 @@ infer (TmLam xps xtm)            = do
   bs <- traverse xinferParam xps
   bimap
     (flip (foldr E.TpFun) (snd <$> bs))
-    (flip (foldr (E.TmLam . uncurry E.Param . first toExtVar)) bs)
+    (flip (foldr ((E.TmLam .) . E.BTyped . uncurry E.Param . first toExtVar)) bs)
     <$> local (addLocalCtx (Map.fromList bs)) (xinfer xtm)
 infer (xtmf `TmApp` xtmas)       = do
   (tpf, tmf') <- xinfer xtmf

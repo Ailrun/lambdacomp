@@ -68,7 +68,7 @@ infer (TmIf tm0 tm1 tm2)       = do
         throwError $ BranchTypeMismatch tp1 tp2
       pure tp1
     _               -> throwError $ TypeMismatch (TpConst TpCBool) tp0
-infer (TmLam p tm)             = TpFun (paramType p) <$> local (insertParamToInfo p) (infer tm)
+infer (TmLam (BTyped p tm))    = TpFun (paramType p) <$> local (insertParamToInfo p) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
   case tpf of
@@ -95,7 +95,7 @@ infer (TmPrintDouble tm0 tm1)  = do
   case tp0 of
     TpConst TpCDouble -> infer tm1
     _                 -> throwError $ TypeMismatch (TpConst TpCDouble) tp0
-infer (TmRec p tm)             = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
+infer (TmRec (BTyped p tm))    = paramType p <$ local (insertParamToInfo p) (check tm $ paramType p)
 
 insertParamToInfo :: Param -> TypeCheckInfo -> TypeCheckInfo
 insertParamToInfo p info = info{ localCtx = insertParamToContext p $ localCtx info }

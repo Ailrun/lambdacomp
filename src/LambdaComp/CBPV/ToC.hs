@@ -18,6 +18,7 @@ import Data.Set                    qualified as Set
 import Data.String                 (IsString (fromString))
 import Data.Text                   qualified as Text
 
+import LambdaComp.Binder      (getBinderBody, getBoundVar)
 import LambdaComp.CBPV.Syntax
 
 runToC :: Program -> String
@@ -131,7 +132,7 @@ instance ToC (Tm Com) where
     tm2Code <- toC tm2
     c <- lift $ freshNameOf $ toSys "c"
     pure (tm0Code True c <> [ifStmt (intItem c) tm1Code tm2Code])
-  toC (TmLam p tm) = underScope . (globalStackPopStmt (toVar (paramName p)) :) <$> toC tm
+  toC (TmLam b) = underScope . (globalStackPopStmt (toVar $ getBoundVar b) :) <$> toC (getBinderBody b)
   toC (tmf `TmApp` tma) = liftA2 (<>) (globalStackPushStmt <$> toC tma) (toC tmf)
   toC (TmForce tm) = do
     tmCode <- toC tm
@@ -140,14 +141,14 @@ instance ToC (Tm Com) where
   toC (TmReturn tm) = do
     tmCode <- toC tm
     pure $ tmCode False retValue
-  toC (TmTo tm0 x tm1) = do
+  toC (TmTo tm0 b) = do
     tm0Code <- toC tm0
-    tm1Code <- toC tm1
-    pure (tm0Code <> underScope (defineConstItemStmt (toVar x) retValue : tm1Code))
-  toC (TmLet x tm0 tm1) = do
+    tm1Code <- toC $ getBinderBody b
+    pure (tm0Code <> underScope (defineConstItemStmt (toVar $ getBoundVar b) retValue : tm1Code))
+  toC (TmLet tm0 b) = do
     tm0Code <- toC tm0
-    tm1Code <- toC tm1
-    pure (underScope (tm0Code True (toVar x) <> tm1Code))
+    tm1Code <- toC $ getBinderBody b
+    pure (underScope (tm0Code True (toVar $ getBoundVar b) <> tm1Code))
   toC (TmPrimBinOp op tm0 tm1) = do
     tm0Code <- toC tm0
     tm1Code <- toC tm1
@@ -169,12 +170,13 @@ instance ToC (Tm Com) where
     tm1Code <- toC tm1
     msg <- lift $ freshNameOf $ toSys "msg"
     pure (tm0Code True msg <> (printlnAsDoubleStmt msg : tm1Code))
-  toC (TmRec p tm) = do
+  toC (TmRec b) = do
     tmCode <- local (const thunkEnvVars) $ toC tm
     (thunkInit, inits) <- thunkOfCode thunkEnvSize thunkEnvVars (comment (show tm) : tmCode)
     pure (thunkInit True xVar <> inits xVar <> [forceThunkStmt xVar])
     where
-      xVar = toVar (paramName p)
+      tm = getBinderBody b
+      xVar = toVar $ getBoundVar b
       thunkEnv = freeVarOfTm tm
       thunkEnvSize = Set.size thunkEnv
       thunkEnvVars = Set.toList thunkEnv

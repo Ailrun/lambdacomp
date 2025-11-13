@@ -2,8 +2,9 @@ module LambdaComp.CBPV.Optimization.EtaReduction
   ( runEtaReduction
   ) where
 
-import Control.Monad.Identity (Identity (Identity, runIdentity))
+import Data.Set qualified as Set
 
+import LambdaComp.Binder      (mapBinderBody)
 import LambdaComp.CBPV.Syntax
 
 runEtaReduction :: Tm Com -> Tm Com
@@ -13,7 +14,7 @@ etaReduction :: Tm c -> Tm c
 
 etaReduction tm@(TmVar _
                 ; TmGlobal _
-                ; TmConst _)        = runIdentity $ polyRecTmM (Identity . etaReduction) tm
+                ; TmConst _)        = polyRecTm etaReduction tm
 etaReduction (TmThunk (TmForce tm)) = etaReduction tm
 etaReduction (TmThunk tm)           = TmThunk $ etaReduction tm
 
@@ -24,7 +25,8 @@ etaReduction tm@(TmIf {}
                 ; TmLet {}
                 ; TmPrimBinOp {}; TmPrimUnOp {}
                 ; TmPrintInt {}; TmPrintDouble {}
-                ; TmRec {})                 = runIdentity $ polyRecTmM (Identity . etaReduction) tm
-etaReduction (TmLam p (tm `TmApp` TmVar x))
-  | paramName p == x                        = etaReduction tm
-etaReduction (TmLam p tm)                   = TmLam p $ etaReduction tm
+                ; TmRec _)           = polyRecTm etaReduction tm
+etaReduction (TmLam (BTyped p (tm `TmApp` TmVar x)))
+  | paramName p == x
+  , x `Set.notMember` freeVarOfTm tm = etaReduction tm
+etaReduction (TmLam b)               = TmLam $ mapBinderBody etaReduction b

@@ -48,30 +48,30 @@ instance Pretty (Tm c) where
   pretty = prettyTmPrec 0
 
 prettyTmPrec :: Int -> Tm c -> Doc ann
-prettyTmPrec _  (TmVar x)                = pretty x
-prettyTmPrec _  (TmGlobal x)             = "#" <> pretty x
-prettyTmPrec _  (TmConst c)              = pretty c
-prettyTmPrec pr (TmThunk tm)             = group $ prefixOfPrec2 pr ("thunk", tmThunkPrec) (group . (line <>) . (`prettyTmPrec` tm))
-prettyTmPrec pr (TmIf tm0 tm1 tm2)       = group $ condParens (pr > tmIfPrec) $ align $ vsep $ fmap group ["if" <> line <> pretty tm0, "then" <> line <> prettyTmPrec (tmIfPrec + 1) tm1, "else" <> line <> prettyTmPrec (tmIfPrec + 1) tm2]
-prettyTmPrec pr (TmLam p tm)             = group $ prettyTmLam pr [p] tm
-prettyTmPrec pr (tmf `TmApp` tma)        = group $ infixlOfPrec pr (`prettyTmPrec` tmf) (emptyDoc, tmAppPrec) (group . (line <>) . (`prettyTmPrec` tma))
-prettyTmPrec pr (TmForce tm)             = group $ prefixOfPrec2 pr ("force", tmForcePrec) (group . (line <>) . (`prettyTmPrec` tm))
-prettyTmPrec pr (TmReturn tm)            = group $ prefixOfPrec2 pr ("return", tmReturnPrec) (group . (line <>) . (`prettyTmPrec` tm))
-prettyTmPrec pr (TmTo tm0 x tm1)         = group $ condParens (pr > tmToPrec) $ align $ group (prettyTmPrec (tmToPrec + 1) tm0 <> line <> "to" <+> pretty x <+> "->") <> line <> group (prettyTmPrec 0 tm1)
-prettyTmPrec pr (TmLet x tm0 tm1)        = group $ condParens (pr > tmLetPrec) $ align $ prettyTmLet [(x, tm0)] tm1
-prettyTmPrec pr (TmPrimBinOp op tm0 tm1) = group $ prettyTmPrimBinOp pr op tm0 tm1
-prettyTmPrec pr (TmPrimUnOp op tm)       = group $ prettyTmPrimUnOp pr op tm
-prettyTmPrec pr (TmPrintInt tm0 tm1)     = condParens (pr > tmPrintPrec) $ align $ vsep ["printInt" <+> pretty tm0 <+> "then", pretty tm1]
-prettyTmPrec pr (TmPrintDouble tm0 tm1)  = condParens (pr > tmPrintPrec) $ align $ vsep ["printDouble" <+> pretty tm0 <+> "then", pretty tm1]
-prettyTmPrec pr (TmRec p tm)             = group $ prefixOfPrec0 pr ("rec" <+> pretty p <+> "->", tmRecPrec) (group . (line <>) . (`prettyTmPrec` tm))
+prettyTmPrec _  (TmVar x)                    = pretty x
+prettyTmPrec _  (TmGlobal x)                 = "#" <> pretty x
+prettyTmPrec _  (TmConst c)                  = pretty c
+prettyTmPrec pr (TmThunk tm)                 = group $ prefixOfPrec2 pr ("thunk", tmThunkPrec) (group . (line <>) . (`prettyTmPrec` tm))
+prettyTmPrec pr (TmIf tm0 tm1 tm2)           = group $ condParens (pr > tmIfPrec) $ align $ vsep $ fmap group ["if" <> line <> pretty tm0, "then" <> line <> prettyTmPrec (tmIfPrec + 1) tm1, "else" <> line <> prettyTmPrec (tmIfPrec + 1) tm2]
+prettyTmPrec pr (TmLam (BTyped p tm))        = group $ prettyTmLam pr [p] tm
+prettyTmPrec pr (tmf `TmApp` tma)            = group $ infixlOfPrec pr (`prettyTmPrec` tmf) (emptyDoc, tmAppPrec) (group . (line <>) . (`prettyTmPrec` tma))
+prettyTmPrec pr (TmForce tm)                 = group $ prefixOfPrec2 pr ("force", tmForcePrec) (group . (line <>) . (`prettyTmPrec` tm))
+prettyTmPrec pr (TmReturn tm)                = group $ prefixOfPrec2 pr ("return", tmReturnPrec) (group . (line <>) . (`prettyTmPrec` tm))
+prettyTmPrec pr (TmTo tm0 (BUntyped x tm1))  = group $ condParens (pr > tmToPrec) $ align $ group (prettyTmPrec (tmToPrec + 1) tm0 <> line <> "to" <+> pretty x <+> "->") <> line <> group (prettyTmPrec 0 tm1)
+prettyTmPrec pr (TmLet tm0 (BUntyped x tm1)) = group $ condParens (pr > tmLetPrec) $ align $ prettyTmLet [(x, tm0)] tm1
+prettyTmPrec pr (TmPrimBinOp op tm0 tm1)     = group $ prettyTmPrimBinOp pr op tm0 tm1
+prettyTmPrec pr (TmPrimUnOp op tm)           = group $ prettyTmPrimUnOp pr op tm
+prettyTmPrec pr (TmPrintInt tm0 tm1)         = condParens (pr > tmPrintPrec) $ align $ vsep ["printInt" <+> pretty tm0 <+> "then", pretty tm1]
+prettyTmPrec pr (TmPrintDouble tm0 tm1)      = condParens (pr > tmPrintPrec) $ align $ vsep ["printDouble" <+> pretty tm0 <+> "then", pretty tm1]
+prettyTmPrec pr (TmRec (BTyped p tm))        = group $ prefixOfPrec0 pr ("rec" <+> pretty p <+> "->", tmRecPrec) (group . (line <>) . (`prettyTmPrec` tm))
 
 prettyTmLam :: Int -> [Param] -> Tm Com -> Doc ann
-prettyTmLam pr rps (TmLam p tm) = prettyTmLam pr (p : rps) tm
-prettyTmLam pr rps tm           = prefixOfPrec0 pr ("\\" <+> align (sep $ pretty <$> reverse rps) <+> "->", tmLamPrec) (group . (line <>) . (`prettyTmPrec` tm))
+prettyTmLam pr rps (TmLam (BTyped p tm)) = prettyTmLam pr (p : rps) tm
+prettyTmLam pr rps tm                    = prefixOfPrec0 pr ("\\" <+> align (sep $ pretty <$> reverse rps) <+> "->", tmLamPrec) (group . (line <>) . (`prettyTmPrec` tm))
 
 prettyTmLet :: [(Ident, Tm Val)] -> Tm Com -> Doc ann
-prettyTmLet rbs (TmLet x tm0 tm1) = prettyTmLet ((x, tm0) : rbs) tm1
-prettyTmLet rbs tm                = vsep ["let", indent 2 . concatWith (surround $ ";" <> "line") . fmap prettyBinding $ reverse rbs, "in", pretty tm]
+prettyTmLet rbs (TmLet tm0 (BUntyped x tm1)) = prettyTmLet ((x, tm0) : rbs) tm1
+prettyTmLet rbs tm                           = vsep ["let", indent 2 . concatWith (surround $ ";" <> "line") . fmap prettyBinding $ reverse rbs, "in", pretty tm]
   where
     prettyBinding :: (Ident, Tm Val) -> Doc ann
     prettyBinding (x, tm') = pretty x <+> "=" <> softline <> pretty tm'

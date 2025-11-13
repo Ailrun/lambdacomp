@@ -39,7 +39,7 @@ runProgramInfer p = do
   pure ctx
   where
     go :: (TypeErrorC m) => Context -> Top -> m Context
-    go ctx top = ($ ctx) . Map.insert (tmDefName top) <$> topInfer top `runGlobalTypeCheckT` ctx
+    go ctx top = flip (Map.insert (tmDefName top)) ctx <$> topInfer top `runGlobalTypeCheckT` ctx
 
 topInfer :: (TypeErrorC m) => Top -> TypeCheckT m (Tp Val)
 topInfer top = do
@@ -60,14 +60,18 @@ check (TmThunk tm)             = \case
 check (TmReturn tm)            = \case
   TpDown tp -> check tm tp
   tp        -> throwError $ NonDownType "Return" tp
-check (TmTo tm0 x tm1)         = \tp -> do
+check (TmTo tm0 b)             = \tp -> do
   tp0 <- infer tm0
   case tp0 of
     TpDown tp0' -> local (insertEntryToInfo x tp0') $ check tm1 tp
     _           -> throwError $ NonDownType "To" tp0
-check (TmLet x tm0 tm1)        = \tp -> do
+  where
+    BUntyped x tm1 = b
+check (TmLet tm0 b)            = \tp -> do
   tp0 <- infer tm0
   local (insertEntryToInfo x tp0) $ check tm1 tp
+  where
+    BUntyped x tm1 = b
 check tm                       = \tp -> do
   tp' <- infer tm
   when (tp /= tp') $
@@ -88,7 +92,7 @@ infer (TmIf tm0 tm1 tm2)       = do
         then pure tp1
         else throwError $ BranchTypeMismatch tp1 tp2
     _               -> throwError $ TypeMismatch "If condition" (TpConst TpCBool) tpc
-infer (TmLam p tm)             = (paramType p :->:) <$> local (insertParamToInfo p) (infer tm)
+infer (TmLam (BTyped p tm))    = (paramType p :->:) <$> local (insertParamToInfo p) (infer tm)
 infer (tmf `TmApp` tma)        = do
   tpf <- infer tmf
   case tpf of
@@ -100,14 +104,18 @@ infer (TmForce tm)             = do
     TpUp tp' -> pure tp'
     _        -> throwError $ NonUpType tp
 infer (TmReturn tm)            = TpDown <$> infer tm
-infer (TmTo tm0 x tm1)         = do
+infer (TmTo tm0 b)             = do
   tp0 <- infer tm0
   case tp0 of
     TpDown tp0' -> local (insertEntryToInfo x tp0') $ infer tm1
     _           -> throwError $ NonDownType "To" tp0
-infer (TmLet x tm0 tm1)        = do
+  where
+    BUntyped x tm1 = b
+infer (TmLet tm0 b)            = do
   tp0 <- infer tm0
   local (insertEntryToInfo x tp0) $ infer tm1
+  where
+    BUntyped x tm1 = b
 infer (TmPrimBinOp op tm0 tm1) = do
   check tm0 $ TpConst arg0Tp
   check tm1 $ TpConst arg1Tp
@@ -129,7 +137,7 @@ infer (TmPrintDouble tm0 tm1)  = do
   case tp0 of
     TpConst TpCDouble -> infer tm1
     _                 -> throwError $ TypeMismatch "PrintDouble printing value" (TpConst TpCDouble) tp0
-infer (TmRec p tm)             =
+infer (TmRec (BTyped p tm))    =
   withError (OfRec (paramName p)) $ case paramType p of
     TpUp tp -> tp <$ local (insertParamToInfo p) (check tm tp)
     tp      -> throwError $ NonUpType tp

@@ -88,33 +88,31 @@ arityAnalysisInTermDown tm@(TmVar x)    = tm <$ useVar x
 arityAnalysisInTermDown tm@(TmGlobal x) = tm <$ useVar x
 
 arityAnalysisInTermDown tm@(TmForce _
-                           ; TmReturn _)         = polyRecTmM arityAnalysisInTermDown tm
-arityAnalysisInTermDown (TmIf tm0 tm1 tm2)       =
+                           ; TmReturn _)                 = polyRecTmM arityAnalysisInTermDown tm
+arityAnalysisInTermDown tm@(TmPrimBinOp {}
+                           ; TmPrimUnOp {})              = polyRecTmM arityAnalysisInNonTailDown tm
+arityAnalysisInTermDown (TmIf tm0 tm1 tm2)               =
   liftA3
   TmIf
   (arityAnalysisInNonTailDown tm0)
   (arityAnalysisInBranchDown tm1)
   (arityAnalysisInBranchDown tm2)
-arityAnalysisInTermDown (TmLam p tm)             = TmLam p <$> arityAnalysisInLamDown tm
-arityAnalysisInTermDown (tmf `TmApp` tma)        = liftA2 TmApp (arityAnalysisInAppFunDown tmf) (arityAnalysisInNonTailDown tma)
-arityAnalysisInTermDown (TmTo tm0 x tm1)         = do
+arityAnalysisInTermDown (TmLam b)                        = TmLam <$> arityAnalysisInLamDown b
+arityAnalysisInTermDown (tmf `TmApp` tma)                = liftA2 TmApp (arityAnalysisInAppFunDown tmf) (arityAnalysisInNonTailDown tma)
+arityAnalysisInTermDown (TmTo tm0 (BUntyped x tm1))      = do
   (tm1', ar) <- censor (deleteArity x) . listens (readArityWithDefault 0 x) $ arityAnalysisInTermDown tm1
   tm0' <- local (const ar) $ arityAnalysisInTermDown tm0
-  pure $ TmTo tm0' x tm1'
-arityAnalysisInTermDown (TmLet x tm0 tm1)        = do
+  pure $ TmTo tm0' (BUntyped x tm1')
+arityAnalysisInTermDown (TmLet tm0 (BUntyped x tm1))     = do
   (tm1', ar) <- censor (deleteArity x) . listens (readArityWithDefault 0 x) $ arityAnalysisInTermDown tm1
   tm0' <- local (const ar) $ arityAnalysisInTermDown tm0
-  pure $ TmLet x tm0' tm1'
-arityAnalysisInTermDown (TmPrimBinOp op tm0 tm1) = liftA2 (TmPrimBinOp op) (arityAnalysisInNonTailDown tm0) (arityAnalysisInNonTailDown tm1)
-arityAnalysisInTermDown (TmPrimUnOp op tm)       = TmPrimUnOp op <$> arityAnalysisInNonTailDown tm
-arityAnalysisInTermDown (TmPrintInt tm0 tm1)     = liftA2 TmPrintInt (arityAnalysisInNonTailDown tm0) (arityAnalysisInTermDown tm1)
-arityAnalysisInTermDown (TmPrintDouble tm0 tm1)  = liftA2 TmPrintDouble (arityAnalysisInNonTailDown tm0) (arityAnalysisInTermDown tm1)
-arityAnalysisInTermDown (TmRec p tm)             = do
-  let x = paramName p
-      tp = paramType p
+  pure $ TmLet tm0' (BUntyped x tm1')
+arityAnalysisInTermDown (TmPrintInt tm0 tm1)             = liftA2 TmPrintInt (arityAnalysisInNonTailDown tm0) (arityAnalysisInTermDown tm1)
+arityAnalysisInTermDown (TmPrintDouble tm0 tm1)          = liftA2 TmPrintDouble (arityAnalysisInNonTailDown tm0) (arityAnalysisInTermDown tm1)
+arityAnalysisInTermDown (TmRec (BTyped (Param x tp) tm)) = do
   ar <- ask
   (censor (deleteArity x) . listens (min ar . readArityWithDefault 0 x) $ arityAnalysisInTermDown tm)
-    >>= fmap (TmRec . Param x $ flattenNTpFun ar tp) . uncurry (etaExpandDown tp . TmReturn . TmThunk)
+    >>= fmap ((TmRec .) . BTyped . Param x $ flattenNTpFun ar tp) . uncurry (etaExpandDown tp . TmReturn . TmThunk)
 
 arityAnalysisInNonTailDown :: Tm c -> ArityAnalysisDown (Tm c)
 arityAnalysisInNonTailDown = local (const 0) . arityAnalysisInTermDown
@@ -122,8 +120,8 @@ arityAnalysisInNonTailDown = local (const 0) . arityAnalysisInTermDown
 arityAnalysisInBranchDown :: Tm c -> ArityAnalysisDown (Tm c)
 arityAnalysisInBranchDown = local (const 0) . arityAnalysisInTermDown
 
-arityAnalysisInLamDown :: Tm Com -> ArityAnalysisDown (Tm Com)
-arityAnalysisInLamDown = local (max 0 . subtract 1) . arityAnalysisInTermDown
+arityAnalysisInLamDown :: Binder BTTyped -> ArityAnalysisDown (Binder BTTyped)
+arityAnalysisInLamDown (BTyped p tm) = BTyped p <$> local (max 0 . subtract 1) (arityAnalysisInTermDown tm)
 
 arityAnalysisInAppFunDown :: Tm c -> ArityAnalysisDown (Tm c)
 arityAnalysisInAppFunDown tm = local (+ 1) $ arityAnalysisInTermDown tm
@@ -142,12 +140,12 @@ etaExpandDown _  tm 0     = pure tm
 etaExpandDown tp tm arity = do
   xs <- freshNamesOf (fmap (toArityVar . fromString . show)  [(0::ArgLen)..(arity - 1)])
   let apps = foldl' buildApp tm xs
-  pure . foldr TmLam apps $ zipWith Param xs tpPs
+  pure . foldr ((TmLam .) . BTyped) apps $ zipWith Param xs tpPs
   where
     tpPs = takeTpFunArg arity tp
 
     buildApp :: Tm Com -> Ident -> Tm Com
-    buildApp tm' x = TmTo tm' tempX (TmForce (TmVar tempX) `TmApp` TmVar x)
+    buildApp tm' x = TmTo tm' (BUntyped tempX (TmForce (TmVar tempX) `TmApp` TmVar x))
       where
         tempX = toArityTempVar x
 
@@ -166,10 +164,10 @@ arityAnalysisInTermUp tm@(TmIf {}
                          ; TmPrimBinOp {}
                          ; TmPrimUnOp {}
                          ; TmPrintInt {}
-                         ; TmPrintDouble {})    = polyRecTmM arityAnalysisInTermUp tm
-arityAnalysisInTermUp (TmRec p@(Param {..}) tm) =
+                         ; TmPrintDouble {})             = polyRecTmM arityAnalysisInTermUp tm
+arityAnalysisInTermUp (TmRec (BTyped p@(Param {..}) tm)) =
   local (Map.insert paramName paramType) (arityAnalysisInTermUp tm)
-  >>= etaExpandUp (unwrapTpUp paramType) . TmRec p
+  >>= etaExpandUp (unwrapTpUp paramType) . TmRec . BTyped p
 
 etaExpandUpVar :: (MonadFreshName m) => Tp Val -> Tm Val -> m (Tm Val)
 etaExpandUpVar (TpUp tp) tm = TmThunk <$> etaExpandUp tp (TmForce tm)
@@ -184,8 +182,8 @@ etaExpandUp tp tm = do
     psLen = length tpPs
 
     buildLam :: Param -> Tm Com -> Tm Com
-    buildLam p tm'@(TmLam _ _) = TmLam p (TmReturn (TmThunk tm'))
-    buildLam p tm'             = TmLam p tm'
+    buildLam p tm'@(TmLam _) = TmLam (BTyped p (TmReturn (TmThunk tm')))
+    buildLam p tm'           = TmLam (BTyped p tm')
 
 unwrapTpUp :: Tp Val -> Tp Com
 unwrapTpUp (TpUp tp) = tp
