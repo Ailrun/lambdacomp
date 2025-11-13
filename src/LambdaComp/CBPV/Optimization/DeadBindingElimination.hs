@@ -16,8 +16,8 @@ type WithFreeVars = Writer (Set Ident)
 deadLetElimination :: Tm c -> WithFreeVars (Tm c)
 deadLetElimination tm@(TmGlobal _
                       ; TmConst _
-                      ; TmThunk _)          = polyRecTmM deadLetElimination tm
-deadLetElimination tm@(TmVar x)             = tm <$ tell (Set.singleton x)
+                      ; TmThunk _) = polyRecTmM deadLetElimination tm
+deadLetElimination tm@(TmVar x)    = tm <$ tell (Set.singleton x)
 
 deadLetElimination tm@(TmIf {}
                       ; TmApp {}
