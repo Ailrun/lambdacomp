@@ -21,19 +21,18 @@ type data BackendType where
 type role Backend nominal
 data Backend (c :: BackendType) where
   DirectCBackend :: Backend DirectCBackendType
-  AMBackend :: Backend AMBackendType
+  AMBackend      :: Backend AMBackendType
 
 type role Phase nominal
 data Phase (c :: BackendType) where
-  UntilAST            :: Phase c
-  UntilElaboration    :: Phase c
-  UntilElaborationOpt :: Phase c
-  UntilCBPV           :: Phase c
-  UntilCBPVOpt        :: Phase c
-  UntilC              :: Phase DirectCBackendType
-  UntilExe            :: Phase DirectCBackendType
-  UntilAM             :: Phase AMBackendType
-  Run                 :: Phase c
+  UntilAST,
+    UntilElaboration,
+    UntilElaborationOpt,
+    UntilCBPV,
+    UntilCBPVOpt   :: Phase c
+  UntilC, UntilExe :: Phase DirectCBackendType
+  UntilAM          :: Phase AMBackendType
+  Run              :: Phase c
 
 type family FilePathFor (c :: BackendType) = r | r -> c where
   FilePathFor DirectCBackendType = Maybe FilePath
