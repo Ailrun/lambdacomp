@@ -86,6 +86,7 @@ library
     LambdaComp.CBPV.Optimization.EtaReduction
     LambdaComp.CBPV.Optimization.InlineBinding
     LambdaComp.CBPV.Optimization.Local
+    LambdaComp.CBPV.Optimization.PrintConversion
     LambdaComp.CBPV.PrettyPrinter
     LambdaComp.CBPV.Syntax
     LambdaComp.CBPV.ToAM

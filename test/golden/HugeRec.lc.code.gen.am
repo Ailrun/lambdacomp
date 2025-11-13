@@ -23,6 +23,14 @@
     , thunkCode =
         [ IPop
             ( AIdent "var_aa_0_0" )
+        , IPop
+            ( AIdent "var_e_x" )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_e_x" )
+            )
+        , IPrintInt
+            ( VaInt 2 )
         , IScope
         , IPush
             ( VaAddr
@@ -34,14 +42,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_c_3" )
-        , IPop
-            ( AIdent "var_e_x" )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_e_x" )
-            )
-        , IPrintInt
-            ( VaInt 2 )
         , ICondJump
             ( VaAddr
                 ( AIdent "var_c_c_3" )

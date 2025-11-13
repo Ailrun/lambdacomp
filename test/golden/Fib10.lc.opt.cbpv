@@ -8,11 +8,11 @@ e_recFib =
               if c_c_1
               then return 0
               else
-              (aa_2_1 + e_y) to c_a_9 ->
-              (aa_1_1 + 1) to c_a_7 ->
-              printInt aa_1_1 then
-              printInt aa_2_1 then
-              (force e_recFib) aa_0_1 c_a_7 e_y c_a_9))
+              (printInt aa_1_1 then
+               printInt aa_2_1 then
+               (aa_2_1 + e_y) to c_a_9 ->
+               (aa_1_1 + 1) to c_a_7 ->
+               (force e_recFib) aa_0_1 c_a_7 e_y c_a_9)))
 ;;
 e_fib = return (thunk (\ (e_n : Int) -> (force #e_recFib) e_n 0 0 1))
 ;;

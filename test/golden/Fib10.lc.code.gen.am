@@ -54,6 +54,14 @@
         , ISetReturn
             ( VaInt 0 )
         , IJump 19
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_aa_1_1" )
+            )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_aa_2_1" )
+            )
         , IScope
         , IPush
             ( VaAddr
@@ -78,14 +86,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_a_7" )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_aa_1_1" )
-            )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_aa_2_1" )
-            )
         , IPush
             ( VaAddr
                 ( AIdent "var_c_a_9" )

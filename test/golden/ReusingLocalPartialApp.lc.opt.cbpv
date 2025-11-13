@@ -14,5 +14,6 @@ e_main =
   (force #e_f) 3 to c_a_9 ->
   (force c_a_9) 2 to c_f_4 ->
   (force c_f_4) 5 to c_v_5 ->
+  printInt c_v_5 then
   (force c_a_9) 4 to c_f_7 ->
-  (force c_f_7) 1 to c_v_8 -> printInt c_v_5 then printInt c_v_8 then return 0
+  (force c_f_7) 1 to c_v_8 -> printInt c_v_8 then return 0

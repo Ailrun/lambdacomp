@@ -58,17 +58,17 @@ void sys_thunk_7(item *const _, item *const ret)
 
 void sys_thunk_13(item *const _, item *const ret)
 {
-/* TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCTrue)) (BUntyped "c_v_5" (TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCFalse)) (BUntyped "c_v_7" (TmPrintInt (TmVar "c_v_5") (TmPrintInt (TmVar "c_v_7") (TmReturn (TmConst (TmCInt 0)))))))) */
+/* TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCTrue)) (BUntyped "c_v_5" (TmPrintInt (TmVar "c_v_5") (TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCFalse)) (BUntyped "c_v_7" (TmPrintInt (TmVar "c_v_7") (TmReturn (TmConst (TmCInt 0)))))))) */
 (global_stack.items[global_stack.top++]).int_item = 1;
 const item sys_t_9 = top_e_f;
 sys_t_9.thunk_item.code(sys_t_9.thunk_item.env, ret);
 const item var_c_v_5 = (*ret);
+const item sys_msg_12 = var_c_v_5;
+printf("%d\n", sys_msg_12.int_item);
 (global_stack.items[global_stack.top++]).int_item = 0;
 const item sys_t_10 = top_e_f;
 sys_t_10.thunk_item.code(sys_t_10.thunk_item.env, ret);
 const item var_c_v_7 = (*ret);
-const item sys_msg_12 = var_c_v_5;
-printf("%d\n", sys_msg_12.int_item);
 const item sys_msg_11 = var_c_v_7;
 printf("%d\n", sys_msg_11.int_item);
 (*ret).int_item = 0;
@@ -84,7 +84,7 @@ item *const ret = &retv;
 const item sys_t_8 = {.thunk_item = {.code = sys_thunk_7, .env = NULL}};
 sys_t_8.thunk_item.code(sys_t_8.thunk_item.env, ret);
 top_e_f = (*ret);
-/* TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCTrue)) (BUntyped "c_v_5" (TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCFalse)) (BUntyped "c_v_7" (TmPrintInt (TmVar "c_v_5") (TmPrintInt (TmVar "c_v_7") (TmReturn (TmConst (TmCInt 0)))))))) */
+/* TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCTrue)) (BUntyped "c_v_5" (TmPrintInt (TmVar "c_v_5") (TmTo (TmApp (TmForce (TmGlobal "e_f")) (TmConst TmCFalse)) (BUntyped "c_v_7" (TmPrintInt (TmVar "c_v_7") (TmReturn (TmConst (TmCInt 0)))))))) */
 const item sys_t_14 = {.thunk_item = {.code = sys_thunk_13, .env = NULL}};
 sys_t_14.thunk_item.code(sys_t_14.thunk_item.env, ret);
 top_e_main = (*ret);

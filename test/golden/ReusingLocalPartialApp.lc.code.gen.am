@@ -37,6 +37,10 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_v_5" )
+        , IPrintInt
+            ( VaAddr
+                ( AIdent "var_c_v_5" )
+            )
         , IScope
         , IPush
             ( VaInt 4 )
@@ -57,10 +61,6 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_v_8" )
-        , IPrintInt
-            ( VaAddr
-                ( AIdent "var_c_v_5" )
-            )
         , IPrintInt
             ( VaAddr
                 ( AIdent "var_c_v_8" )

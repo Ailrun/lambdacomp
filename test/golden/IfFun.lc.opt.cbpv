@@ -10,5 +10,5 @@ e_f =
 ;;
 e_main =
   (force #e_f) True to c_v_5 ->
-  (force #e_f) False to c_v_7 ->
-  printInt c_v_5 then printInt c_v_7 then return 0
+  printInt c_v_5 then
+  (force #e_f) False to c_v_7 -> printInt c_v_7 then return 0

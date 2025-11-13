@@ -8,4 +8,4 @@ e_g = return (thunk ((force #e_f) 3))
 ;;
 e_main =
   (force #e_g) 2 5 to c_v_5 ->
-  (force #e_g) 4 1 to c_v_8 -> printInt c_v_5 then printInt c_v_8 then return 0
+  printInt c_v_5 then (force #e_g) 4 1 to c_v_8 -> printInt c_v_8 then return 0
