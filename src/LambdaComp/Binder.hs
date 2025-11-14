@@ -29,6 +29,10 @@ getBoundVar :: Binder t tp tm -> Ident
 getBoundVar (BUntyped x _) = x
 getBoundVar (BTyped p _)   = paramName p
 
+mapBoundVar :: (Ident -> Ident) -> Binder t tp tm -> Binder t tp tm
+mapBoundVar f (BUntyped x tm) = BUntyped (f x) tm
+mapBoundVar f (BTyped p tm)   = BTyped (p{ paramName = f $ paramName p }) tm
+
 -- | Lens-like transformer for the body (term part) of a binder
 lensBinderBody :: (Functor f) => (tm -> f tm) -> Binder t tp tm -> f (Binder t tp tm)
 lensBinderBody f (BUntyped x tm) = BUntyped x <$> f tm

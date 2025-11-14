@@ -43,25 +43,29 @@
         , IEndScope
         , IReceive
             ( AIdent "var_c_c_1" )
+        , ICondJump
+            ( VaAddr
+                ( AIdent "var_c_c_1" )
+            ) 4
         , IPop
             ( AIdent "var_aa_2_1" )
         , IPop
             ( AIdent "var_e_y" )
-        , ICondJump
-            ( VaAddr
-                ( AIdent "var_c_c_1" )
-            ) 2
         , ISetReturn
             ( VaInt 0 )
-        , IJump 19
+        , IJump 21
         , IPrintInt
             ( VaAddr
                 ( AIdent "var_aa_1_1" )
             )
+        , IPop
+            ( AIdent "var_aa_2_1" )
         , IPrintInt
             ( VaAddr
                 ( AIdent "var_aa_2_1" )
             )
+        , IPop
+            ( AIdent "var_e_y" )
         , IScope
         , IPush
             ( VaAddr

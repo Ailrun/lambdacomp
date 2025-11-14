@@ -4,6 +4,7 @@ import Control.Monad        (void)
 import Data.ByteString.Lazy qualified as LBS
 import Data.Int             (Int64)
 import Data.Maybe           (fromMaybe)
+import Data.Set             (Set)
 import GHC.IO.Exception     (ExitCode (ExitFailure))
 import System.Directory     (makeAbsolute)
 import System.FilePath      (takeFileName, (<.>), (</>))
@@ -15,7 +16,7 @@ import Test.Tasty.Golden    (findByExtension, goldenVsStringDiff)
 
 import LambdaComp.Driver          (mainFuncWithOptions)
 import LambdaComp.Driver.Argument (Backend (..), BackendType (..), Options (..), Phase (..))
-import LambdaComp.Optimizations   (defaultOptimizations)
+import LambdaComp.Optimizations   (Optimization, o2Optimization)
 
 main :: IO ()
 main = listAllExamples >>= defaultMain . tests
@@ -113,10 +114,13 @@ goldenOf maySize tag f optionBuilder s =
       Nothing   -> LBS.readFile fp
 
 makeCOptions :: Phase DirectCBackendType -> FilePath -> Options
-makeCOptions phase input = Options { input, backend = DirectCBackend, phase, optimizations = defaultOptimizations, output = Nothing }
+makeCOptions phase input = Options { input, backend = DirectCBackend, phase, optimizations = testOptimization, output = Nothing }
 
 makeAMOptions :: Phase AMBackendType -> FilePath -> Options
-makeAMOptions phase input = Options { input, backend = AMBackend, phase, optimizations = defaultOptimizations, output = () }
+makeAMOptions phase input = Options { input, backend = AMBackend, phase, optimizations = testOptimization, output = () }
+
+testOptimization :: Set Optimization
+testOptimization = o2Optimization
 
 listAllExamples :: IO [String]
 listAllExamples = getExampleDir >>= fmap (fmap takeFileName) . findByExtension [".lc"]

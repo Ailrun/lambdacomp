@@ -10,8 +10,10 @@ import LambdaComp.CBPV.Optimization.BetaReduction          (runBetaReduction)
 import LambdaComp.CBPV.Optimization.BindingConversion      (runCommutingTo, runLiftingLet)
 import LambdaComp.CBPV.Optimization.DeadBindingElimination (runDeadLetElimination)
 import LambdaComp.CBPV.Optimization.EtaReduction           (runEtaReduction)
+import LambdaComp.CBPV.Optimization.IfConversion           (runCommutingIf)
 import LambdaComp.CBPV.Optimization.InlineBinding          (runInlineLinearLet, runInlineSimpleLet)
 import LambdaComp.CBPV.Optimization.PrintConversion        (runCommutingPrint)
+import LambdaComp.CBPV.PrettyPrinter                       ()
 import LambdaComp.CBPV.Syntax
 import LambdaComp.Optimizations                            (Optimization (..))
 
@@ -24,7 +26,19 @@ runLocalOptTop opts = \m -> m{ tmDefBody = runLocalOptTm' $ tmDefBody m }
     runLocalOptTm' = runLocalOptTm opts
 
 runLocalOptTm :: Set Optimization -> Tm Com -> Tm Com
-runLocalOptTm opts = runIdentity . repeatUntilFix (Identity . runDeadLetElimination' . runInlineLinearLet' . runInlineSimpleLet' . runLiftingLet' . runEtaReduction' . runBetaReduction' . runCommutingTo' . runCommutingPrint')
+runLocalOptTm opts =
+  runIdentity
+  . repeatUntilFix
+    (Identity
+     . runDeadLetElimination'
+     . runInlineLinearLet'
+     . runInlineSimpleLet'
+     . runLiftingLet'
+     . runEtaReduction'
+     . runBetaReduction'
+     . runCommutingTo'
+     . runCommutingPrint'
+     . runCommutingIf')
   where
     runDeadLetElimination' = optionalByOption OCBPVDeadLetElimination runDeadLetElimination
     runInlineLinearLet' = optionalByOption OCBPVInlineLinearLet (runInlineLinearLet :: Tm Com -> Tm Com)
@@ -34,6 +48,7 @@ runLocalOptTm opts = runIdentity . repeatUntilFix (Identity . runDeadLetEliminat
     runBetaReduction' = optionalByOption OCBPVBetaReduction runBetaReduction
     runCommutingTo' = optionalByOption OCBPVCommutingTo runCommutingTo
     runCommutingPrint' = optionalByOption OCBPVCommutingPrint runCommutingPrint
+    runCommutingIf' = optionalByOption OCBPVCommutingIf runCommutingIf
 
     optionalByOption :: Optimization -> (a -> a) -> a -> a
     optionalByOption opt f

@@ -75,6 +75,7 @@ library
   exposed-modules:
     Control.Monad.FreshName
     Control.Monad.FreshName.Class
+    Data.TaggedTree
     LambdaComp.AM.Eval
     LambdaComp.AM.Syntax
     LambdaComp.Binder
@@ -84,6 +85,7 @@ library
     LambdaComp.CBPV.Optimization.BindingConversion
     LambdaComp.CBPV.Optimization.DeadBindingElimination
     LambdaComp.CBPV.Optimization.EtaReduction
+    LambdaComp.CBPV.Optimization.IfConversion
     LambdaComp.CBPV.Optimization.InlineBinding
     LambdaComp.CBPV.Optimization.Local
     LambdaComp.CBPV.Optimization.PrintConversion
@@ -171,6 +173,7 @@ test-suite lambdacomp-test
   build-depends:
     , base
     , bytestring
+    , containers
     , directory
     , filepath
     , lambdacomp

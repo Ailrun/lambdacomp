@@ -135,7 +135,8 @@ getOptimizations :: Parser (Set Optimization)
 getOptimizations = getOptimizationClass <**> getOptimizationMap
 
 getOptimizationClass :: Parser (Set Optimization)
-getOptimizationClass = integerToOptimizationClass <$> option auto (short 'O')
+getOptimizationClass =
+  integerToOptimizationClass <$> (option auto (short 'O') <|> pure 1)
 
 getOptimizationMap :: Parser (Set Optimization -> Set Optimization)
 getOptimizationMap = foldr (.) id <$> many getOneOptimizationMap
