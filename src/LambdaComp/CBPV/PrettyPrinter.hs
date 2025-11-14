@@ -71,7 +71,7 @@ prettyTmLam pr rps tm                    = prefixOfPrec0 pr ("\\" <+> align (sep
 
 prettyTmLet :: [(Ident, Tm Val)] -> Tm Com -> Doc ann
 prettyTmLet rbs (TmLet tm0 (BUntyped x tm1)) = prettyTmLet ((x, tm0) : rbs) tm1
-prettyTmLet rbs tm                           = vsep ["let", indent 2 . concatWith (surround $ ";" <> "line") . fmap prettyBinding $ reverse rbs, "in", pretty tm]
+prettyTmLet rbs tm                           = vsep ["let", indent 2 . concatWith (surround $ ";" <> line) . fmap prettyBinding $ reverse rbs, "in", pretty tm]
   where
     prettyBinding :: (Ident, Tm Val) -> Doc ann
     prettyBinding (x, tm') = pretty x <+> "=" <> softline <> pretty tm'
